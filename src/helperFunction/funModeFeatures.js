@@ -102,27 +102,28 @@ export const countSeparateThreeInARows = (board, player) => {
   return count;
 };
 
-// CHANGE: Lowered requirement to 1 separate 3-in-a-row for more frequent triggering
-export const shouldTriggerMonkeyMayhem = (board, player, usedMonkeyMayhem) => {
+// CHANGE: Modified to check global monkey mayhem state - only first eligible player can trigger
+export const shouldTriggerMonkeyMayhem = (board, player, monkeyMayhemState) => {
   console.log("🐒 CHECKING MONKEY MAYHEM TRIGGER:", {
     player,
-    hasUsedBefore: usedMonkeyMayhem.has(player),
-    usedPlayers: Array.from(usedMonkeyMayhem),
+    monkeyMayhemState,
   });
 
-  if (usedMonkeyMayhem.has(player)) {
-    console.log("❌ PLAYER ALREADY USED MONKEY MAYHEM:", player);
+  // CHANGE: If monkey mayhem was already offered or used, no more triggers
+  if (monkeyMayhemState.wasOffered || monkeyMayhemState.wasUsed) {
+    console.log("❌ MONKEY MAYHEM ALREADY OFFERED/USED:", monkeyMayhemState);
     return false;
   }
 
   const threeInARowCount = countSeparateThreeInARows(board, player);
-  const shouldTrigger = threeInARowCount >= 1; // CHANGE: Reduced from 3 to 1 for better gameplay
+  const shouldTrigger = threeInARowCount >= 1;
 
   console.log("🎯 MONKEY MAYHEM DECISION:", {
     player,
     threeInARowCount,
     requiredCount: 1,
     shouldTrigger,
+    isFirstOpportunity: !monkeyMayhemState.wasOffered,
   });
 
   return shouldTrigger;
@@ -175,6 +176,7 @@ export const maybeStealDisc = (board, triggeringPlayer) => {
 
   console.log("🍌 MONKEY STEALING A DISC! (50% chance)");
 
+  // CHANGE: Only steal from the opponent who didn't trigger monkey mayhem
   // CHANGE: Only steal from the opponent who didn't trigger monkey mayhem
   const opponentPlayer = triggeringPlayer === "🔴" ? "🟡" : "🔴";
 
@@ -239,6 +241,7 @@ export const isMonkeyWinner = (winner, isUpsideDown) => {
 // CHANGE: Fixed upside-down drop logic to properly stack pieces from top to bottom
 export const dropPieceUpsideDown = (board, col, player) => {
   console.log("🙃 DROPPING PIECE UPSIDE DOWN:", { col, player });
+  console.log("🙃 DROPPING PIECE UPSIDE DOWN:", { col, player });
   console.log(
     "🙃 COLUMN STATE BEFORE DROP:",
     board.map((row) => row[col]),
@@ -251,10 +254,12 @@ export const dropPieceUpsideDown = (board, col, player) => {
       const newBoard = board.map((r) => [...r]);
       newBoard[row][col] = player;
       console.log("✅ UPSIDE DOWN DROP SUCCESS:", { row, col, player });
+      console.log("✅ UPSIDE DOWN DROP SUCCESS:", { row, col, player });
       console.log(
         "🙃 COLUMN STATE AFTER DROP:",
         newBoard.map((r) => r[col]),
       );
+
       return { newBoard, row };
     }
   }

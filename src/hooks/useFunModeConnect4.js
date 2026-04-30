@@ -24,44 +24,17 @@ export const useFunModeConnect4 = () => {
   const [monkeyButtonPlayer, setMonkeyButtonPlayer] = useState(null);
   const [isUpsideDown, setIsUpsideDown] = useState(false);
   const [upsideDownTurnsLeft, setUpsideDownTurnsLeft] = useState(0);
-  const [usedMonkeyMayhem, setUsedMonkeyMayhem] = useState(new Set());
+  // CHANGE: Replace usedMonkeyMayhem Set with comprehensive state object
+  const [monkeyMayhemState, setMonkeyMayhemState] = useState({
+    wasOffered: false, // Was the opportunity ever offered to any player
+    wasUsed: false, // Was monkey mayhem actually triggered
+    offeredTo: null, // Which player was offered the opportunity
+    usedBy: null, // Which player actually used it (if any)
+  });
   const [isMonkeyAnimating, setIsMonkeyAnimating] = useState(false);
   const [monkeyVoiceLine, setMonkeyVoiceLine] = useState("");
 
   const monkeyButtonTimerRef = useRef(null);
-
-  // CHANGE: Separate function to handle monkey mayhem trigger logic
-  const checkAndTriggerMonkeyMayhem = useCallback(
-    (board, player) => {
-      console.log("🔍 CHECKING MONKEY MAYHEM FOR PLAYER:", player);
-
-      if (shouldTriggerMonkeyMayhem(board, player, usedMonkeyMayhem)) {
-        console.log("🎯 MONKEY MAYHEM TRIGGERED FOR PLAYER:", player);
-
-        // Clear any existing timer
-        if (monkeyButtonTimerRef.current) {
-          clearTimeout(monkeyButtonTimerRef.current);
-          monkeyButtonTimerRef.current = null;
-        }
-
-        setShowMonkeyButton(true);
-        setMonkeyButtonPlayer(player);
-
-        // Auto-hide button after 10 seconds
-        monkeyButtonTimerRef.current = setTimeout(() => {
-          console.log("⏰ MONKEY BUTTON TIMEOUT - HIDING");
-          setShowMonkeyButton(false);
-          setMonkeyButtonPlayer(null);
-        }, 10000);
-
-        return true;
-      }
-
-      console.log("❌ NO MONKEY MAYHEM TRIGGER FOR PLAYER:", player);
-      return false;
-    },
-    [usedMonkeyMayhem],
-  );
 
   const makeMove = useCallback(
     (col) => {
@@ -75,7 +48,8 @@ export const useFunModeConnect4 = () => {
         isMonkeyAnimating,
         isUpsideDown,
         upsideDownTurnsLeft,
-        usedMonkeyMayhem: Array.from(usedMonkeyMayhem),
+        monkeyMayhemState,
+
         showMonkeyButton,
         monkeyButtonPlayer,
       });
@@ -183,13 +157,13 @@ export const useFunModeConnect4 = () => {
         }
       }
 
-      // CHANGE: Check for Monkey Mayhem trigger after EVERY move for the current player only
+      // CHANGE: Check for Monkey Mayhem trigger with new state management
       if (!newState.winner && !newState.isDraw && !isMonkeyAnimating) {
         console.log("🔍 CHECKING MONKEY MAYHEM TRIGGER...");
 
         // Only check for the player who just made the move
         if (
-          shouldTriggerMonkeyMayhem(newBoard, currentPlayer, usedMonkeyMayhem)
+          shouldTriggerMonkeyMayhem(newBoard, currentPlayer, monkeyMayhemState)
         ) {
           console.log(
             "🎯 MONKEY MAYHEM TRIGGERED FOR CURRENT PLAYER:",
@@ -203,6 +177,13 @@ export const useFunModeConnect4 = () => {
             console.log("⏰ CLEARED EXISTING MONKEY BUTTON TIMER");
           }
 
+          // CHANGE: Update monkey mayhem state to mark as offered
+          setMonkeyMayhemState((prev) => ({
+            ...prev,
+            wasOffered: true,
+            offeredTo: currentPlayer,
+          }));
+
           // CHANGE: Set button state immediately
           setShowMonkeyButton(true);
           setMonkeyButtonPlayer(currentPlayer);
@@ -210,13 +191,23 @@ export const useFunModeConnect4 = () => {
           console.log("🐒 MONKEY BUTTON STATE SET:", {
             showMonkeyButton: true,
             monkeyButtonPlayer: currentPlayer,
+            monkeyMayhemState: {
+              ...monkeyMayhemState,
+              wasOffered: true,
+              offeredTo: currentPlayer,
+            },
           });
 
-          // CHANGE: Set timer after state update
+          // CHANGE: Set timer after state update - when timer expires, mark opportunity as lost
           monkeyButtonTimerRef.current = setTimeout(() => {
-            console.log("⏰ MONKEY BUTTON TIMEOUT - HIDING");
+            console.log("⏰ MONKEY BUTTON TIMEOUT - OPPORTUNITY LOST");
             setShowMonkeyButton(false);
             setMonkeyButtonPlayer(null);
+            // CHANGE: Mark opportunity as lost forever
+            setMonkeyMayhemState((prev) => ({
+              ...prev,
+              wasOffered: true, // Keep this true so no future triggers
+            }));
           }, 10000);
 
           console.log("⏰ MONKEY BUTTON TIMER SET FOR 10 SECONDS");
@@ -245,7 +236,8 @@ export const useFunModeConnect4 = () => {
       gameState,
       isUpsideDown,
       upsideDownTurnsLeft,
-      usedMonkeyMayhem,
+      monkeyMayhemState, // CHANGE: Updated dependency
+
       isMonkeyAnimating,
     ],
   );
@@ -254,7 +246,7 @@ export const useFunModeConnect4 = () => {
     console.log("🐒 TRIGGER MONKEY MAYHEM CALLED:", {
       showMonkeyButton,
       monkeyButtonPlayer,
-      isMonkeyAnimating,
+      monkeyMayhemState,
     });
 
     if (!showMonkeyButton || !monkeyButtonPlayer || isMonkeyAnimating) {
@@ -277,14 +269,20 @@ export const useFunModeConnect4 = () => {
     // Hide button
     setShowMonkeyButton(false);
 
-    // Mark this player as having used Monkey Mayhem
-    setUsedMonkeyMayhem((prev) => {
-      const newSet = new Set([...prev, monkeyButtonPlayer]);
-      console.log("🐒 MARKED PLAYER AS USED:", {
-        player: monkeyButtonPlayer,
-        usedPlayers: Array.from(newSet),
-      });
-      return newSet;
+    // CHANGE: Mark monkey mayhem as used and by whom
+    setMonkeyMayhemState((prev) => ({
+      ...prev,
+      wasUsed: true,
+      usedBy: monkeyButtonPlayer,
+    }));
+
+    console.log("🐒 MARKED MONKEY MAYHEM AS USED:", {
+      player: monkeyButtonPlayer,
+      finalState: {
+        ...monkeyMayhemState,
+        wasUsed: true,
+        usedBy: monkeyButtonPlayer,
+      },
     });
 
     // Start animation sequence
@@ -322,7 +320,12 @@ export const useFunModeConnect4 = () => {
         isUpsideDown: true,
       });
     }, 2500); // Animation duration
-  }, [showMonkeyButton, monkeyButtonPlayer, isMonkeyAnimating]);
+  }, [
+    showMonkeyButton,
+    monkeyButtonPlayer,
+    isMonkeyAnimating,
+    monkeyMayhemState,
+  ]);
 
   const reset = useCallback(() => {
     console.log("🔄 RESETTING GAME");
@@ -337,7 +340,14 @@ export const useFunModeConnect4 = () => {
     setMonkeyButtonPlayer(null);
     setIsUpsideDown(false);
     setUpsideDownTurnsLeft(0);
-    setUsedMonkeyMayhem(new Set());
+    // CHANGE: Reset monkey mayhem state to initial values
+    setMonkeyMayhemState({
+      wasOffered: false,
+      wasUsed: false,
+      offeredTo: null,
+      usedBy: null,
+    });
+
     setIsMonkeyAnimating(false);
     setMonkeyVoiceLine("");
   }, []);
@@ -353,6 +363,6 @@ export const useFunModeConnect4 = () => {
     upsideDownTurnsLeft,
     isMonkeyAnimating,
     monkeyVoiceLine,
-    usedMonkeyMayhem,
+    monkeyMayhemState, // CHANGE: Return new state instead of usedMonkeyMayhem
   };
 };
