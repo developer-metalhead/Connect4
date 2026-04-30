@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { BoardContainer, Row, Cell, PreviewRow } from "./index.style"; // Make sure path is correct
+import {
+  BoardContainer,
+  Row,
+  Cell,
+  PreviewRow,
+  ColumnHighlight,
+  FallingDisc,
+} from "./index.style";
 
 const Board = ({
   board,
@@ -11,16 +18,54 @@ const Board = ({
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
+  const [fallingDisc, setFallingDisc] = useState(null);
 
   const handleClick = (col) => {
-    if (winner || isDraw || !canInteract) return;
+    if (winner || isDraw || !canInteract || droppingCol !== null) return;
 
+    // Clear hover state immediately when drop begins
+    setHoverCol(null);
     setDroppingCol(col);
 
+    // Find the target row for the falling disc
+    let targetRow = -1;
+    for (let row = board.length - 1; row >= 0; row--) {
+      if (board[row][col] === "⚪") {
+        targetRow = row;
+        break;
+      }
+    }
+
+    if (targetRow === -1) return; // Column is full
+
+    // Start falling animation
+    setFallingDisc({
+      col,
+      targetRow,
+      currentRow: -1, // Start above the board
+      player: currentPlayer,
+    });
+
+    // Animation duration based on distance (more realistic)
+    const animationDuration = 200 + targetRow * 50;
+
     setTimeout(() => {
+      setFallingDisc(null);
       onDrop(col);
       setDroppingCol(null);
-    }, 400);
+    }, animationDuration);
+  };
+
+  const handleMouseEnter = (col) => {
+    if (canInteract && !winner && !isDraw && droppingCol === null) {
+      setHoverCol(col);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (canInteract && droppingCol === null) {
+      setHoverCol(null);
+    }
   };
 
   return (
@@ -30,27 +75,63 @@ const Board = ({
           <div
             key={col}
             className="preview-cell"
-            onMouseEnter={() => canInteract && setHoverCol(col)}
-            onMouseLeave={() => canInteract && setHoverCol(null)}
-            onClick={() => canInteract && handleClick(col)}
+            onMouseEnter={() => handleMouseEnter(col)}
+            onMouseLeave={handleMouseLeave}
           >
-            {hoverCol === col && canInteract && !winner && !isDraw && (
-              <span className="preview-piece">{currentPlayer}</span>
-            )}
+            {hoverCol === col &&
+              canInteract &&
+              !winner &&
+              !isDraw &&
+              droppingCol === null && (
+                <span className="preview-piece">{currentPlayer}</span>
+              )}
           </div>
         ))}
       </PreviewRow>
 
       <BoardContainer>
+        {/* Column highlights */}
+        {hoverCol !== null && droppingCol === null && (
+          <ColumnHighlight
+            style={{
+              left: `calc(${hoverCol} * (var(--cell) + var(--gap)) + var(--gap))`,
+              backgroundColor:
+                currentPlayer === "🔴"
+                  ? "rgba(255, 68, 68, 0.35)"
+                  : "rgba(255, 221, 0, 0.35)",
+            }}
+          />
+        )}
+
+        {/* Falling disc animation */}
+        {fallingDisc && (
+          <FallingDisc
+            style={{
+              left: `calc(${fallingDisc.col} * (var(--cell) + var(--gap)) + var(--gap))`,
+              animationDuration: `${400 + fallingDisc.targetRow * 50}ms`,
+              "--target-row": fallingDisc.targetRow,
+            }}
+          >
+            {fallingDisc.player}
+          </FallingDisc>
+        )}
+
         {board.map((row, r) => (
           <Row key={r}>
             {row.map((cell, c) => (
               <Cell
                 key={c}
                 onClick={() => canInteract && handleClick(c)}
-                onMouseEnter={() => canInteract && setHoverCol(c)}
-                onMouseLeave={() => canInteract && setHoverCol(null)}
+                onMouseEnter={() => handleMouseEnter(c)}
+                onMouseLeave={handleMouseLeave}
                 className={droppingCol === c ? "dropping" : ""}
+                style={{
+                  cursor:
+                    canInteract && !winner && !isDraw && droppingCol === null
+                      ? "pointer"
+                      : "default",
+                  opacity: droppingCol !== null && droppingCol !== c ? 0.7 : 1,
+                }}
               >
                 {cell}
               </Cell>
