@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import useVideoManager from '../../../hooks/core/useVideoManager';
+import FunConfirmationModal from '../ConfirmationModal';
 
 const VideoButton = styled(Button)(({ theme }) => ({
   display: "flex",
@@ -33,7 +34,6 @@ const VideoButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-// CHANGE: Add styled components for video modal
 const VideoModal = styled('div')({
   position: 'fixed',
   top: 0,
@@ -81,7 +81,7 @@ const CloseButton = styled('button')({
   },
 });
 
-const BoredVideoButton = ({ children = "Play Bored Video", ...props }) => {
+const BoredVideoButton = ({ children = "Extremely Fun Button!", onGameReset, ...props }) => {
   const { 
     playBoredVideo, 
     isPlaying, 
@@ -91,20 +91,42 @@ const BoredVideoButton = ({ children = "Play Bored Video", ...props }) => {
     getVideoElement 
   } = useVideoManager();
 
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   const handleClick = () => {
-    console.log("🎬 Playing bored video...");
+    console.log("🎬 Fun button clicked - showing confirmation modal...");
+    setShowConfirmModal(true);
+  };
+
+  const handleAccept = () => {
+    console.log("🎉 User accepted more fun - playing video and resetting game!");
+    setShowConfirmModal(false);
+    
+    // Reset the game first
+    if (onGameReset) {
+      onGameReset();
+    }
+    
+    // Then play the video
     playBoredVideo();
   };
 
-  // CHANGE: Add function to handle modal close
-  const handleCloseModal = () => {
+  const handleDecline = () => {
+    console.log("😊 User declined more fun - keeping current state");
+    setShowConfirmModal(false);
+  };
+
+  const handleCloseConfirmModal = () => {
+    setShowConfirmModal(false);
+  };
+
+  const handleCloseVideoModal = () => {
     closeVideoModal('bored');
   };
 
-  // CHANGE: Add function to handle backdrop click
-  const handleBackdropClick = (e) => {
+  const handleVideoBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
-      handleCloseModal();
+      handleCloseVideoModal();
     }
   };
 
@@ -120,17 +142,23 @@ const BoredVideoButton = ({ children = "Play Bored Video", ...props }) => {
         {...props}
       >
         {!isBoredLoaded ? "Loading fun..." : isBoredPlaying ? "Having fun..." : children}
-     
       </VideoButton>
 
-      {/* CHANGE: Add video modal that shows when video is playing */}
+      {/* Confirmation Modal */}
+      <FunConfirmationModal
+        isOpen={showConfirmModal}
+        onAccept={handleAccept}
+        onDecline={handleDecline}
+        onClose={handleCloseConfirmModal}
+      />
+
+      {/* Video Modal */}
       {showBoredModal && (
-        <VideoModal onClick={handleBackdropClick}>
+        <VideoModal onClick={handleVideoBackdropClick}>
           <VideoContainer>
-            <CloseButton onClick={handleCloseModal}>
+            <CloseButton onClick={handleCloseVideoModal}>
               ×
             </CloseButton>
-            {/* CHANGE: Render the actual video element in the modal */}
             <VideoRenderer videoElement={getVideoElement('bored')} />
           </VideoContainer>
         </VideoModal>
@@ -139,17 +167,14 @@ const BoredVideoButton = ({ children = "Play Bored Video", ...props }) => {
   );
 };
 
-// CHANGE: Add component to render video element in React
 const VideoRenderer = ({ videoElement }) => {
   const containerRef = React.useRef(null);
 
   React.useEffect(() => {
     if (containerRef.current && videoElement) {
-      // Append the video element to our container
       containerRef.current.appendChild(videoElement);
       
       return () => {
-        // Clean up by removing the video element when component unmounts
         if (containerRef.current && videoElement && containerRef.current.contains(videoElement)) {
           containerRef.current.removeChild(videoElement);
         }
