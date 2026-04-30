@@ -162,7 +162,7 @@ const Online = () => {
             Room: <strong>{roomId}</strong>
           </BodyContainer>
 
-          {inviteLink && (
+          {inviteLink && myDisc === PLAYER1 && (
             <div
               style={{
                 display: "flex",
