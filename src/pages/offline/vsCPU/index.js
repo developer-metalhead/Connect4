@@ -1,13 +1,13 @@
 /* eslint-disable no-unused-vars */
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import CustomButton from "../../../components/buttonComponent";
-import Status from "../../../components/status";
-import Board from "../../../components/boardStyles";
+import CustomButton from "../../../components/organisms/buttonComponent";
+import Status from "../../../components/organisms/status";
+import Board from "../../../components/organisms/boardStyles";
 import { PLAYER1 } from "../../../helperFunction/helperFunction";
-import useSoundManager from "../../../hooks/useSoundManager";
+import useSoundManager from "../../../hooks/core/useSoundManager";
 
-import useConnect4CPU from "../../../hooks/useConnect4CPU";
+import useConnect4CPU from "../../../hooks/core/useConnect4CPU";
 
 import {
   PageContainer,

@@ -6,7 +6,7 @@ import {
   isBoardFull,
   isValidMove,
   getNextPlayer,
-} from "../helperFunction/helperFunction";
+} from "../../helperFunction/helperFunction";
 
 export const useConnect4 = () => {
   const [gameState, setGameState] = useState(resetGame);

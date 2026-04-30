@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import CustomButton from "../../components/buttonComponent";
+import CustomButton from "../../components/organisms/buttonComponent";
 
 import {
   PageContainer,

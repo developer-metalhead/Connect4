@@ -2,11 +2,11 @@
 import { useMemo, useRef, useState, useEffect } from "react";
 
 import { useNavigate, useLocation } from "react-router-dom";
-import CustomButton from "../../components/buttonComponent";
-import Status from "../../components/status";
-import Board from "../../components/boardStyles";
-import SoundSettings from "../../components/SoundSettings";
-import useSoundManager from "../../hooks/useSoundManager";
+import CustomButton from "../../components/organisms/buttonComponent";
+import Status from "../../components/organisms/status";
+import Board from "../../components/organisms/boardStyles";
+import SoundSettings from "../../components/organisms/SoundSettings";
+import useSoundManager from "../../hooks/core/useSoundManager";
 
 import {
   PageContainer,
@@ -14,7 +14,7 @@ import {
   ButtonContainer,
   BodyContainer,
 } from "./index.style";
-import useOnlineConnect4 from "../../hooks/useOnlineConnect4";
+import useOnlineConnect4 from "../../hooks/core/useOnlineConnect4";
 import { PLAYER1 } from "../../helperFunction/helperFunction";
 
 const Online = () => {
