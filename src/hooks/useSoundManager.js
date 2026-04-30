@@ -82,14 +82,14 @@ export const useSoundManager = () => {
       const timestamp = new Date().toISOString();
       const config = SOUND_CONFIG[soundKey];
 
-      console.log(`🔊 [${timestamp}] Sound ${action}: ${soundKey}`, {
-        volume: config?.volume || "unknown",
-        pitchVariation: config?.pitchVariation || false,
-        isMuted,
-        currentVolume: volume,
-        musicVolume,
-        ...details,
-      });
+      // console.log(`🔊 [${timestamp}] Sound ${action}: ${soundKey}`, {
+      //   volume: config?.volume || "unknown",
+      //   pitchVariation: config?.pitchVariation || false,
+      //   isMuted,
+      //   currentVolume: volume,
+      //   musicVolume,
+      //   ...details,
+      // });
     },
     [isMuted, volume, musicVolume],
   );
@@ -313,7 +313,7 @@ export const useSoundManager = () => {
     }
 
     // Randomly choose between drop and drop2 for variety
-    const soundKey = Math.random() > 0.5 ? "drop" : "drop2";
+    const soundKey = Math.random() > 0.5 ? "drop" : "drop";
 
     if (isPlayingDropRef.current) {
       dropSoundQueueRef.current.push(soundKey);
