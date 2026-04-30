@@ -141,35 +141,55 @@ const useOnlineConnect4 = () => {
 
   // Public actions
   const createRoom = useCallback(() => {
-    if (!connected) return;
-    setStatus("room"); // optimistic UI; server will confirm
-    socket.emit("create_room", {
-      name: nameRef.current,
-      playerId: playerIdRef.current,
-    });
-  }, [connected]);
+    // optimistic UI; server will confirm with room_created
+    setStatus("room");
 
-  const joinRoomByCode = useCallback(
-    (code) => {
-      const roomCode = (code || "").trim().toUpperCase();
-      if (!connected || !roomCode) return;
+    const emitCreate = () =>
+      socket.emit("create_room", {
+        name: nameRef.current,
+        playerId: playerIdRef.current,
+      });
+
+    if (socket.connected) {
+      emitCreate();
+    } else {
+      // Ensure we connect and then create the room once ready
+      socket.once("connect", emitCreate);
+      socket.connect();
+    }
+  }, []);
+
+  const joinRoomByCode = useCallback((code) => {
+    const roomCode = (code || "").trim().toUpperCase();
+    if (!roomCode) return;
+    const emitJoin = () =>
       socket.emit("join_room", {
         roomId: roomCode,
         name: nameRef.current,
         playerId: playerIdRef.current,
       });
-    },
-    [connected],
-  );
+    if (socket.connected) {
+      emitJoin();
+    } else {
+      socket.once("connect", emitJoin);
+      socket.connect();
+    }
+  }, []);
 
   const startQueue = useCallback(() => {
-    if (!connected) return;
     setStatus("searching");
-    socket.emit("enqueue", {
-      name: nameRef.current,
-      playerId: playerIdRef.current,
-    });
-  }, [connected]);
+    const emitEnqueue = () =>
+      socket.emit("enqueue", {
+        name: nameRef.current,
+        playerId: playerIdRef.current,
+      });
+    if (socket.connected) {
+      emitEnqueue();
+    } else {
+      socket.once("connect", emitEnqueue);
+      socket.connect();
+    }
+  }, []);
 
   const stopQueue = useCallback(() => {
     if (!connected) return;
@@ -194,10 +214,21 @@ const useOnlineConnect4 = () => {
 
   const makeMove = useCallback(
     (col) => {
-      if (!connected || !roomId || !myTurn) return;
-      socket.emit("make_move", { roomId, col, playerId: playerIdRef.current });
+      if (!roomId || !myTurn) return;
+      const emitMove = () =>
+        socket.emit("make_move", {
+          roomId,
+          col,
+          playerId: playerIdRef.current,
+        });
+      if (socket.connected) {
+        emitMove();
+      } else {
+        socket.once("connect", emitMove);
+        socket.connect();
+      }
     },
-    [connected, roomId, myTurn],
+    [roomId, myTurn],
   );
 
   return {
