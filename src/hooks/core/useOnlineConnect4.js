@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import socket from "../services/wsClient";
+import socket from "../../services/wsClient";
 
 // Same emojis as your helper to keep rendering consistent
 const PLAYER1 = "🔴";

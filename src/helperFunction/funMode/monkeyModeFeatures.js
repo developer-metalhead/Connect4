@@ -1,4 +1,4 @@
-import { ROWS, COLS, EMPTY } from "./helperFunction";
+import { ROWS, COLS, EMPTY } from "../helperFunction";
 
 // Monkey Mayhem voice lines
 const MONKEY_VOICE_LINES = [
@@ -9,6 +9,7 @@ const MONKEY_VOICE_LINES = [
   "Let's turn this upside down!",
 ];
 
+// CHANGE: Updated to count overlapping 3-in-a-rows by removing usedCells tracking
 export const countSeparateThreeInARows = (board, player) => {
   console.log("🔍 COUNTING 3-IN-A-ROWS FOR PLAYER:", player);
   console.log(
@@ -16,7 +17,6 @@ export const countSeparateThreeInARows = (board, player) => {
     board.map((row) => row.join("")),
   );
 
-  const usedCells = new Set();
   let count = 0;
 
   const directions = [
@@ -60,21 +60,10 @@ export const countSeparateThreeInARows = (board, player) => {
           }
 
           const cellKey = `${r},${c}`;
-          if (usedCells.has(cellKey)) {
-            console.log("❌ CELL ALREADY USED:", {
-              cell: cellKey,
-              direction: dirName,
-              startPos: `${row},${col}`,
-            });
-            valid = false;
-            break;
-          }
-
           cells.push(cellKey);
         }
 
         if (valid) {
-          cells.forEach((cell) => usedCells.add(cell));
           count++;
 
           console.log("✅ FOUND 3-IN-A-ROW:", {
@@ -91,7 +80,6 @@ export const countSeparateThreeInARows = (board, player) => {
   console.log("📊 FINAL 3-IN-A-ROW COUNT:", {
     player,
     count,
-    usedCells: Array.from(usedCells),
   });
 
   return count;
@@ -114,7 +102,7 @@ export const shouldTriggerMonkeyMayhem = (board, player, monkeyMayhemState) => {
   console.log("🎯 MONKEY MAYHEM DECISION:", {
     player,
     threeInARowCount,
-    requiredCount: 1,
+    requiredCount: 2,
     shouldTrigger,
     isFirstOpportunity: !monkeyMayhemState.wasOffered,
   });
@@ -274,7 +262,6 @@ export const isBoardFullUpsideDown = (board) => {
   return true;
 };
 
-
 export const applyNormalGravity = (board) => {
   const newBoard = Array(ROWS)
     .fill(null)
@@ -344,4 +331,32 @@ export const returnToNormalGravity = (board, { isUpsideDown } = {}) => {
   const durationMs = base + maxDist * unitDuration;
   const finalBoard = applyNormalGravity(board);
   return { finalBoard, animations, durationMs };
+};
+
+// CHANGE: Extracted player name generation to utility function
+export const getPlayerNames = (monkeyMayhemState) => {
+  const names = { "🔴": "Player 1", "🟡": "Player 2" };
+
+  if (monkeyMayhemState.usedBy === "🔴") {
+    names["🔴"] += " 🐒";
+  }
+  if (monkeyMayhemState.usedBy === "🟡") {
+    names["🟡"] += " 🐒";
+  }
+
+  return names;
+};
+
+// CHANGE: Extracted monkey button click handler to utility function
+export const createMonkeyButtonHandler = (soundManager, triggerMonkeyMayhem) => {
+  return () => {
+    console.log("🐒 MONKEY BUTTON CLICKED!");
+    soundManager.playClickSound();
+    triggerMonkeyMayhem();
+  };
+};
+
+// CHANGE: Extracted board interaction calculation to utility function
+export const canInteractWithBoard = (isMonkeyAnimating, showMonkeyButton, isGravityFalling) => {
+  return !isMonkeyAnimating && !showMonkeyButton && !isGravityFalling;
 };

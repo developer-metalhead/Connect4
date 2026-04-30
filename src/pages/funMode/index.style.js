@@ -58,19 +58,6 @@ export const PageContainer = styled("div")({
   position: "relative",
 });
 
-export const UpsideDownIndicator = styled("div")({
-  background: "linear-gradient(45deg, #ff6b35, #ffa500)",
-  color: "white",
-  padding: "15px 30px",
-  borderRadius: "25px",
-  fontSize: "20px",
-  fontWeight: "bold",
-  textAlign: "center",
-  animation: `${glow} 2s infinite`,
-  marginBottom: "10px",
-  border: "3px solid #fff",
-  boxShadow: "0 8px 20px rgba(255, 107, 53, 0.4)",
-});
 
 // CHANGE: Removed CSS transform that was blocking pointer events
 export const FunModeBoard = styled("div")(({ isUpsideDown }) => ({
