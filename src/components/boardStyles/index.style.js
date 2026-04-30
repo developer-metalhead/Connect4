@@ -1,40 +1,43 @@
 import { styled } from "@mui/material/styles";
 
 export const BoardContainer = styled("div")({
+  // Fluid sizing across devices
+  "--cell": "clamp(34px, 9vmin, 64px)",
+  "--gap": "clamp(6px, 2vmin, 12px)",
+
   background: "#0a1f45",
-  padding: "16px",
-  borderRadius: "20px",
-  boxShadow: "0 15px 35px rgba(0, 0, 0, 0.6)",
-  display: "inline-grid",
-  gridTemplateRows: "repeat(6, 75px)",
-  gap: "10px",
+  padding: "clamp(8px, 2.5vmin, 16px)",
+  borderRadius: "16px",
+  boxShadow: "0 12px 28px rgba(0, 0, 0, 0.5)",
+  display: "inline-block",
+  maxWidth: "100%",
 });
 
 export const Row = styled("div")({
   display: "grid",
-  gridTemplateColumns: "repeat(7, 75px)",
-  gap: "10px",
+  gridTemplateColumns: "repeat(7, var(--cell))",
+  gap: "var(--gap)",
+  justifyContent: "center",
 });
 
 export const Cell = styled("div")({
-  width: "75px",
-  height: "75px",
+  width: "var(--cell)",
+  height: "var(--cell)",
   background: "#1e90ff",
   borderRadius: "50%",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  fontSize: "55px",
+  fontSize: "calc(var(--cell) * 0.72)",
   cursor: "pointer",
-  transition: "all 0.2s ease",
+  transition: "transform 0.15s ease, background 0.15s ease, opacity 0.15s ease",
   boxShadow: "inset 0 6px 12px rgba(0,0,0,0.4)",
 
   "&:hover": {
     background: "#4fc3f7",
-    transform: "scale(1.08)",
+    transform: "scale(1.06)",
   },
 
-  // Drop Animation
   "&.dropping": {
     animation: "fall 0.35s ease-in",
   },
@@ -58,13 +61,13 @@ export const PreviewRow = styled("div")({
   },
 
   "& .preview-piece": {
-    fontSize: "48px",
+    fontSize: "40px",
     opacity: 0.6,
     transition: "all 0.2s",
   },
 });
 
-// Add this at the bottom of the file (Global Keyframes)
+// Global Keyframes
 export const GlobalStyles = `
   @keyframes fall {
     0% {
