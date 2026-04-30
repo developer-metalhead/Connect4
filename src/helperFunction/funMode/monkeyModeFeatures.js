@@ -1,4 +1,4 @@
-import { ROWS, COLS, EMPTY } from "./helperFunction";
+import { ROWS, COLS, EMPTY } from "../helperFunction";
 
 // Monkey Mayhem voice lines
 const MONKEY_VOICE_LINES = [

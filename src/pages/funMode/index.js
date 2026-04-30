@@ -7,8 +7,8 @@ import Board from "../../components/boardStyles";
 import MonkeyMayhemButton from "../../components/MonkeyButton";
 import MonkeyFlipAnimation from "../../components/MonkeyAnimation";
 import useSoundManager from "../../hooks/core/useSoundManager";
-import { useFunModeConnect4 } from "../../hooks/core/useFunModeConnect4";
-import useFunModeSettings from "../../hooks/useFunModeSettings";
+import { useFunModeConnect4 } from "../../hooks/funMode/useMonkeyMode";
+import useFunModeSettings from "../../hooks/funMode/useFunModeSettings";
 
 import {
   PageContainer,

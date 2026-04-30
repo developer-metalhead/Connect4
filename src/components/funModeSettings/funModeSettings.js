@@ -1,7 +1,7 @@
 import React from 'react';
 import { styled } from '@mui/material/styles';
 import CustomButton from '../buttonComponent';
-import useFunModeSettings from '../../hooks/useFunModeSettings';
+import useFunModeSettings from '../../hooks/funMode/useFunModeSettings';
 
 
 const SettingsContainer = styled('div')({
