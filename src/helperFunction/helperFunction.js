@@ -38,8 +38,8 @@ export const isValidMove = (board, col) => {
   return col >= 0 && col < COLS && board[0][col] === EMPTY;
 };
 
-// Check for win
-export const checkWin = (board, row, col, player) => {
+// CHANGE: Added upside-down mode parameter to check win function
+export const checkWin = (board, row, col, player, isUpsideDown = false) => {
   const directions = [
     [0, 1],
     [1, 0],
