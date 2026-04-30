@@ -17,13 +17,13 @@ const Offline = () => {
       <BodyContainer>Choose Game Mode</BodyContainer>
 
       <ButtonContainer>
-        <CustomButton onClick={() => navigate("/")}>Main Menu</CustomButton>
-        <CustomButton onClick={() => navigate("/play-offline/cpu")}>
-          Play VS CPU
-        </CustomButton>
         <CustomButton onClick={() => navigate("/play-offline/2p")}>
           Play VS 2nd Player
         </CustomButton>
+        <CustomButton onClick={() => navigate("/play-offline/cpu")}>
+          Play VS CPU
+        </CustomButton>
+        <CustomButton onClick={() => navigate("/")}>Main Menu</CustomButton>
       </ButtonContainer>
     </PageContainer>
   );
