@@ -27,7 +27,7 @@ export const BodyContainer = styled("div")({
 
 export const PageContainer = styled("div")({
   background: "#0f0f0f",
-  gap: "24px",
+  gap: "clamp(12px, 3vw, 24px)",
 
   display: "flex",
   flexDirection: "column",
@@ -36,10 +36,11 @@ export const PageContainer = styled("div")({
 
   color: "#fff",
 
-  minHeight: "100vh",
-  width: "100vw",
+  minHeight: "100dvh",
+  width: "100%",
+  padding: "clamp(12px, 3vw, 24px)",
 
   margin: 0,
-  overflow: "hidden", // Fixed: "none" → "hidden"
+  overflowX: "hidden",
   boxSizing: "border-box",
 });
