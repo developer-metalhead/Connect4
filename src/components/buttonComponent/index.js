@@ -1,7 +1,8 @@
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 
-// Custom Styled Button
+// Custom Styled Button with sound support
+
 const CustomButton = styled(Button)(({ theme }) => ({
   display: "flex",
   padding: "12px 24px",
@@ -37,4 +38,25 @@ const CustomButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-export default CustomButton;
+// Enhanced button component with sound integration
+const SoundAwareButton = ({ children, onClick, soundManager, ...props }) => {
+  const handleClick = (e) => {
+    // Play click sound
+    if (soundManager) {
+      soundManager.playClickSound();
+    }
+
+    // Call original onClick handler
+    if (onClick) {
+      onClick(e);
+    }
+  };
+
+  return (
+    <CustomButton onClick={handleClick} {...props}>
+      {children}
+    </CustomButton>
+  );
+};
+
+export default SoundAwareButton;

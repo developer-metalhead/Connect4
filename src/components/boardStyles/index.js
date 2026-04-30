@@ -15,6 +15,7 @@ const Board = ({
   isDraw,
   onDrop,
   canInteract = true,
+  soundManager, // Add sound manager prop
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
@@ -47,7 +48,14 @@ const Board = ({
     });
 
     // Animation duration based on distance (more realistic)
-    const animationDuration = 200 + targetRow * 50;
+    const animationDuration = 400 + targetRow * 50;
+
+    // Play drop sound at the end of animation for better timing
+    setTimeout(() => {
+      if (soundManager) {
+        soundManager.playDropSound();
+      }
+    }, animationDuration - 100); // Slightly before animation ends
 
     setTimeout(() => {
       setFallingDisc(null);
@@ -59,6 +67,10 @@ const Board = ({
   const handleMouseEnter = (col) => {
     if (canInteract && !winner && !isDraw && droppingCol === null) {
       setHoverCol(col);
+      // Play hover sound
+      if (soundManager) {
+        soundManager.playHoverSound();
+      }
     }
   };
 
@@ -77,6 +89,7 @@ const Board = ({
             className="preview-cell"
             onMouseEnter={() => handleMouseEnter(col)}
             onMouseLeave={handleMouseLeave}
+            onClick={() => canInteract && handleClick(col)}
           >
             {hoverCol === col &&
               canInteract &&
