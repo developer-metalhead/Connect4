@@ -16,6 +16,7 @@ import {
   dropPieceUpsideDown,
   isValidMoveUpsideDown,
   isBoardFullUpsideDown,
+  returnToNormalGravity
 } from "../helperFunction/funModeFeatures";
 
 export const useFunModeConnect4 = () => {
@@ -33,6 +34,7 @@ export const useFunModeConnect4 = () => {
   const [isMonkeyAnimating, setIsMonkeyAnimating] = useState(false);
   const [monkeyVoiceLine, setMonkeyVoiceLine] = useState("");
   const [isGravityFalling, setIsGravityFalling] = useState(false);
+  const [gravityAnimation, setGravityAnimation] = useState(null);
 
   const monkeyButtonTimerRef = useRef(null);
 
@@ -52,6 +54,7 @@ export const useFunModeConnect4 = () => {
         showMonkeyButton,
         monkeyButtonPlayer,
         isGravityFalling,
+        gravityAnimation
       });
 
       const isValidMoveCheck = isUpsideDown
@@ -139,21 +142,32 @@ export const useFunModeConnect4 = () => {
             setMonkeyVoiceLine("Phew! Back to normal!");
 
             setTimeout(() => {
+              // Start the mass falling animation instead of reversing the board
               setIsGravityFalling(true);
-              console.log("🌊 STARTING GRAVITY FALLING ANIMATION");
+              console.log("🌊 STARTING GRAVITY RESTORE (mass falling) ANIMATION");
 
-              setGameState((prev) => ({
-                ...prev,
-                board: flipBoardUpsideDown(prev.board),
-              }));
-              setIsUpsideDown(false);
+              // Plan animation from the CURRENT upside-down board
+              const { finalBoard, animations, durationMs } = returnToNormalGravity(
+                gameState.board,
+                { isUpsideDown: true },
+              );
+
+              // Show overlays and mask source cells while they fall
+              setGravityAnimation(animations);
+
+              // After animation completes, commit the final (bottom-stacked) board
+             setTimeout(() => {
+                setGameState((prev) => ({
+                 ...prev,
+                 board: finalBoard,
+                }));
+               setIsUpsideDown(false);
               setIsMonkeyAnimating(false);
               setMonkeyVoiceLine("");
-
-              setTimeout(() => {
-                setIsGravityFalling(false);
-                console.log("✅ GRAVITY FALLING ANIMATION COMPLETE - NORMAL GAMEPLAY RESUMED");
-              }, 1500);
+              setGravityAnimation(null);
+               setIsGravityFalling(false);
+               console.log("✅ GRAVITY RESTORE COMPLETE - NORMAL GAMEPLAY RESUMED");
+             }, durationMs + 50);
 
               console.log("🔄 BOARD FLIPPED BACK TO NORMAL");
             }, 2500);
