@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import socket from "../services/wsClient";
 
