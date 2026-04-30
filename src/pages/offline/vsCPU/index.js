@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { useNavigate } from "react-router-dom";
 import CustomButton from "../../../components/buttonComponent";
 
 import {
@@ -9,7 +10,17 @@ import {
 } from "./index.style";
 
 const PlayCPU = () => {
-  return <PageContainer>Under Construction</PageContainer>;
+  const navigate = useNavigate();
+  return (
+    <PageContainer>
+      Under Construction
+      <ButtonContainer>
+        <CustomButton onClick={() => navigate("/play-offline")}>
+          Back
+        </CustomButton>
+      </ButtonContainer>
+    </PageContainer>
+  );
 };
 
 export default PlayCPU;
