@@ -1,0 +1,81 @@
+const ROWS = 6;
+const COLS = 7;
+const PLAYER1 = "🔴";
+const PLAYER2 = "🟡";
+const EMPTY = "⚪";
+
+// Create empty board
+export const createEmptyBoard = () => {
+  return Array(ROWS)
+    .fill()
+    .map(() => Array(COLS).fill(EMPTY));
+};
+
+// Reset game (returns initial state)
+export const resetGame = () => {
+  return {
+    board: createEmptyBoard(),
+    currentPlayer: PLAYER1,
+    winner: null,
+    isDraw: false,
+  };
+};
+
+// Drop piece in column
+export const dropPiece = (board, col, player) => {
+  for (let row = ROWS - 1; row >= 0; row--) {
+    if (board[row][col] === EMPTY) {
+      const newBoard = board.map((r) => [...r]);
+      newBoard[row][col] = player;
+      return { newBoard, row };
+    }
+  }
+  return { newBoard: board, row: -1 }; // Column full
+};
+
+// Check valid move
+export const isValidMove = (board, col) => {
+  return col >= 0 && col < COLS && board[0][col] === EMPTY;
+};
+
+// Check for win
+export const checkWin = (board, row, col, player) => {
+  const directions = [
+    [0, 1],
+    [1, 0],
+    [1, 1],
+    [1, -1],
+  ];
+
+  for (let [dr, dc] of directions) {
+    let count = 1;
+
+    // Positive direction
+    let r = row + dr,
+      c = col + dc;
+    while (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r][c] === player) {
+      count++;
+      r += dr;
+      c += dc;
+    }
+
+    // Negative direction
+    r = row - dr;
+    c = col - dc;
+    while (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r][c] === player) {
+      count++;
+      r -= dr;
+      c -= dc;
+    }
+
+    if (count >= 4) return true;
+  }
+  return false;
+};
+
+// Check draw
+export const isBoardFull = (board) => {
+  return board[0].every((cell) => cell !== EMPTY);
+};
+
+export { ROWS, COLS, PLAYER1, PLAYER2, EMPTY };
