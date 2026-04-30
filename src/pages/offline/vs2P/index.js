@@ -12,6 +12,7 @@ import {
   BodyContainer,
   ButtonContainer,
 } from "./index.style";
+import BoredVideoButton from "../../../components/organisms/VideoButton";
 
 const Game2P = () => {
   const navigate = useNavigate();
@@ -59,6 +60,9 @@ const Game2P = () => {
         >
           Back to Menu
         </CustomButton>
+        <BoredVideoButton onGameReset={reset}>
+          Extremely Fun Button!
+        </BoredVideoButton>
       </ButtonContainer>
     </PageContainer>
   );
