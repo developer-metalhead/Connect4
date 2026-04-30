@@ -16,6 +16,7 @@ import {
   BodyContainer,
   UpsideDownIndicator,
   FunModeBoard,
+  MonkeyModeOverlay,
 } from "./index.style";
 
 const FunMode = () => {
@@ -146,7 +147,11 @@ const FunMode = () => {
       <HeaderContainer>Connect 4 - Fun Mode</HeaderContainer>
       <BodyContainer>Monkey Mayhem Enabled! 🐒</BodyContainer>
 
+      {/* CHANGE: Add background overlay when monkey button is shown */}
+      {showMonkeyButton && <MonkeyModeOverlay />}
+
       {/* CHANGE: Simplified monkey button condition and added debug info */}
+
       {showMonkeyButton && (
         <div>
           <div
@@ -195,7 +200,7 @@ const FunMode = () => {
           winner={winner}
           isDraw={isDraw}
           onDrop={makeMove}
-          canInteract={!isMonkeyAnimating}
+          canInteract={!isMonkeyAnimating && !showMonkeyButton} // CHANGE: Disable interaction when monkey button is shown
           soundManager={soundManager}
         />
       </FunModeBoard>
