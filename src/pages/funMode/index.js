@@ -194,6 +194,7 @@ const FunMode = () => {
       />
 
       <FunModeBoard isUpsideDown={isUpsideDown}>
+        {/* CHANGE: Pass isUpsideDown prop to Board component */}
         <Board
           board={board}
           currentPlayer={currentPlayer}
@@ -202,6 +203,7 @@ const FunMode = () => {
           onDrop={makeMove}
           canInteract={!isMonkeyAnimating && !showMonkeyButton} // CHANGE: Disable interaction when monkey button is shown
           soundManager={soundManager}
+          isUpsideDown={isUpsideDown}
         />
       </FunModeBoard>
 

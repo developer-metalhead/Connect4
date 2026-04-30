@@ -14,6 +14,8 @@ import {
   getRandomMonkeyVoiceLine,
   isMonkeyWinner,
   dropPieceUpsideDown,
+  isValidMoveUpsideDown,
+  isBoardFullUpsideDown,
 } from "../helperFunction/funModeFeatures";
 
 export const useFunModeConnect4 = () => {
@@ -78,13 +80,18 @@ export const useFunModeConnect4 = () => {
         monkeyButtonPlayer,
       });
 
-      if (winner || isDraw || !isValidMove(board, col) || isMonkeyAnimating) {
+      // CHANGE: Use appropriate validation based on board state
+      const isValidMoveCheck = isUpsideDown
+        ? isValidMoveUpsideDown(board, col)
+        : isValidMove(board, col);
+
+      if (winner || isDraw || !isValidMoveCheck || isMonkeyAnimating) {
         console.log("❌ MOVE BLOCKED:", {
           reason: winner
             ? "winner exists"
             : isDraw
               ? "draw"
-              : !isValidMove(board, col)
+              : !isValidMoveCheck
                 ? "invalid move"
                 : "monkey animating",
         });
@@ -114,8 +121,8 @@ export const useFunModeConnect4 = () => {
 
       let newState = { ...gameState, board: newBoard };
 
-      // Check for win
-      if (checkWin(newBoard, row, col, currentPlayer)) {
+      // CHANGE: Pass isUpsideDown parameter to checkWin
+      if (checkWin(newBoard, row, col, currentPlayer, isUpsideDown)) {
         newState.winner = currentPlayer;
         console.log("🏆 WINNER DETECTED:", currentPlayer);
 
@@ -124,17 +131,24 @@ export const useFunModeConnect4 = () => {
           newState.isMonkeyWinner = true;
           console.log("🐒 MONKEY WINNER!", currentPlayer);
         }
-      } else if (isBoardFull(newBoard)) {
-        newState.isDraw = true;
-        console.log("🤝 DRAW DETECTED");
       } else {
-        newState.currentPlayer = getNextPlayer(currentPlayer);
-        console.log(
-          "🔄 TURN CHANGE:",
-          currentPlayer,
-          "→",
-          newState.currentPlayer,
-        );
+        // CHANGE: Use appropriate board full check based on board state
+        const isBoardFullCheck = isUpsideDown
+          ? isBoardFullUpsideDown(newBoard)
+          : isBoardFull(newBoard);
+
+        if (isBoardFullCheck) {
+          newState.isDraw = true;
+          console.log("🤝 DRAW DETECTED");
+        } else {
+          newState.currentPlayer = getNextPlayer(currentPlayer);
+          console.log(
+            "🔄 TURN CHANGE:",
+            currentPlayer,
+            "→",
+            newState.currentPlayer,
+          );
+        }
       }
 
       setGameState(newState);
@@ -283,7 +297,8 @@ export const useFunModeConnect4 = () => {
     setTimeout(() => {
       setGameState((prev) => {
         let flippedBoard = flipBoardUpsideDown(prev.board);
-        flippedBoard = maybeStealDisc(flippedBoard); // Chance to steal a disc
+        // CHANGE: Pass the triggering player to maybeStealDisc
+        flippedBoard = maybeStealDisc(flippedBoard, monkeyButtonPlayer);
 
         console.log("🔄 BOARD FLIPPED:", {
           before: prev.board.map((row) => row.join("")),

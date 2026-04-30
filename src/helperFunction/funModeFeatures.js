@@ -166,35 +166,42 @@ export const flipBoardUpsideDown = (board) => {
   return newBoard;
 };
 
-// CHANGE: Re-enabled disc stealing with 10% chance
-export const maybeStealDisc = (board) => {
+// CHANGE: Modified disc stealing to only target opponent who didn't trigger monkey mayhem
+export const maybeStealDisc = (board, triggeringPlayer) => {
   if (Math.random() > 0.5) {
     console.log("🍌 NO DISC STOLEN (50% chance)");
-    return board; // 90% chance no steal
+    return board; // 50% chance no steal
   }
 
   console.log("🍌 MONKEY STEALING A DISC! (50% chance)");
 
-  const occupiedCells = [];
+  // CHANGE: Only steal from the opponent who didn't trigger monkey mayhem
+  const opponentPlayer = triggeringPlayer === "🔴" ? "🟡" : "🔴";
+
+  const opponentCells = [];
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
-      if (board[row][col] !== EMPTY) {
-        occupiedCells.push({ row, col });
+      if (board[row][col] === opponentPlayer) {
+        opponentCells.push({ row, col });
       }
     }
   }
 
-  if (occupiedCells.length === 0) {
-    console.log("❌ NO DISCS TO STEAL");
+  if (opponentCells.length === 0) {
+    console.log("❌ NO OPPONENT DISCS TO STEAL");
     return board;
   }
 
   const randomCell =
-    occupiedCells[Math.floor(Math.random() * occupiedCells.length)];
+    opponentCells[Math.floor(Math.random() * opponentCells.length)];
   const newBoard = board.map((row) => [...row]);
   newBoard[randomCell.row][randomCell.col] = EMPTY;
 
-  console.log("🍌 STOLE DISC FROM:", randomCell);
+  console.log("🍌 STOLE DISC FROM OPPONENT:", {
+    cell: randomCell,
+    opponent: opponentPlayer,
+    triggeredBy: triggeringPlayer,
+  });
 
   // Apply gravity to the affected column
   const pieces = [];
@@ -229,20 +236,56 @@ export const isMonkeyWinner = (winner, isUpsideDown) => {
   return winner && isUpsideDown;
 };
 
-// CHANGE: New function to handle upside-down drop logic
+// CHANGE: Fixed upside-down drop logic to properly stack pieces from top to bottom
 export const dropPieceUpsideDown = (board, col, player) => {
   console.log("🙃 DROPPING PIECE UPSIDE DOWN:", { col, player });
+  console.log(
+    "🙃 COLUMN STATE BEFORE DROP:",
+    board.map((row) => row[col]),
+  );
 
   // In upside-down mode, pieces stack from top (row 0) downward
+  // Find the first empty row from top to bottom
   for (let row = 0; row < ROWS; row++) {
     if (board[row][col] === EMPTY) {
       const newBoard = board.map((r) => [...r]);
       newBoard[row][col] = player;
       console.log("✅ UPSIDE DOWN DROP SUCCESS:", { row, col, player });
+      console.log(
+        "🙃 COLUMN STATE AFTER DROP:",
+        newBoard.map((r) => r[col]),
+      );
       return { newBoard, row };
     }
   }
 
   console.log("❌ UPSIDE DOWN COLUMN FULL:", col);
   return { newBoard: board, row: -1 }; // Column full
+};
+
+// CHANGE: Fixed validation to check if bottom row is full in upside-down mode
+export const isValidMoveUpsideDown = (board, col) => {
+  if (col < 0 || col >= COLS) return false;
+  // In upside-down mode, check if there's any empty space in the column
+  // Since pieces stack from top, we need to check if there's any empty cell
+  for (let row = 0; row < ROWS; row++) {
+    if (board[row][col] === EMPTY) {
+      return true;
+    }
+  }
+  return false; // Column is completely full
+};
+
+// CHANGE: Fixed board full check for upside-down mode
+export const isBoardFullUpsideDown = (board) => {
+  // In upside-down mode, board is full when all cells are occupied
+  // Check every cell in the board
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      if (board[row][col] === EMPTY) {
+        return false;
+      }
+    }
+  }
+  return true;
 };
