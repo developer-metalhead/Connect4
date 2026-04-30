@@ -1,9 +1,12 @@
 /* eslint-disable no-unused-vars */
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
+
 import { useNavigate, useLocation } from "react-router-dom";
 import CustomButton from "../../components/buttonComponent";
 import Status from "../../components/status";
 import Board from "../../components/boardStyles";
+import SoundSettings from "../../components/SoundSettings";
+import useSoundManager from "../../hooks/useSoundManager";
 
 import {
   PageContainer,
@@ -12,11 +15,14 @@ import {
   BodyContainer,
 } from "./index.style";
 import useOnlineConnect4 from "../../hooks/useOnlineConnect4";
-import { PLAYER1 } from "../../helperFunction/helperFunction"; // only for emoji parity if needed
+import { PLAYER1 } from "../../helperFunction/helperFunction";
 
 const Online = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const soundManager = useSoundManager();
+  const [showSoundSettings, setShowSoundSettings] = useState(false);
+
   const {
     connected,
     status,
@@ -35,6 +41,7 @@ const Online = () => {
     resetRoom,
     makeMove,
   } = useOnlineConnect4();
+
   const nameByDisc = useMemo(
     () =>
       (players || []).reduce((acc, p) => {
@@ -47,7 +54,7 @@ const Online = () => {
   // Prefill from query ?room=ABCD
   const params = new URLSearchParams(location.search);
   const prefillRoom = params.get("room") || "";
-  // console.log("hey ", nameByDisc);
+
   const [name, setName] = useState("");
   const codeRef = useRef(prefillRoom);
 
@@ -61,6 +68,19 @@ const Online = () => {
     return url.toString();
   }, [roomId]);
 
+  // Play appropriate sounds when game ends
+  useEffect(() => {
+    if (gameState.winner) {
+      if (gameState.winner === myDisc) {
+        soundManager.playWinSound(); // I win
+      } else {
+        soundManager.playLoseSound(); // Opponent wins
+      }
+    } else if (gameState.isDraw) {
+      soundManager.playDrawSound();
+    }
+  }, [gameState.winner, gameState.isDraw, myDisc, soundManager]);
+
   const handleSetName = () => {
     setDisplayName(name);
   };
@@ -73,6 +93,29 @@ const Online = () => {
       {!connected && <BodyContainer>Connecting...</BodyContainer>}
       {error && (
         <BodyContainer style={{ color: "#ff6b6b" }}>{error}</BodyContainer>
+      )}
+
+      {/* Sound Settings Modal */}
+      {showSoundSettings && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <SoundSettings
+            soundManager={soundManager}
+            onClose={() => setShowSoundSettings(false)}
+          />
+        </div>
       )}
 
       {!inRoom && (
@@ -100,7 +143,11 @@ const Online = () => {
             />
 
             <ButtonContainer>
-              <CustomButton aria-label="Create a new room" onClick={createRoom}>
+              <CustomButton
+                aria-label="Create a new room"
+                onClick={createRoom}
+                soundManager={soundManager}
+              >
                 Create Room (code/link)
               </CustomButton>
 
@@ -127,27 +174,42 @@ const Online = () => {
                 <CustomButton
                   aria-label="Join room by code"
                   onClick={() => joinRoomByCode(codeRef.current?.value)}
+                  soundManager={soundManager}
                 >
                   Join
                 </CustomButton>
               </div>
 
               {status !== "searching" ? (
-                <CustomButton aria-label="Find a match" onClick={startQueue}>
+                <CustomButton
+                  aria-label="Find a match"
+                  onClick={startQueue}
+                  soundManager={soundManager}
+                >
                   Find Match (Queue)
                 </CustomButton>
               ) : (
                 <CustomButton
                   aria-label="Cancel matchmaking"
                   onClick={stopQueue}
+                  soundManager={soundManager}
                 >
                   Cancel Search…
                 </CustomButton>
               )}
 
               <CustomButton
+                aria-label="Sound Settings"
+                onClick={() => setShowSoundSettings(true)}
+                soundManager={soundManager}
+              >
+                🔊 Sound Settings
+              </CustomButton>
+
+              <CustomButton
                 aria-label="Back to Main Menu"
                 onClick={() => navigate("/")}
+                soundManager={soundManager}
               >
                 Back
               </CustomButton>
@@ -194,6 +256,7 @@ const Online = () => {
                     // ignore
                   }
                 }}
+                soundManager={soundManager}
               >
                 Copy
               </CustomButton>
@@ -214,7 +277,6 @@ const Online = () => {
             playerNames={nameByDisc}
           />
 
-          {/* For preview: show my own disc so hover does not reveal opponent */}
           <Board
             board={gameState.board}
             currentPlayer={myDisc || PLAYER1}
@@ -222,18 +284,35 @@ const Online = () => {
             isDraw={gameState.isDraw}
             onDrop={makeMove}
             canInteract={myTurn}
+            soundManager={soundManager}
           />
 
           <ButtonContainer>
-            <CustomButton aria-label="Start a new game" onClick={resetRoom}>
+            <CustomButton
+              aria-label="Start a new game"
+              onClick={resetRoom}
+              soundManager={soundManager}
+            >
               New Game
             </CustomButton>
-            <CustomButton aria-label="Leave this room" onClick={leaveRoom}>
+            <CustomButton
+              aria-label="Sound Settings"
+              onClick={() => setShowSoundSettings(true)}
+              soundManager={soundManager}
+            >
+              🔊 Settings
+            </CustomButton>
+            <CustomButton
+              aria-label="Leave this room"
+              onClick={leaveRoom}
+              soundManager={soundManager}
+            >
               Leave Room
             </CustomButton>
             <CustomButton
               aria-label="Back to menu"
               onClick={() => navigate("/")}
+              soundManager={soundManager}
             >
               Main Menu
             </CustomButton>
