@@ -19,7 +19,7 @@ import {
   returnToNormalGravity
 } from "../../helperFunction/funMode/monkeyModeFeatures";
 
-export const useFunModeConnect4 = (options = {}) => {
+export const useMonkeyMode = (options = {}) => {
   const { monkeyModeEnabled = true } = options;
   const [gameState, setGameState] = useState(resetGame);
 
