@@ -1,24 +1,25 @@
 /* eslint-disable no-unused-vars */
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import CustomButton from "../../components/organisms/buttonComponent";
 import Status from "../../components/organisms/status";
 import Board from "../../components/organisms/boardStyles";
-import MonkeyMayhemButton from "../../components/features/MayhemMonkey/MonkeyButton";
-import MonkeyFlipAnimation from "../../components/features/MayhemMonkey/MonkeyAnimation";
 import useSoundManager from "../../hooks/core/useSoundManager";
 import { useMonkeyMode } from "../../hooks/funMode/useMonkeyMode";
 import useFunModeSettings from "../../hooks/funMode/useFunModeSettings";
+import { MonkeyModeContainer } from "../../components/features/MayhemMonkey/MonkeyModeComponent";
+import { useFunModeEffects } from "../../hooks/funMode/useFunModeEffects";
+import { getPlayerNames,createMonkeyButtonHandler,canInteractWithBoard } from "../../helperFunction/funMode/monkeyModeFeatures";
+
 
 import {
   PageContainer,
   HeaderContainer,
   ButtonContainer,
   BodyContainer,
-  UpsideDownIndicator,
   FunModeBoard,
-  MonkeyModeOverlay,
 } from "./index.style";
+
 
 const FunMode = () => {
   const navigate = useNavigate();
@@ -40,109 +41,29 @@ const FunMode = () => {
 
   const { board, currentPlayer, winner, isDraw, isMonkeyWinner } = gameState;
   const soundManager = useSoundManager();
-  const [monkeyButtonTimer, setMonkeyButtonTimer] = useState(10);
 
-  useEffect(() => {
-    console.log("🎮 FUN MODE STATE UPDATE:", {
-      showMonkeyButton,
-      monkeyButtonPlayer,
-      currentPlayer,
-      isUpsideDown,
-      upsideDownTurnsLeft,
-      isMonkeyAnimating,
-      monkeyMayhemState,
-      isGravityFalling,
-      winner,
-      isDraw,
-    });
-  }, [
+  // CHANGE: Moved all effects to custom hook
+  const { monkeyButtonTimer } = useFunModeEffects({
     showMonkeyButton,
-    monkeyButtonPlayer,
-    currentPlayer,
-    isUpsideDown,
-    upsideDownTurnsLeft,
-    isMonkeyAnimating,
-    monkeyMayhemState,
-    isGravityFalling,
     winner,
     isDraw,
-  ]);
-
-  useEffect(() => {
-    if (showMonkeyButton) {
-      console.log("⏰ STARTING MONKEY BUTTON TIMER");
-      setMonkeyButtonTimer(10);
-      const interval = setInterval(() => {
-        setMonkeyButtonTimer((prev) => {
-          const newTime = prev - 1;
-          console.log("⏰ MONKEY BUTTON TIMER:", newTime);
-          if (newTime <= 0) {
-            console.log("⏰ MONKEY BUTTON TIMER EXPIRED");
-            clearInterval(interval);
-            return 0;
-          }
-          return newTime;
-        });
-      }, 1000);
-
-      return () => {
-        console.log("⏰ CLEANING UP MONKEY BUTTON TIMER");
-        clearInterval(interval);
-      };
-    }
-  }, [showMonkeyButton]);
-
-  useEffect(() => {
-    if (winner) {
-      if (isMonkeyWinner) {
-        soundManager.playWinSound();
-        setTimeout(() => soundManager.playSound("click"), 500);
-      } else {
-        soundManager.playWinSound();
-      }
-    } else if (isDraw) {
-      soundManager.playDrawSound();
-    }
-  }, [winner, isDraw, isMonkeyWinner, soundManager]);
-
-  useEffect(() => {
-    if (isMonkeyAnimating && monkeyVoiceLine) {
-      soundManager.playSound("click");
-    }
-  }, [isMonkeyAnimating, monkeyVoiceLine, soundManager]);
-
-  const handleMonkeyButtonClick = () => {
-    console.log("🐒 MONKEY BUTTON CLICKED!");
-    soundManager.playClickSound();
-    triggerMonkeyMayhem();
-  };
-
-  const getPlayerNames = () => {
-    const names = { "🔴": "Player 1", "🟡": "Player 2" };
-
-    if (monkeyMayhemState.usedBy === "🔴") {
-      names["🔴"] += " 🐒";
-    }
-    if (monkeyMayhemState.usedBy === "🟡") {
-      names["🟡"] += " 🐒";
-    }
-
-    return names;
-  };
-
-  console.log("🎨 RENDER CONDITIONS:", {
-    shouldShowMonkeyButton:
-      showMonkeyButton && monkeyButtonPlayer === currentPlayer,
-    showMonkeyButton,
-    monkeyButtonPlayer,
-    currentPlayer,
-    buttonPlayerMatch: monkeyButtonPlayer === currentPlayer,
+    isMonkeyWinner,
+    isMonkeyAnimating,
+    monkeyVoiceLine,
+    soundManager
   });
+
+  // CHANGE: Memoized computed values to avoid recalculation
+  const playerNames = useMemo(() => getPlayerNames(monkeyMayhemState), [monkeyMayhemState]);
+  const handleMonkeyButtonClick = useMemo(() => createMonkeyButtonHandler(soundManager, triggerMonkeyMayhem), [soundManager, triggerMonkeyMayhem]);
+  const canInteract = useMemo(() => canInteractWithBoard(isMonkeyAnimating, showMonkeyButton, isGravityFalling), [isMonkeyAnimating, showMonkeyButton, isGravityFalling]);
+
 
   return (
     <PageContainer>
       <HeaderContainer>Connect 4 - Fun Mode</HeaderContainer>
     
+
 
       {/* Feature status */}
       <BodyContainer style={{ fontSize: "14px" }}>
@@ -152,52 +73,30 @@ const FunMode = () => {
         </span>
       </BodyContainer>
 
-      {showMonkeyButton && <MonkeyModeOverlay />}
 
-      {showMonkeyButton && (
-        <div>
-          <div
-            style={{
-              color: "white",
-              fontSize: "12px",
-              textAlign: "center",
-              marginBottom: "10px",
-            }}
-          >
-            DEBUG: Button for {monkeyButtonPlayer}, Current: {currentPlayer}
-          </div>
-          <MonkeyMayhemButton
-            onTrigger={handleMonkeyButtonClick}
-            timeLeft={monkeyButtonTimer}
-          />
-        </div>
-      )}
-
-      <MonkeyFlipAnimation
-        isAnimating={isMonkeyAnimating}
-        voiceLine={monkeyVoiceLine}
-        isFlippingBack={monkeyVoiceLine.includes("normal")}
+      {/* Monkey Mode Components - Conditionally rendered based on settings */}
+      <MonkeyModeContainer
+        monkeyModeEnabled={monkeyModeEnabled}
+        showMonkeyButton={showMonkeyButton}
+        monkeyButtonPlayer={monkeyButtonPlayer}
+        currentPlayer={currentPlayer}
+        monkeyButtonTimer={monkeyButtonTimer}
+        handleMonkeyButtonClick={handleMonkeyButtonClick}
+        isMonkeyAnimating={isMonkeyAnimating}
+        monkeyVoiceLine={monkeyVoiceLine}
+        isGravityFalling={isGravityFalling}
+        isUpsideDown={isUpsideDown}
+        upsideDownTurnsLeft={upsideDownTurnsLeft}
       />
 
-      {isGravityFalling && (
-        <UpsideDownIndicator>
-          🌊 GRAVITY RESTORED - Discs falling back! 🌊
-        </UpsideDownIndicator>
-      )}
-
-      {isUpsideDown && !isGravityFalling && (
-        <UpsideDownIndicator>
-          🙃 UPSIDE DOWN MODE - {Math.ceil(upsideDownTurnsLeft / 2)} turns left
-          🙃
-        </UpsideDownIndicator>
-      )}
 
       <Status
         winner={winner}
         isDraw={isDraw}
         currentPlayer={currentPlayer}
-        playerNames={getPlayerNames()}
+        playerNames={playerNames}
       />
+
 
       <FunModeBoard isUpsideDown={isUpsideDown}>
         <Board
@@ -206,7 +105,8 @@ const FunMode = () => {
           winner={winner}
           isDraw={isDraw}
           onDrop={makeMove}
-          canInteract={!isMonkeyAnimating && !showMonkeyButton && !isGravityFalling}
+          canInteract={canInteract}
+
           soundManager={soundManager}
           isUpsideDown={isUpsideDown}
         />
