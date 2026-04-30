@@ -49,7 +49,6 @@ export const useFunModeConnect4 = () => {
         isUpsideDown,
         upsideDownTurnsLeft,
         monkeyMayhemState,
-
         showMonkeyButton,
         monkeyButtonPlayer,
       });
@@ -237,7 +236,6 @@ export const useFunModeConnect4 = () => {
       isUpsideDown,
       upsideDownTurnsLeft,
       monkeyMayhemState, // CHANGE: Updated dependency
-
       isMonkeyAnimating,
     ],
   );
@@ -295,8 +293,8 @@ export const useFunModeConnect4 = () => {
     setTimeout(() => {
       setGameState((prev) => {
         let flippedBoard = flipBoardUpsideDown(prev.board);
-        // CHANGE: Pass the triggering player to maybeStealDisc
-        flippedBoard = maybeStealDisc(flippedBoard, monkeyButtonPlayer);
+        // CHANGE: Pass the triggering player and board orientation to maybeStealDisc
+        flippedBoard = maybeStealDisc(flippedBoard, monkeyButtonPlayer, true);
 
         console.log("🔄 BOARD FLIPPED:", {
           before: prev.board.map((row) => row.join("")),
