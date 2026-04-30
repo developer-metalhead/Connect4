@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import CustomButton from "../../components/organisms/buttonComponent/index.js";
-import BoredVideoButton from "../../components/organisms/VideoButton/index.js";
+
 
 import {
   PageContainer,
@@ -33,9 +33,7 @@ const Home = () => {
         <CustomButton onClick={() => setShowFunModeSettings(true)}>
           Fun Mode Settings
         </CustomButton>
-        <BoredVideoButton>
-          Play Bored Video 🎬
-        </BoredVideoButton>
+      
       </ButtonContainer>
       {showFunModeSettings && (
         <div
