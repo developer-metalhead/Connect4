@@ -6,8 +6,8 @@ import Status from "../../components/status";
 import Board from "../../components/boardStyles";
 import MonkeyMayhemButton from "../../components/MonkeyButton";
 import MonkeyFlipAnimation from "../../components/MonkeyAnimation";
-import useSoundManager from "../../hooks/useSoundManager";
-import { useFunModeConnect4 } from "../../hooks/useFunModeConnect4";
+import useSoundManager from "../../hooks/core/useSoundManager";
+import { useFunModeConnect4 } from "../../hooks/core/useFunModeConnect4";
 import useFunModeSettings from "../../hooks/useFunModeSettings";
 
 import {

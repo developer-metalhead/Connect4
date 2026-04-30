@@ -12,7 +12,7 @@ import {
   PLAYER2,
   COLS,
   ROWS,
-} from "../helperFunction/helperFunction";
+} from "../../helperFunction/helperFunction";
 
 // Players
 const HUMAN = PLAYER1; // 🔴

@@ -6,7 +6,7 @@ import {
   isBoardFull,
   isValidMove,
   getNextPlayer,
-} from "../helperFunction/helperFunction";
+} from "../../helperFunction/helperFunction";
 import {
   shouldTriggerMonkeyMayhem,
   flipBoardUpsideDown,
@@ -17,7 +17,7 @@ import {
   isValidMoveUpsideDown,
   isBoardFullUpsideDown,
   returnToNormalGravity
-} from "../helperFunction/funModeFeatures";
+} from "../../helperFunction/funModeFeatures";
 
 export const useFunModeConnect4 = (options = {}) => {
   const { monkeyModeEnabled = true } = options;

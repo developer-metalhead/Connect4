@@ -3,9 +3,9 @@ import { useEffect } from "react";
 import CustomButton from "../../../components/buttonComponent";
 import Status from "../../../components/status";
 import Board from "../../../components/boardStyles";
-import useSoundManager from "../../../hooks/useSoundManager";
+import useSoundManager from "../../../hooks/core/useSoundManager";
 
-import { useConnect4 } from "../../../hooks/useConnect4";
+import { useConnect4 } from "../../../hooks/core/useConnect4";
 import {
   PageContainer,
   HeaderContainer,
