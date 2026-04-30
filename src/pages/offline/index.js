@@ -8,7 +8,7 @@ import {
   BodyContainer,
 } from "./index.style";
 
-const Home = () => {
+const Offline = () => {
   const navigate = useNavigate();
 
   return (
@@ -17,15 +17,15 @@ const Home = () => {
       <BodyContainer>Choose Game Mode</BodyContainer>
 
       <ButtonContainer>
-        <CustomButton onClick={() => navigate("/play-offline")}>
-          Play Offline
+        <CustomButton onClick={() => navigate("/play-offline/cpu")}>
+          Play VS CPU
         </CustomButton>
-        <CustomButton onClick={() => navigate("/play-online")}>
-          Play Online
+        <CustomButton onClick={() => navigate("/play-offline/2p")}>
+          Play VS 2nd Player
         </CustomButton>
       </ButtonContainer>
     </PageContainer>
   );
 };
 
-export default Home;
+export default Offline;
