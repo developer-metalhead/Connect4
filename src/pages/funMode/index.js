@@ -8,6 +8,7 @@ import MonkeyMayhemButton from "../../components/MonkeyButton";
 import MonkeyFlipAnimation from "../../components/MonkeyAnimation";
 import useSoundManager from "../../hooks/useSoundManager";
 import { useFunModeConnect4 } from "../../hooks/useFunModeConnect4";
+import useFunModeSettings from "../../hooks/useFunModeSettings";
 
 import {
   PageContainer,
@@ -21,6 +22,7 @@ import {
 
 const FunMode = () => {
   const navigate = useNavigate();
+  const { monkeyModeEnabled } = useFunModeSettings();
   const {
     gameState,
     makeMove,
@@ -34,7 +36,7 @@ const FunMode = () => {
     monkeyVoiceLine,
     monkeyMayhemState,
     isGravityFalling,
-  } = useFunModeConnect4();
+  } = useFunModeConnect4({ monkeyModeEnabled });
 
   const { board, currentPlayer, winner, isDraw, isMonkeyWinner } = gameState;
   const soundManager = useSoundManager();
@@ -140,7 +142,15 @@ const FunMode = () => {
   return (
     <PageContainer>
       <HeaderContainer>Connect 4 - Fun Mode</HeaderContainer>
-      <BodyContainer>Monkey Mayhem Enabled! 🐒</BodyContainer>
+    
+
+      {/* Feature status */}
+      <BodyContainer style={{ fontSize: "14px" }}>
+        Features:{" "}
+        <span style={{ color: monkeyModeEnabled ? "#4caf50" : "#ff6b6b", fontWeight: 700 }}>
+          Monkey Mode: {monkeyModeEnabled ? "On" : "Off"}
+        </span>
+      </BodyContainer>
 
       {showMonkeyButton && <MonkeyModeOverlay />}
 
@@ -169,7 +179,7 @@ const FunMode = () => {
         isFlippingBack={monkeyVoiceLine.includes("normal")}
       />
 
-      {isGravityFalling  && (
+      {isGravityFalling && (
         <UpsideDownIndicator>
           🌊 GRAVITY RESTORED - Discs falling back! 🌊
         </UpsideDownIndicator>
@@ -217,7 +227,10 @@ const FunMode = () => {
       <BodyContainer
         style={{ fontSize: "16px", marginTop: "20px", textAlign: "center" }}
       >
-        Get 2 separate 3-in-a-row to trigger Monkey Mayhem! 🐒
+        {monkeyModeEnabled
+          ? "Get 2 separate 3-in-a-row to trigger Monkey Mayhem! 🐒"
+          : "Monkey Mode is disabled in Settings."}
+
         <br />
         {monkeyMayhemState.wasUsed ? (
           <span style={{ color: "#ff6b6b" }}>
@@ -229,9 +242,11 @@ const FunMode = () => {
             Monkey Mayhem opportunity expired!
           </span>
         ) : (
-          <span style={{ color: "#4caf50" }}>
-            First player to get 3-in-a-row can trigger it once!
-          </span>
+          monkeyModeEnabled && (
+            <span style={{ color: "#4caf50" }}>
+              First player to get 3-in-a-row can trigger it once!
+            </span>
+          )
         )}
       </BodyContainer>
     </PageContainer>

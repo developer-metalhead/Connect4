@@ -19,8 +19,10 @@ import {
   returnToNormalGravity
 } from "../helperFunction/funModeFeatures";
 
-export const useFunModeConnect4 = () => {
+export const useFunModeConnect4 = (options = {}) => {
+  const { monkeyModeEnabled = true } = options;
   const [gameState, setGameState] = useState(resetGame);
+
   const [showMonkeyButton, setShowMonkeyButton] = useState(false);
   const [monkeyButtonPlayer, setMonkeyButtonPlayer] = useState(null);
   const [isUpsideDown, setIsUpsideDown] = useState(false);
@@ -179,8 +181,10 @@ export const useFunModeConnect4 = () => {
         console.log("🔍 CHECKING MONKEY MAYHEM TRIGGER...");
 
         if (
+          monkeyModeEnabled &&
           shouldTriggerMonkeyMayhem(newBoard, currentPlayer, monkeyMayhemState)
         ) {
+
           console.log(
             "🎯 MONKEY MAYHEM TRIGGERED FOR CURRENT PLAYER:",
             currentPlayer,
@@ -256,7 +260,12 @@ export const useFunModeConnect4 = () => {
   );
 
   const triggerMonkeyMayhem = useCallback(() => {
+    if (!monkeyModeEnabled) {
+      console.log("❌ MONKEY MAYHEM DISABLED IN SETTINGS");
+      return;
+    }
     console.log("🐒 TRIGGER MONKEY MAYHEM CALLED:", {
+
       showMonkeyButton,
       monkeyButtonPlayer,
       monkeyMayhemState,
@@ -332,7 +341,9 @@ export const useFunModeConnect4 = () => {
     monkeyButtonPlayer,
     isMonkeyAnimating,
     monkeyMayhemState,
+    monkeyModeEnabled,
   ]);
+
 
   const reset = useCallback(() => {
     console.log("🔄 RESETTING GAME");
