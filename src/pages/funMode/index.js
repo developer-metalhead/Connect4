@@ -5,15 +5,14 @@ import CustomButton from "../../components/organisms/buttonComponent";
 import Status from "../../components/organisms/status";
 import Board from "../../components/organisms/boardStyles";
 import useSoundManager from "../../hooks/core/useSoundManager";
+import { useFunMode } from "../../hooks/funMode/useFunMode"; // CHANGE: Use new core funMode hook
 import { useMonkeyMode } from "../../hooks/funMode/useMonkeyMode";
-import { useChaosChicken } from "../../hooks/funMode/useChaosChicken"; // CHANGE: Added chaos chicken hook
+import { useChaosChicken } from "../../hooks/funMode/useChaosChicken";
 import useFunModeSettings from "../../hooks/funMode/useFunModeSettings";
 import { MonkeyModeContainer } from "../../components/features/MayhemMonkey/MonkeyModeComponent";
-import { ChaosChickenContainer } from "../../components/features/ChaosChicken/ChickenModeComponents"; // CHANGE: Added chaos chicken components
+import { ChaosChickenContainer } from "../../components/features/ChaosChicken/ChickenModeComponents";
 import { useFunModeEffects } from "../../hooks/funMode/useFunModeEffects";
-import { getPlayerNames,createMonkeyButtonHandler,canInteractWithBoard } from "../../helperFunction/funMode/monkeyModeFeatures";
-
-
+import { getPlayerNames, createMonkeyButtonHandler, canInteractWithBoard } from "../../helperFunction/funMode/monkeyModeFeatures";
 
 import {
   PageContainer,
@@ -23,58 +22,62 @@ import {
   FunModeBoard,
 } from "./index.style";
 
-
 const FunMode = () => {
   const navigate = useNavigate();
-  // CHANGE: Added chaos chicken enabled setting
   const { monkeyModeEnabled, chaosChickenEnabled } = useFunModeSettings();
 
+  // CHANGE: Initialize feature hooks first
+  const chaosChickenHook = useChaosChicken({ chaosChickenEnabled });
+  const monkeyModeHook = useMonkeyMode({ monkeyModeEnabled });
+
+  // CHANGE: Use new core funMode hook as primary game controller
   const {
     gameState,
     makeMove,
     reset,
+    isGravityFalling,
+    gravityAnimation,
+  } = useFunMode({
+    monkeyModeHook,
+    chaosChickenHook,
+  });
+
+  // CHANGE: Destructure from individual hooks
+  const {
     showMonkeyButton,
     monkeyButtonPlayer,
-    triggerMonkeyMayhem,
     isUpsideDown,
     upsideDownTurnsLeft,
     isMonkeyAnimating,
     monkeyVoiceLine,
     monkeyMayhemState,
-    isGravityFalling,
-  } = useMonkeyMode({ monkeyModeEnabled });
+    triggerMonkeyMayhem,
+  } = monkeyModeHook;
 
-  // CHANGE: Added chaos chicken hook
   const {
     chaosChickenState,
     blockedColumns,
     isChickenAnimating,
     chickenVoiceLine,
     chickenAction,
-    checkChaosChickenTrigger,
-    triggerChaosChicken,
-    endTurn: endChickenTurn,
     isValidMove: isValidChickenMove,
     getAlternativeColumn,
-    reset: resetChicken,
-  } = useChaosChicken({ chaosChickenEnabled });
+  } = chaosChickenHook;
 
   const { board, currentPlayer, winner, isDraw, isMonkeyWinner } = gameState;
   const soundManager = useSoundManager();
 
-  // CHANGE: Updated effects to include chicken animations
   const { monkeyButtonTimer } = useFunModeEffects({
     showMonkeyButton,
     winner,
     isDraw,
     isMonkeyWinner,
-    isMonkeyAnimating: isMonkeyAnimating || isChickenAnimating, // Include chicken animation
-    monkeyVoiceLine: monkeyVoiceLine || chickenVoiceLine, // Include chicken voice
+    isMonkeyAnimating: isMonkeyAnimating || isChickenAnimating,
+    monkeyVoiceLine: monkeyVoiceLine || chickenVoiceLine,
     soundManager
   });
 
-
-  // CHANGE: Enhanced move function to handle chaos chicken
+  // CHANGE: Enhanced move function handles column blocking only
   const enhancedMakeMove = useMemo(() => {
     return (col) => {
       // Check if column is blocked by chicken poop
@@ -89,45 +92,31 @@ const FunMode = () => {
         col = altCol;
       }
 
-      // Make the move
-      const moveResult = makeMove(col);
-      if (!moveResult) return false;
-
-      // Check for chaos chicken trigger after successful move
-      if (checkChaosChickenTrigger(board, currentPlayer)) {
-        setTimeout(() => {
-          const { newBoard } = triggerChaosChicken(board, currentPlayer);
-          // Note: In a real implementation, you'd need to update the game state with newBoard
-        }, 500);
-      }
-
-      // End turn for chicken (decrease blocked column timers)
-      endChickenTurn();
-
-      return true;
+      // CHANGE: Core game logic is now handled in useFunMode
+      return makeMove(col);
     };
-  }, [makeMove, isValidChickenMove, getAlternativeColumn, board, currentPlayer, isUpsideDown, checkChaosChickenTrigger, triggerChaosChicken, endChickenTurn]);
-
-  // CHANGE: Enhanced reset function
-  const enhancedReset = useMemo(() => {
-    return () => {
-      reset();
-      resetChicken();
-    };
-  }, [reset, resetChicken]);
+  }, [makeMove, isValidChickenMove, getAlternativeColumn, board, isUpsideDown]);
 
   // Memoized computed values to avoid recalculation
   const playerNames = useMemo(() => getPlayerNames(monkeyMayhemState), [monkeyMayhemState]);
-  const handleMonkeyButtonClick = useMemo(() => createMonkeyButtonHandler(soundManager, triggerMonkeyMayhem), [soundManager, triggerMonkeyMayhem]);
+  
+  // CHANGE: Pass gameState setter to monkey mode for board updates
+  const handleMonkeyButtonClick = useMemo(() => {
+    return () => {
+      console.log("🐒 MONKEY BUTTON CLICKED!");
+      soundManager.playClickSound();
+      triggerMonkeyMayhem((updateFn) => {
+        // This will be handled by the core hook's state management
+        console.log("🐒 MONKEY MAYHEM BOARD UPDATE REQUESTED");
+      });
+    };
+  }, [soundManager, triggerMonkeyMayhem]);
+
   const canInteract = useMemo(() => canInteractWithBoard(isMonkeyAnimating || isChickenAnimating, showMonkeyButton, isGravityFalling), [isMonkeyAnimating, isChickenAnimating, showMonkeyButton, isGravityFalling]);
-
-
 
   return (
     <PageContainer>
       <HeaderContainer>Connect 4 - Fun Mode</HeaderContainer>
-    
-
 
       {/* Feature status */}
       <BodyContainer style={{ fontSize: "14px" }}>
@@ -136,13 +125,10 @@ const FunMode = () => {
           Monkey Mode: {monkeyModeEnabled ? "On" : "Off"}
         </span>
         {" | "}
-        {/* CHANGE: Added chaos chicken status */}
         <span style={{ color: chaosChickenEnabled ? "#4caf50" : "#ff6b6b", fontWeight: 700 }}>
           Chaos Chicken: {chaosChickenEnabled ? "On" : "Off"}
         </span>
       </BodyContainer>
-
-
 
       {/* Monkey Mode Components */}
       <MonkeyModeContainer
@@ -159,7 +145,7 @@ const FunMode = () => {
         upsideDownTurnsLeft={upsideDownTurnsLeft}
       />
 
-      {/* CHANGE: Added Chaos Chicken Components */}
+      {/* Chaos Chicken Components */}
       <ChaosChickenContainer
         chaosChickenEnabled={chaosChickenEnabled}
         isChickenAnimating={isChickenAnimating}
@@ -169,8 +155,6 @@ const FunMode = () => {
         blockedColumns={blockedColumns}
       />
 
-
-
       <Status
         winner={winner}
         isDraw={isDraw}
@@ -178,25 +162,23 @@ const FunMode = () => {
         playerNames={playerNames}
       />
 
-
       <FunModeBoard isUpsideDown={isUpsideDown}>
         <Board
           board={board}
           currentPlayer={currentPlayer}
           winner={winner}
           isDraw={isDraw}
-          onDrop={enhancedMakeMove} // CHANGE: Use enhanced move function
+          onDrop={enhancedMakeMove}
           canInteract={canInteract}
           soundManager={soundManager}
           isUpsideDown={isUpsideDown}
-          blockedColumns={blockedColumns} // CHANGE: Pass blocked columns to board
+          blockedColumns={blockedColumns}
+          gravityAnimation={gravityAnimation} // CHANGE: Pass gravity animation from core hook
         />
-
       </FunModeBoard>
 
       <ButtonContainer>
-        <CustomButton onClick={enhancedReset} soundManager={soundManager}> {/* CHANGE: Use enhanced reset */}
-
+        <CustomButton onClick={reset} soundManager={soundManager}>
           New Game
         </CustomButton>
         <CustomButton
@@ -214,7 +196,6 @@ const FunMode = () => {
           ? "Get 2 separate 3-in-a-row to trigger Monkey Mayhem! 🐒"
           : "Monkey Mode is disabled in Settings."}
         
-        {/* CHANGE: Added chaos chicken instructions */}
         {chaosChickenEnabled && (
           <>
             <br />
