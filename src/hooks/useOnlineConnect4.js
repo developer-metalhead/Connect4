@@ -8,13 +8,14 @@ const EMPTY = "⚪";
 
 // Simple local UUID for anonymous players
 const getOrCreatePlayerId = () => {
-  const k = "c4_player_id";
-  let v = localStorage.getItem(k);
+  // Per-tab identity so opening a new tab acts as a new player.
+  const k = "c4_player_id_session";
+  let v = sessionStorage.getItem(k);
   if (!v) {
     v =
       Math.random().toString(36).slice(2, 10) +
       Date.now().toString(36).slice(-4);
-    localStorage.setItem(k, v);
+    sessionStorage.setItem(k, v);
   }
   return v;
 };
