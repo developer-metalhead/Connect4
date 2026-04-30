@@ -47,7 +47,7 @@ export const PreviewRow = styled("div")({
   display: "grid",
   gridTemplateColumns: "repeat(7, 75px)",
   gap: "10px",
-  height: "90px",
+  height: "55px",
   marginBottom: "0px",
   justifyContent: "center",
 
