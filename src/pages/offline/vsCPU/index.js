@@ -1,9 +1,11 @@
 /* eslint-disable no-unused-vars */
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import CustomButton from "../../../components/buttonComponent";
 import Status from "../../../components/status";
 import Board from "../../../components/boardStyles";
-import { PLAYER1 } from "../../../helperFunction/helperFunction"; // For preview icon
+import { PLAYER1 } from "../../../helperFunction/helperFunction";
+import useSoundManager from "../../../hooks/useSoundManager";
 
 import useConnect4CPU from "../../../hooks/useConnect4CPU";
 
@@ -18,6 +20,21 @@ const PlayCPU = () => {
   const navigate = useNavigate();
   const { gameState, makeHumanMove, reset, isCpuTurn } = useConnect4CPU();
   const { board, currentPlayer, winner, isDraw } = gameState;
+  const soundManager = useSoundManager();
+
+  // Play appropriate sounds when game ends
+  useEffect(() => {
+    if (winner) {
+      if (winner === PLAYER1) {
+        soundManager.playWinSound(); // Human wins
+      } else {
+        soundManager.playLoseSound(); // CPU wins
+      }
+    } else if (isDraw) {
+      soundManager.playDrawSound();
+    }
+  }, [winner, isDraw, soundManager]);
+
   return (
     <PageContainer>
       <HeaderContainer>Connect 4</HeaderContainer>
@@ -35,10 +52,17 @@ const PlayCPU = () => {
         isDraw={isDraw}
         onDrop={makeHumanMove}
         canInteract={!isCpuTurn}
+        soundManager={soundManager}
       />
+
       <ButtonContainer>
-        <CustomButton onClick={reset}>New Game</CustomButton>
-        <CustomButton onClick={() => navigate("/play-offline")}>
+        <CustomButton onClick={reset} soundManager={soundManager}>
+          New Game
+        </CustomButton>
+        <CustomButton
+          onClick={() => navigate("/play-offline")}
+          soundManager={soundManager}
+        >
           Main Menu
         </CustomButton>
       </ButtonContainer>
