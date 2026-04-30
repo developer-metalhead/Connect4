@@ -17,6 +17,7 @@ const Board = ({
   canInteract = true,
   soundManager, // Add sound manager prop
   isUpsideDown = false, // CHANGE: Add isUpsideDown prop
+  gravityAnimation=null
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);

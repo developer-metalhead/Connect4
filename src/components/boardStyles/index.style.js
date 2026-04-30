@@ -111,4 +111,23 @@ export const GlobalStyles = `
       opacity: 0;
     }
   }
+
+  /* NEW: Mass gravity-restore animation (no initial -80px jump) */
+  @keyframes gravityDrop {
+    0% {
+      transform: translateY(calc(var(--start-row) * (var(--cell) + var(--gap))));
+      opacity: 1;
+    }
+    85% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) + 10px));
+    }
+    95% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 5px));
+    }
+    100% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      opacity: 0;
+    }
+  }
 `;
+
