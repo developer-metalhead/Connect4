@@ -16,6 +16,7 @@ const Board = ({
   onDrop,
   canInteract = true,
   soundManager, // Add sound manager prop
+  isUpsideDown = false, // CHANGE: Add isUpsideDown prop
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
@@ -28,27 +29,42 @@ const Board = ({
     setHoverCol(null);
     setDroppingCol(col);
 
-    // Find the target row for the falling disc
+    // CHANGE: Find target row based on board orientation
     let targetRow = -1;
-    for (let row = board.length - 1; row >= 0; row--) {
-      if (board[row][col] === "⚪") {
-        targetRow = row;
-        break;
+    if (isUpsideDown) {
+      // In upside-down mode, find first empty row from top
+      for (let row = 0; row < board.length; row++) {
+        if (board[row][col] === "⚪") {
+          targetRow = row;
+          break;
+        }
+      }
+    } else {
+      // Normal mode, find first empty row from bottom
+      for (let row = board.length - 1; row >= 0; row--) {
+        if (board[row][col] === "⚪") {
+          targetRow = row;
+          break;
+        }
       }
     }
 
     if (targetRow === -1) return; // Column is full
 
+    // CHANGE: Adjust falling animation for upside-down mode
+    const startRow = isUpsideDown ? board.length : -1;
+
     // Start falling animation
     setFallingDisc({
       col,
       targetRow,
-      currentRow: -1, // Start above the board
+      currentRow: startRow,
       player: currentPlayer,
     });
 
     // Animation duration based on distance (more realistic)
-    const animationDuration = 300 + targetRow * 50;
+    const distance = isUpsideDown ? targetRow + 1 : board.length - targetRow;
+    const animationDuration = 300 + distance * 50;
 
     // CHANGE: Play drop sound earlier - at 30% of animation duration instead of near the end
     setTimeout(() => {
@@ -82,25 +98,28 @@ const Board = ({
 
   return (
     <>
-      <PreviewRow>
-        {Array.from({ length: 7 }).map((_, col) => (
-          <div
-            key={col}
-            className="preview-cell"
-            onMouseEnter={() => handleMouseEnter(col)}
-            onMouseLeave={handleMouseLeave}
-            onClick={() => canInteract && handleClick(col)}
-          >
-            {hoverCol === col &&
-              canInteract &&
-              !winner &&
-              !isDraw &&
-              droppingCol === null && (
-                <span className="preview-piece">{currentPlayer}</span>
-              )}
-          </div>
-        ))}
-      </PreviewRow>
+      {/* CHANGE: Conditionally render preview row based on board orientation */}
+      {!isUpsideDown && (
+        <PreviewRow>
+          {Array.from({ length: 7 }).map((_, col) => (
+            <div
+              key={col}
+              className="preview-cell"
+              onMouseEnter={() => handleMouseEnter(col)}
+              onMouseLeave={handleMouseLeave}
+              onClick={() => canInteract && handleClick(col)}
+            >
+              {hoverCol === col &&
+                canInteract &&
+                !winner &&
+                !isDraw &&
+                droppingCol === null && (
+                  <span className="preview-piece">{currentPlayer}</span>
+                )}
+            </div>
+          ))}
+        </PreviewRow>
+      )}
 
       <BoardContainer>
         {/* Column highlights */}
@@ -116,14 +135,15 @@ const Board = ({
           />
         )}
 
-        {/* Falling disc animation */}
+        {/* CHANGE: Adjust falling disc animation for upside-down mode */}
         {fallingDisc && (
           <FallingDisc
             style={{
               left: `calc(${fallingDisc.col} * (var(--cell) + var(--gap)) + var(--gap))`,
-              animationDuration: `${400 + fallingDisc.targetRow * 50}ms`,
-
+              animationDuration: `${400 + Math.abs(fallingDisc.targetRow - fallingDisc.currentRow) * 50}ms`,
               "--target-row": fallingDisc.targetRow,
+              "--start-row": fallingDisc.currentRow,
+              "--is-upside-down": isUpsideDown ? 1 : 0,
             }}
           >
             {fallingDisc.player}
@@ -154,6 +174,29 @@ const Board = ({
           </Row>
         ))}
       </BoardContainer>
+
+      {/* CHANGE: Add preview row at bottom for upside-down mode */}
+      {isUpsideDown && (
+        <PreviewRow style={{ marginTop: "0px", marginBottom: "0px" }}>
+          {Array.from({ length: 7 }).map((_, col) => (
+            <div
+              key={col}
+              className="preview-cell"
+              onMouseEnter={() => handleMouseEnter(col)}
+              onMouseLeave={handleMouseLeave}
+              onClick={() => canInteract && handleClick(col)}
+            >
+              {hoverCol === col &&
+                canInteract &&
+                !winner &&
+                !isDraw &&
+                droppingCol === null && (
+                  <span className="preview-piece">{currentPlayer}</span>
+                )}
+            </div>
+          ))}
+        </PreviewRow>
+      )}
     </>
   );
 };

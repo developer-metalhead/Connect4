@@ -93,18 +93,18 @@ export const FallingDisc = styled("div")({
   boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
 });
 
-// Global Keyframes
+// CHANGE: Updated keyframes to handle both normal and upside-down falling
 export const GlobalStyles = `
   @keyframes discFall {
     0% {
-      transform: translateY(-80px);
+      transform: translateY(calc(var(--start-row, -1) * (var(--cell) + var(--gap)) - 80px));
       opacity: 1;
     }
     85% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) + 10px));
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) + 10px * (var(--is-upside-down, 0) * 2 - 1)));
     }
     95% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 5px));
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 5px * (var(--is-upside-down, 0) * 2 - 1)));
     }
     100% {
       transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
