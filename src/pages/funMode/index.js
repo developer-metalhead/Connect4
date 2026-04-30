@@ -7,7 +7,7 @@ import Board from "../../components/organisms/boardStyles";
 import MonkeyMayhemButton from "../../components/features/MayhemMonkey/MonkeyButton";
 import MonkeyFlipAnimation from "../../components/features/MayhemMonkey/MonkeyAnimation";
 import useSoundManager from "../../hooks/core/useSoundManager";
-import { useFunModeConnect4 } from "../../hooks/funMode/useMonkeyMode";
+import { useMonkeyMode } from "../../hooks/funMode/useMonkeyMode";
 import useFunModeSettings from "../../hooks/funMode/useFunModeSettings";
 
 import {
@@ -36,7 +36,7 @@ const FunMode = () => {
     monkeyVoiceLine,
     monkeyMayhemState,
     isGravityFalling,
-  } = useFunModeConnect4({ monkeyModeEnabled });
+  } = useMonkeyMode({ monkeyModeEnabled });
 
   const { board, currentPlayer, winner, isDraw, isMonkeyWinner } = gameState;
   const soundManager = useSoundManager();
