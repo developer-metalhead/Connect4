@@ -8,29 +8,41 @@ const StatusWrapper = styled("div")({
   minHeight: "60px",
 });
 
-const Status = ({ winner, isDraw, currentPlayer }) => {
+const coinColor = (coin) =>
+  coin === "🔴" ? "#ff4444" : coin === "🟡" ? "#ffdd00" : "#ddd";
+
+const Status = ({ winner, isDraw, currentPlayer, playerNames = {} }) => {
+  const currentName = playerNames[currentPlayer];
+  const winnerName = playerNames[winner];
+
   if (winner) {
     return (
-      <StatusWrapper>
-        🎉{" "}
-        <span style={{ color: winner === "🔴" ? "#ff4444" : "#ffdd00" }}>
-          {winner}
-        </span>{" "}
-        Wins! 🎉
+      <StatusWrapper aria-live="polite">
+        🎉 <span style={{ color: coinColor(winner) }}>{winner}</span>
+        {winnerName ? ` (${winnerName})` : ""} Wins! 🎉
       </StatusWrapper>
     );
   }
 
   if (isDraw) {
-    return <StatusWrapper>🤝 It's a Draw!</StatusWrapper>;
+    return <StatusWrapper aria-live="polite">🤝 It's a Draw!</StatusWrapper>;
   }
 
   return (
-    <StatusWrapper>
-      Current Turn :{" "}
-      <span style={{ fontSize: "32px", paddingLeft: "2px" }}>
+    <StatusWrapper aria-live="polite">
+      Current Turn:{" "}
+      <span
+        style={{
+          fontSize: "32px",
+          paddingLeft: "4px",
+          color: coinColor(currentPlayer),
+        }}
+      >
         {currentPlayer}
       </span>
+      {currentName ? (
+        <span style={{ paddingLeft: 6 }}>({currentName})</span>
+      ) : null}
     </StatusWrapper>
   );
 };

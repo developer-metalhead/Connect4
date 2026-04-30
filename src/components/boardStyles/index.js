@@ -1,12 +1,19 @@
 import { useState } from "react";
 import { BoardContainer, Row, Cell, PreviewRow } from "./index.style"; // Make sure path is correct
 
-const Board = ({ board, currentPlayer, winner, isDraw, onDrop }) => {
+const Board = ({
+  board,
+  currentPlayer,
+  winner,
+  isDraw,
+  onDrop,
+  canInteract = true,
+}) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
 
   const handleClick = (col) => {
-    if (winner || isDraw) return;
+    if (winner || isDraw || !canInteract) return;
 
     setDroppingCol(col);
 
@@ -23,11 +30,11 @@ const Board = ({ board, currentPlayer, winner, isDraw, onDrop }) => {
           <div
             key={col}
             className="preview-cell"
-            onMouseEnter={() => setHoverCol(col)}
-            onMouseLeave={() => setHoverCol(null)}
-            onClick={() => handleClick(col)}
+            onMouseEnter={() => canInteract && setHoverCol(col)}
+            onMouseLeave={() => canInteract && setHoverCol(null)}
+            onClick={() => canInteract && handleClick(col)}
           >
-            {hoverCol === col && !winner && !isDraw && (
+            {hoverCol === col && canInteract && !winner && !isDraw && (
               <span className="preview-piece">{currentPlayer}</span>
             )}
           </div>
@@ -40,9 +47,9 @@ const Board = ({ board, currentPlayer, winner, isDraw, onDrop }) => {
             {row.map((cell, c) => (
               <Cell
                 key={c}
-                onClick={() => handleClick(c)}
-                onMouseEnter={() => setHoverCol(c)}
-                onMouseLeave={() => setHoverCol(null)}
+                onClick={() => canInteract && handleClick(c)}
+                onMouseEnter={() => canInteract && setHoverCol(c)}
+                onMouseLeave={() => canInteract && setHoverCol(null)}
                 className={droppingCol === c ? "dropping" : ""}
               >
                 {cell}

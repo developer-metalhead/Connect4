@@ -35,11 +35,19 @@ const Online = () => {
     resetRoom,
     makeMove,
   } = useOnlineConnect4();
+  const nameByDisc = useMemo(
+    () =>
+      (players || []).reduce((acc, p) => {
+        if (p?.disc) acc[p.disc] = p?.name || "Guest";
+        return acc;
+      }, {}),
+    [players],
+  );
 
   // Prefill from query ?room=ABCD
   const params = new URLSearchParams(location.search);
   const prefillRoom = params.get("room") || "";
-
+  // console.log("hey ", nameByDisc);
   const [name, setName] = useState("");
   const codeRef = useRef(prefillRoom);
 
@@ -203,6 +211,7 @@ const Online = () => {
             winner={gameState.winner}
             isDraw={gameState.isDraw}
             currentPlayer={gameState.currentPlayer}
+            playerNames={nameByDisc}
           />
 
           {/* For preview: show my own disc so hover does not reveal opponent */}
@@ -212,6 +221,7 @@ const Online = () => {
             winner={gameState.winner}
             isDraw={gameState.isDraw}
             onDrop={makeMove}
+            // canInteract={myTurn}
           />
 
           <ButtonContainer>
