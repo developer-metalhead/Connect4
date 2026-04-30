@@ -18,27 +18,28 @@ const PlayCPU = () => {
   const navigate = useNavigate();
   const { gameState, makeHumanMove, reset, isCpuTurn } = useConnect4CPU();
   const { board, currentPlayer, winner, isDraw } = gameState;
-
   return (
     <PageContainer>
       <HeaderContainer>Connect 4</HeaderContainer>
       <BodyContainer>VS CPU</BodyContainer>
-
-      <Status winner={winner} isDraw={isDraw} currentPlayer={currentPlayer} />
-
-      {/* Pass human disc for preview to avoid confusing CPU preview */}
+      <Status
+        winner={winner}
+        isDraw={isDraw}
+        currentPlayer={currentPlayer}
+        playerNames={{ "🔴": "Player", "🟡": "CPU" }}
+      />
       <Board
         board={board}
         currentPlayer={PLAYER1}
         winner={winner}
         isDraw={isDraw}
         onDrop={makeHumanMove}
+        canInteract={!isCpuTurn}
       />
-
       <ButtonContainer>
         <CustomButton onClick={reset}>New Game</CustomButton>
         <CustomButton onClick={() => navigate("/play-offline")}>
-          Back to Menu
+          Main Menu
         </CustomButton>
       </ButtonContainer>
     </PageContainer>
