@@ -5,9 +5,9 @@ import CustomButton from "../../../components/buttonComponent";
 import Status from "../../../components/status";
 import Board from "../../../components/boardStyles";
 import { PLAYER1 } from "../../../helperFunction/helperFunction";
-import useSoundManager from "../../../hooks/useSoundManager";
+import useSoundManager from "../../../hooks/core/useSoundManager";
 
-import useConnect4CPU from "../../../hooks/useConnect4CPU";
+import useConnect4CPU from "../../../hooks/core/useConnect4CPU";
 
 import {
   PageContainer,

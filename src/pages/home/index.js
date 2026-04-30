@@ -9,7 +9,7 @@ import {
 } from "./index.style";
 import FunModeSettings from "../../components/funModeSettings/funModeSettings.js";
 import { useState } from "react";
-import useSoundManager from "../../hooks/useSoundManager";
+import useSoundManager from "../../hooks/core/useSoundManager.js";
 
 
 const Home = () => {
