@@ -48,14 +48,14 @@ const Board = ({
     });
 
     // Animation duration based on distance (more realistic)
-    const animationDuration = 400 + targetRow * 50;
+    const animationDuration = 300 + targetRow * 50;
 
-    // Play drop sound at the end of animation for better timing
+    // CHANGE: Play drop sound earlier - at 30% of animation duration instead of near the end
     setTimeout(() => {
       if (soundManager) {
         soundManager.playDropSound();
       }
-    }, animationDuration - 100); // Slightly before animation ends
+    }, animationDuration * 0.1); // Play sound at 30% of animation completion
 
     setTimeout(() => {
       setFallingDisc(null);
@@ -122,6 +122,7 @@ const Board = ({
             style={{
               left: `calc(${fallingDisc.col} * (var(--cell) + var(--gap)) + var(--gap))`,
               animationDuration: `${400 + fallingDisc.targetRow * 50}ms`,
+
               "--target-row": fallingDisc.targetRow,
             }}
           >
@@ -143,6 +144,7 @@ const Board = ({
                     canInteract && !winner && !isDraw && droppingCol === null
                       ? "pointer"
                       : "default",
+
                   opacity: droppingCol !== null && droppingCol !== c ? 0.7 : 1,
                 }}
               >
