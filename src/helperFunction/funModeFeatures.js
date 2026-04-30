@@ -167,8 +167,12 @@ export const flipBoardUpsideDown = (board) => {
   return newBoard;
 };
 
-// CHANGE: Modified disc stealing to only target opponent who didn't trigger monkey mayhem
-export const maybeStealDisc = (board, triggeringPlayer) => {
+// CHANGE: Fixed disc stealing to apply correct gravity based on board orientation
+export const maybeStealDisc = (
+  board,
+  triggeringPlayer,
+  isUpsideDown = false,
+) => {
   if (Math.random() > 0.5) {
     console.log("🍌 NO DISC STOLEN (50% chance)");
     return board; // 50% chance no steal
@@ -176,7 +180,6 @@ export const maybeStealDisc = (board, triggeringPlayer) => {
 
   console.log("🍌 MONKEY STEALING A DISC! (50% chance)");
 
-  // CHANGE: Only steal from the opponent who didn't trigger monkey mayhem
   // CHANGE: Only steal from the opponent who didn't trigger monkey mayhem
   const opponentPlayer = triggeringPlayer === "🔴" ? "🟡" : "🔴";
 
@@ -203,20 +206,33 @@ export const maybeStealDisc = (board, triggeringPlayer) => {
     cell: randomCell,
     opponent: opponentPlayer,
     triggeredBy: triggeringPlayer,
+    isUpsideDown,
   });
 
-  // Apply gravity to the affected column
+  // CHANGE: Apply gravity based on board orientation
   const pieces = [];
-  for (let row = ROWS - 1; row >= 0; row--) {
+
+  // Collect all pieces in the affected column
+  for (let row = 0; row < ROWS; row++) {
     if (newBoard[row][randomCell.col] !== EMPTY) {
       pieces.push(newBoard[row][randomCell.col]);
       newBoard[row][randomCell.col] = EMPTY;
     }
   }
 
-  // Re-drop pieces
-  for (let i = 0; i < pieces.length; i++) {
-    newBoard[ROWS - 1 - i][randomCell.col] = pieces[i];
+  // CHANGE: Re-drop pieces according to current gravity orientation
+  if (isUpsideDown) {
+    // In upside-down mode, pieces stack from top (row 0) downward
+    for (let i = 0; i < pieces.length; i++) {
+      newBoard[i][randomCell.col] = pieces[i];
+    }
+    console.log("🙃 APPLIED UPSIDE-DOWN GRAVITY TO COLUMN", randomCell.col);
+  } else {
+    // In normal mode, pieces stack from bottom (row ROWS-1) upward
+    for (let i = 0; i < pieces.length; i++) {
+      newBoard[ROWS - 1 - i][randomCell.col] = pieces[i];
+    }
+    console.log("⬇️ APPLIED NORMAL GRAVITY TO COLUMN", randomCell.col);
   }
 
   console.log(
@@ -239,8 +255,8 @@ export const isMonkeyWinner = (winner, isUpsideDown) => {
 };
 
 // CHANGE: Fixed upside-down drop logic to properly stack pieces from top to bottom
+// CHANGE: Fixed upside-down drop logic to properly stack pieces from top to bottom
 export const dropPieceUpsideDown = (board, col, player) => {
-  console.log("🙃 DROPPING PIECE UPSIDE DOWN:", { col, player });
   console.log("🙃 DROPPING PIECE UPSIDE DOWN:", { col, player });
   console.log(
     "🙃 COLUMN STATE BEFORE DROP:",
@@ -254,12 +270,10 @@ export const dropPieceUpsideDown = (board, col, player) => {
       const newBoard = board.map((r) => [...r]);
       newBoard[row][col] = player;
       console.log("✅ UPSIDE DOWN DROP SUCCESS:", { row, col, player });
-      console.log("✅ UPSIDE DOWN DROP SUCCESS:", { row, col, player });
       console.log(
         "🙃 COLUMN STATE AFTER DROP:",
         newBoard.map((r) => r[col]),
       );
-
       return { newBoard, row };
     }
   }
