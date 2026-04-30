@@ -77,25 +77,25 @@ const FunMode = () => {
     soundManager
   });
 
-  // CHANGE: Enhanced move function handles column blocking only
+  // CHANGE: Enhanced move function handles column blocking with current player context
   const enhancedMakeMove = useMemo(() => {
     return (col) => {
-      // Check if column is blocked by chicken poop
-      if (!isValidChickenMove(board, col, isUpsideDown)) {
+      // CHANGE: Check if column is blocked by chicken poop for current player
+      if (!isValidChickenMove(board, col, isUpsideDown, currentPlayer)) {
         // Try to find alternative column
-        const altCol = getAlternativeColumn(board, col, isUpsideDown);
+        const altCol = getAlternativeColumn(board, col, isUpsideDown, currentPlayer);
         if (altCol === -1) {
           console.log("❌ NO AVAILABLE COLUMNS - ALL BLOCKED BY POOP");
           return false;
         }
-        console.log(`💩 COLUMN ${col} BLOCKED, USING ALTERNATIVE ${altCol}`);
+        console.log(`💩 COLUMN ${col} BLOCKED FOR ${currentPlayer}, USING ALTERNATIVE ${altCol}`);
         col = altCol;
       }
 
       // CHANGE: Core game logic is now handled in useFunMode
       return makeMove(col);
     };
-  }, [makeMove, isValidChickenMove, getAlternativeColumn, board, isUpsideDown]);
+  }, [makeMove, isValidChickenMove, getAlternativeColumn, board, isUpsideDown, currentPlayer]);
 
   // Memoized computed values to avoid recalculation
   const playerNames = useMemo(() => getPlayerNames(monkeyMayhemState), [monkeyMayhemState]);
@@ -199,10 +199,11 @@ const FunMode = () => {
         {chaosChickenEnabled && (
           <>
             <br />
-            Create a 2x2 square to trigger Chaos Chicken! 🐔
+            {/* CHANGE: Updated instructions to reflect new trigger logic */}
+            Create a 2x2 square to trigger Chaos Chicken! 🐔 (2+ squares = Rooster of Rage! 🔥)
             {chaosChickenState.activations > 0 && (
               <span style={{ color: "#ff8c00" }}>
-                {" "}(Activations: {chaosChickenState.activations}/2)
+                {" "}(Activations: {chaosChickenState.activations})
               </span>
             )}
           </>

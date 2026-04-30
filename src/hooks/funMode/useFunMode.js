@@ -85,7 +85,8 @@ export const useFunMode = (options = {}) => {
 
       // CHANGE: Check for Chaos Chicken IMMEDIATELY after board update, before any turn changes
       let chaosChickenTriggered = false;
-      let chaosChickenResult = { newBoard, blockedColumns: [] };
+      let chaosChickenResult = { newBoard, blockedColumns: chaosChickenHook?.blockedColumns || [] };
+
       
       if (chaosChickenHook && chaosChickenHook.checkChaosChickenTrigger) {
         console.log("🐔 CHECKING CHAOS CHICKEN FOR PLAYER WHO JUST MOVED:", currentPlayer);
@@ -94,11 +95,12 @@ export const useFunMode = (options = {}) => {
           console.log("🐔 CHAOS CHICKEN TRIGGERED IMMEDIATELY FOR:", currentPlayer);
           chaosChickenTriggered = true;
           
-          // Trigger chaos chicken with the board that includes the just-placed piece
+          // CHANGE: Trigger chaos chicken with the board that includes the just-placed piece
+          // This will update the chaos chicken hook's internal state including blocked columns
           chaosChickenResult = chaosChickenHook.triggerChaosChicken(newBoard, currentPlayer);
           
-          // End chicken turn (decrease blocked column timers)
-          chaosChickenHook.endTurn();
+          // CHANGE: End chicken turn (decrease blocked column timers) - this affects all players
+
         }
       }
 

@@ -55,12 +55,18 @@ export const detect2x2Squares = (board, player) => {
   return squares;
 };
 
-// CHANGE: Check if Chaos Chicken should trigger
+// CHANGE: Check if Chaos Chicken should trigger based on new requirements
 export const shouldTriggerChaosChicken = (board, player, chaosChickenState) => {
   console.log("🐔 CHECKING CHAOS CHICKEN TRIGGER:", {
     player,
     chaosChickenState,
   });
+
+  // CHANGE: Check if this player has already triggered Chaos Chicken/Rooster of Rage
+  // if (chaosChickenState.hasTriggeredChaosChicken && chaosChickenState.hasTriggeredChaosChicken[player]) {
+  //   console.log("❌ CHAOS CHICKEN ALREADY TRIGGERED BY PLAYER:", player);
+  //   return false;
+  // }
 
   const squares = detect2x2Squares(board, player);
   const shouldTrigger = squares.length > 0;
@@ -69,11 +75,27 @@ export const shouldTriggerChaosChicken = (board, player, chaosChickenState) => {
     player,
     squareCount: squares.length,
     shouldTrigger,
-    activations: chaosChickenState.activations,
+    hasTriggeredBefore: chaosChickenState.hasTriggeredChaosChicken?.[player] || false,
   });
 
   return shouldTrigger;
 };
+
+// CHANGE: Determine if this should be Rooster of Rage (2+ squares) or regular Chaos Chicken (1 square)
+export const shouldTriggerRoosterOfRage = (board, player) => {
+  const squares = detect2x2Squares(board, player);
+  const isRooster = squares.length >= 2;
+  
+  console.log("🔥 ROOSTER OF RAGE CHECK:", {
+    player,
+    squareCount: squares.length,
+    isRooster,
+  });
+  
+  return isRooster;
+};
+
+// CHANGE: Get available columns (not blocked by poop)
 
 // CHANGE: Get available columns (not blocked by poop)
 export const getAvailableColumns = (blockedColumns) => {
@@ -114,15 +136,18 @@ export const blockRandomColumn = (blockedColumns) => {
   return newBlockedColumns;
 };
 
-// CHANGE: Wipe an entire row (Rooster of Rage ability)
-export const wipeRandomRow = (board) => {
+// CHANGE: Wipe an entire row (Rooster of Rage ability) - only remove opponent's pieces
+export const wipeRandomRow = (board, triggeringPlayer) => {
   console.log("🔥 ROOSTER OF RAGE - WIPING RANDOM ROW");
   
-  // Find rows that have at least one disc
+  // CHANGE: Determine opponent player
+  const opponentPlayer = triggeringPlayer === "🔴" ? "🟡" : "🔴";
+  
+  // Find rows that have at least one opponent disc
   const occupiedRows = [];
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
-      if (board[row][col] !== EMPTY) {
+      if (board[row][col] === opponentPlayer) {
         occupiedRows.push(row);
         break;
       }
@@ -130,19 +155,21 @@ export const wipeRandomRow = (board) => {
   }
 
   if (occupiedRows.length === 0) {
-    console.log("❌ NO OCCUPIED ROWS TO WIPE");
+    console.log("❌ NO OPPONENT ROWS TO WIPE");
     return board;
   }
 
   const randomRow = occupiedRows[Math.floor(Math.random() * occupiedRows.length)];
   const newBoard = board.map((row, rowIndex) => 
     rowIndex === randomRow 
-      ? Array(COLS).fill(EMPTY)
+      ? row.map(cell => cell === opponentPlayer ? EMPTY : cell) // CHANGE: Only remove opponent pieces
       : [...row]
   );
 
   console.log("🔥 WIPED ROW:", {
     row: randomRow,
+    triggeringPlayer,
+    opponentPlayer,
     before: board[randomRow].join(""),
     after: newBoard[randomRow].join("")
   });
@@ -150,6 +177,7 @@ export const wipeRandomRow = (board) => {
   // Apply gravity after row wipe
   return applyGravityAfterRowWipe(newBoard);
 };
+
 
 // CHANGE: Apply gravity after a row is wiped
 export const applyGravityAfterRowWipe = (board) => {
@@ -206,11 +234,14 @@ export const getRandomChickenVoiceLine = (isRooster = false) => {
   return lines[Math.floor(Math.random() * lines.length)];
 };
 
-// CHANGE: Check if column drop is valid (not blocked by poop)
-export const isValidDropWithPoop = (board, col, blockedColumns, isUpsideDown = false) => {
-  // First check if column is blocked by poop
-  if (isColumnBlocked(col, blockedColumns)) {
-    return false;
+// CHANGE: Check if column drop is valid (not blocked by poop) - only for opponent
+export const isValidDropWithPoop = (board, col, blockedColumns, isUpsideDown = false, currentPlayer = null, triggeringPlayer = null) => {
+  // CHANGE: Only block columns for the opponent, not the triggering player
+  if (currentPlayer && triggeringPlayer && currentPlayer !== triggeringPlayer) {
+    // First check if column is blocked by poop
+    if (isColumnBlocked(col, blockedColumns)) {
+      return false;
+    }
   }
 
   // Then check normal validity
@@ -223,17 +254,18 @@ export const isValidDropWithPoop = (board, col, blockedColumns, isUpsideDown = f
   }
 };
 
+
 // CHANGE: Find next available column if current is blocked
-export const findNextAvailableColumn = (board, preferredCol, blockedColumns, isUpsideDown = false) => {
+export const findNextAvailableColumn = (board, preferredCol, blockedColumns, isUpsideDown = false, currentPlayer = null, triggeringPlayer = null) => {
   // Try preferred column first
-  if (isValidDropWithPoop(board, preferredCol, blockedColumns, isUpsideDown)) {
+  if (isValidDropWithPoop(board, preferredCol, blockedColumns, isUpsideDown, currentPlayer, triggeringPlayer)) {
     return preferredCol;
   }
 
   // Find nearest available columns
   const availableColumns = [];
   for (let col = 0; col < COLS; col++) {
-    if (isValidDropWithPoop(board, col, blockedColumns, isUpsideDown)) {
+    if (isValidDropWithPoop(board, col, blockedColumns, isUpsideDown, currentPlayer, triggeringPlayer)) {
       availableColumns.push(col);
     }
   }
