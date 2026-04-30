@@ -38,21 +38,53 @@ const FunMode = () => {
   const soundManager = useSoundManager();
   const [monkeyButtonTimer, setMonkeyButtonTimer] = useState(10);
 
+  // CHANGE: Add logging for component state changes
+  useEffect(() => {
+    console.log("🎮 FUN MODE STATE UPDATE:", {
+      showMonkeyButton,
+      monkeyButtonPlayer,
+      currentPlayer,
+      isUpsideDown,
+      upsideDownTurnsLeft,
+      isMonkeyAnimating,
+      usedMonkeyMayhem: Array.from(usedMonkeyMayhem),
+      winner,
+      isDraw,
+    });
+  }, [
+    showMonkeyButton,
+    monkeyButtonPlayer,
+    currentPlayer,
+    isUpsideDown,
+    upsideDownTurnsLeft,
+    isMonkeyAnimating,
+    usedMonkeyMayhem,
+    winner,
+    isDraw,
+  ]);
+
   // Handle monkey button timer
   useEffect(() => {
     if (showMonkeyButton) {
+      console.log("⏰ STARTING MONKEY BUTTON TIMER");
       setMonkeyButtonTimer(10);
       const interval = setInterval(() => {
         setMonkeyButtonTimer((prev) => {
-          if (prev <= 1) {
+          const newTime = prev - 1;
+          console.log("⏰ MONKEY BUTTON TIMER:", newTime);
+          if (newTime <= 0) {
+            console.log("⏰ MONKEY BUTTON TIMER EXPIRED");
             clearInterval(interval);
             return 0;
           }
-          return prev - 1;
+          return newTime;
         });
       }, 1000);
 
-      return () => clearInterval(interval);
+      return () => {
+        console.log("⏰ CLEANING UP MONKEY BUTTON TIMER");
+        clearInterval(interval);
+      };
     }
   }, [showMonkeyButton]);
 
@@ -80,6 +112,7 @@ const FunMode = () => {
   }, [isMonkeyAnimating, monkeyVoiceLine, soundManager]);
 
   const handleMonkeyButtonClick = () => {
+    console.log("🐒 MONKEY BUTTON CLICKED!");
     soundManager.playClickSound();
     triggerMonkeyMayhem();
   };
@@ -98,17 +131,39 @@ const FunMode = () => {
     return names;
   };
 
+  // CHANGE: Add logging for render conditions
+  console.log("🎨 RENDER CONDITIONS:", {
+    shouldShowMonkeyButton:
+      showMonkeyButton && monkeyButtonPlayer === currentPlayer,
+    showMonkeyButton,
+    monkeyButtonPlayer,
+    currentPlayer,
+    buttonPlayerMatch: monkeyButtonPlayer === currentPlayer,
+  });
+
   return (
     <PageContainer>
       <HeaderContainer>Connect 4 - Fun Mode</HeaderContainer>
       <BodyContainer>Monkey Mayhem Enabled! 🐒</BodyContainer>
 
-      {/* Monkey Mayhem Button */}
-      {showMonkeyButton && monkeyButtonPlayer === currentPlayer && (
-        <MonkeyMayhemButton
-          onTrigger={handleMonkeyButtonClick}
-          timeLeft={monkeyButtonTimer}
-        />
+      {/* CHANGE: Simplified monkey button condition and added debug info */}
+      {showMonkeyButton && (
+        <div>
+          <div
+            style={{
+              color: "white",
+              fontSize: "12px",
+              textAlign: "center",
+              marginBottom: "10px",
+            }}
+          >
+            DEBUG: Button for {monkeyButtonPlayer}, Current: {currentPlayer}
+          </div>
+          <MonkeyMayhemButton
+            onTrigger={handleMonkeyButtonClick}
+            timeLeft={monkeyButtonTimer}
+          />
+        </div>
       )}
 
       {/* Monkey Flip Animation */}
@@ -157,11 +212,11 @@ const FunMode = () => {
         </CustomButton>
       </ButtonContainer>
 
-      {/* Fun Mode Instructions */}
+      {/* CHANGE: Updated instructions to reflect new trigger requirement */}
       <BodyContainer
         style={{ fontSize: "16px", marginTop: "20px", textAlign: "center" }}
       >
-        Get 3 separate 3-in-a-rows to trigger Monkey Mayhem! 🐒
+        Get 1 separate 3-in-a-row to trigger Monkey Mayhem! 🐒
         <br />
         The monkey will flip the board upside down for 3 turns!
       </BodyContainer>
