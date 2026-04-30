@@ -1,0 +1,31 @@
+{
+  "filename": ".env",
+  "path": ".env",
+  "version": "1.1",
+  "files": {
+    "9b121862": {
+      "value": [
+        {
+          "programming_language": "JavaScript",
+          "fileName": "helperFunction.js",
+          "relativeFilePath": "src/helperFunction/helperFunction.js",
+          "startLine": [
+            1
+          ],
+          "endLine": [
+            85
+          ]
+        }
+      ]
+    }
+  },
+  "promptMessage": {
+    "dfb5ff89": {
+      "value": "both manual room codes, friend, queue based maych ,aking ebverything can be there, if user doesnt want to create a profile then he doesnt have to he can just use manual room code so lets start coding"
+    }
+  },
+  "localPrompts": {},
+  "remotePrompts": {},
+  "figma": {},
+  "jira": {}
+}
