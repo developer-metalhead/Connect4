@@ -17,11 +17,19 @@ const Board = ({
   canInteract = true,
   soundManager, // Add sound manager prop
   isUpsideDown = false, // CHANGE: Add isUpsideDown prop
-  gravityAnimation=null
+  gravityAnimation = null, // NEW: batch animation plan for restoring gravity
+
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
   const [fallingDisc, setFallingDisc] = useState(null);
+
+  // Build a quick mask to hide source cells during mass-fall overlays
+  const maskedKeys =
+    Array.isArray(gravityAnimation) && gravityAnimation.length > 0
+      ? new Set(gravityAnimation.map((a) => `${a.fromRow},${a.col}`))
+      : null;
+
 
   const handleClick = (col) => {
     if (winner || isDraw || !canInteract || droppingCol !== null) return;
@@ -151,6 +159,29 @@ const Board = ({
           </FallingDisc>
         )}
 
+        {/* NEW: Batch falling overlays when restoring normal gravity */}
+        {Array.isArray(gravityAnimation) &&
+          gravityAnimation.length > 0 &&
+          gravityAnimation.map((d, i) => {
+            const distance = Math.max(0, d.toRow - d.fromRow);
+            const duration = 300 + distance * 70; // keep in sync with planner
+            return (
+              <FallingDisc
+                key={`grav-${i}`}
+                style={{
+                  left: `calc(${d.col} * (var(--cell) + var(--gap)) + var(--gap))`,
+                  animationDuration: `${duration}ms`,
+                  animationName: "gravityDrop",
+                  "--target-row": d.toRow,
+                  "--start-row": d.fromRow,
+                }}
+              >
+                {d.player}
+              </FallingDisc>
+            );
+          })}
+
+
         {board.map((row, r) => (
           <Row key={r}>
             {row.map((cell, c) => (
@@ -169,7 +200,9 @@ const Board = ({
                   opacity: droppingCol !== null && droppingCol !== c ? 0.7 : 1,
                 }}
               >
-                {cell}
+                {/* Hide original from-cells while overlay is animating */}
+                {maskedKeys && maskedKeys.has(`${r},${c}`) ? "⚪" : cell}
+
               </Cell>
             ))}
           </Row>

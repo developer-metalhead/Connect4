@@ -174,11 +174,11 @@ const MonkeyFlipAnimation = ({
 }) => {
   if (!isAnimating) return null;
 
-  const dustParticles = Array.from({ length: 8 }, (_, i) => (
-    <DustParticle key={i} delay={3.5 + i * 0.1}>
-      💨
-    </DustParticle>
-  ));
+  // const dustParticles = Array.from({ length: 8 }, (_, i) => (
+  //   <DustParticle key={i} delay={3.5 + i * 0.1}>
+  //     💨
+  //   </DustParticle>
+  // ));
 
   return (
     <AnimationOverlay>
@@ -188,9 +188,12 @@ const MonkeyFlipAnimation = ({
 
       {voiceLine && <VoiceLineContainer>{voiceLine}</VoiceLineContainer>}
 
-      <BoardFlipContainer>
-        <div style={{ fontSize: "100px", opacity: 0.3 }}>🎯</div>
-      </BoardFlipContainer>
+      {/* {!isFlippingBack && (
+        <BoardFlipContainer>
+          <div style={{ fontSize: "100px", opacity: 0.3 }}>🎯</div>
+        </BoardFlipContainer>
+      )} */}
+
 
       {!isFlippingBack && (
         <UpsideDownBanner>
@@ -200,7 +203,7 @@ const MonkeyFlipAnimation = ({
         </UpsideDownBanner>
       )}
 
-      <DustParticles>{dustParticles}</DustParticles>
+      {/* <DustParticles>{dustParticles}</DustParticles> */}
     </AnimationOverlay>
   );
 };

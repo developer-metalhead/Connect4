@@ -169,13 +169,13 @@ const FunMode = () => {
         isFlippingBack={monkeyVoiceLine.includes("normal")}
       />
 
-      {isGravityFalling && (
+      {isGravityFalling  && (
         <UpsideDownIndicator>
           🌊 GRAVITY RESTORED - Discs falling back! 🌊
         </UpsideDownIndicator>
       )}
 
-      {isUpsideDown && (
+      {isUpsideDown && !isGravityFalling && (
         <UpsideDownIndicator>
           🙃 UPSIDE DOWN MODE - {Math.ceil(upsideDownTurnsLeft / 2)} turns left
           🙃
