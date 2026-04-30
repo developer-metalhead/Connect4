@@ -345,3 +345,32 @@ export const returnToNormalGravity = (board, { isUpsideDown } = {}) => {
   const finalBoard = applyNormalGravity(board);
   return { finalBoard, animations, durationMs };
 };
+
+
+// CHANGE: Extracted player name generation to utility function
+export const getPlayerNames = (monkeyMayhemState) => {
+  const names = { "🔴": "Player 1", "🟡": "Player 2" };
+
+  if (monkeyMayhemState.usedBy === "🔴") {
+    names["🔴"] += " 🐒";
+  }
+  if (monkeyMayhemState.usedBy === "🟡") {
+    names["🟡"] += " 🐒";
+  }
+
+  return names;
+};
+
+// CHANGE: Extracted monkey button click handler to utility function
+export const createMonkeyButtonHandler = (soundManager, triggerMonkeyMayhem) => {
+  return () => {
+    console.log("🐒 MONKEY BUTTON CLICKED!");
+    soundManager.playClickSound();
+    triggerMonkeyMayhem();
+  };
+};
+
+// CHANGE: Extracted board interaction calculation to utility function
+export const canInteractWithBoard = (isMonkeyAnimating, showMonkeyButton, isGravityFalling) => {
+  return !isMonkeyAnimating && !showMonkeyButton && !isGravityFalling;
+};
