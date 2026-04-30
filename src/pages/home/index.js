@@ -14,7 +14,8 @@ import useSoundManager from "../../hooks/useSoundManager";
 
 const Home = () => {
   const navigate = useNavigate();
-  const [showFunModeSettings,setShowFunModeSettings]=useState('false')
+  const [showFunModeSettings, setShowFunModeSettings] = useState(false)
+
   const soundManager = useSoundManager();
 
 
@@ -30,7 +31,7 @@ const Home = () => {
         <CustomButton onClick={() => navigate("/play-online")}>
           Play Online
         </CustomButton>
-        <CustomButton onClick={() => (true)}>
+        <CustomButton onClick={() => setShowFunModeSettings(true)}>
           Fun Mode Settings
         </CustomButton>
       </ButtonContainer>

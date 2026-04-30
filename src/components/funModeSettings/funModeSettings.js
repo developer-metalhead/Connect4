@@ -1,6 +1,8 @@
 import React from 'react';
 import { styled } from '@mui/material/styles';
 import CustomButton from '../buttonComponent';
+import useFunModeSettings from '../../hooks/useFunModeSettings';
+
 
 const SettingsContainer = styled('div')({
   display: 'flex',
@@ -22,7 +24,7 @@ const SettingRow = styled('div')({
 
 const Label = styled('label')({
   color: '#fff',
-  fontSize: '14px',
+  fontSize: '18px',
   fontWeight: '500',
   minWidth: '120px',
 });
@@ -61,6 +63,9 @@ const VolumeDisplay = styled('span')({
 });
 
 const FunModeSettings = ({ soundManager, onClose }) => {
+  // Fun Mode feature toggles
+  const { monkeyModeEnabled, toggleMonkeyMode } = useFunModeSettings();
+
   const {
     isMuted,
     setIsMuted,
@@ -73,6 +78,7 @@ const FunModeSettings = ({ soundManager, onClose }) => {
     playClickSound,
     isAudioSupported
   } = soundManager;
+
 
   const handleMuteToggle = () => {
     setIsMuted(!isMuted);
@@ -98,82 +104,33 @@ const FunModeSettings = ({ soundManager, onClose }) => {
     soundManager.playDropSound();
   };
 
-  if (!isAudioSupported) {
-    return (
-      <SettingsContainer>
-        <Label style={{ textAlign: 'center', color: '#ff6b6b' }}>
-          Audio not supported in this browser
-        </Label>
-        <CustomButton onClick={onClose}>Close</CustomButton>
-      </SettingsContainer>
-    );
-  }
+
 
   return (
     <SettingsContainer>
       <h3 style={{ color: '#fff', margin: '0 0 16px 0', textAlign: 'center' }}>
-        Sound Settings
+        Fun Mode Settings
       </h3>
+
+      {/* Feature toggles */}
+      <SettingRow>
+        <Label>Monkey Mode</Label>
+        <CustomButton
+          onClick={toggleMonkeyMode}
+          style={{
+            backgroundColor: monkeyModeEnabled ? '#4caf50' : '#ff6b6b',
+            minWidth: '80px',
+          }}
+        >
+          {monkeyModeEnabled ? 'On' : 'Off'}
+        </CustomButton>
+      </SettingRow>
+
       
-      <SettingRow>
-        <Label>Master Audio</Label>
-        <CustomButton 
-          onClick={handleMuteToggle}
-          style={{ 
-            backgroundColor: isMuted ? '#ff6b6b' : '#4caf50',
-            minWidth: '80px'
-          }}
-        >
-          {isMuted ? 'Muted' : 'On'}
-        </CustomButton>
-      </SettingRow>
+     
 
       <SettingRow>
-        <Label>Sound Volume</Label>
-        <Slider
-          type="range"
-          min="0"
-          max="1"
-          step="0.1"
-          value={volume}
-          onChange={handleVolumeChange}
-          disabled={isMuted}
-        />
-        <VolumeDisplay>{Math.round(volume * 100)}%</VolumeDisplay>
-      </SettingRow>
-
-      <SettingRow>
-        <Label>Background Music</Label>
-        <CustomButton 
-          onClick={handleMusicToggle}
-          style={{ 
-            backgroundColor: isMusicEnabled ? '#4caf50' : '#666',
-            minWidth: '80px'
-          }}
-          disabled={isMuted}
-        >
-          {isMusicEnabled ? 'On' : 'Off'}
-        </CustomButton>
-      </SettingRow>
-
-      <SettingRow>
-        <Label>Music Volume</Label>
-        <Slider
-          type="range"
-          min="0"
-          max="1"
-          step="0.1"
-          value={musicVolume}
-          onChange={handleMusicVolumeChange}
-          disabled={isMuted || !isMusicEnabled}
-        />
-        <VolumeDisplay>{Math.round(musicVolume * 100)}%</VolumeDisplay>
-      </SettingRow>
-
-      <SettingRow>
-        <CustomButton onClick={handleTestSound} disabled={isMuted}>
-          Test Drop Sound
-        </CustomButton>
+      
         <CustomButton onClick={onClose}>
           Close
         </CustomButton>
