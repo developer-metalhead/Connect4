@@ -12,7 +12,14 @@ import {
 const Online = () => {
   const navigate = useNavigate();
 
-  return <PageContainer>Under construction</PageContainer>;
+  return (
+    <PageContainer>
+      Under Construction
+      <ButtonContainer>
+        <CustomButton onClick={() => navigate("/")}>Back</CustomButton>
+      </ButtonContainer>
+    </PageContainer>
+  );
 };
 
 export default Online;

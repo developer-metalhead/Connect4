@@ -27,12 +27,11 @@ export const BodyContainer = styled("div")({
 
 export const PageContainer = styled("div")({
   background: "#0f0f0f",
-  gap: "24px",
+  gap: "18px",
 
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  justifyContent: "center",
 
   color: "#fff",
 
