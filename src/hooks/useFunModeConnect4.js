@@ -24,15 +24,15 @@ export const useFunModeConnect4 = () => {
   const [monkeyButtonPlayer, setMonkeyButtonPlayer] = useState(null);
   const [isUpsideDown, setIsUpsideDown] = useState(false);
   const [upsideDownTurnsLeft, setUpsideDownTurnsLeft] = useState(0);
-  // CHANGE: Replace usedMonkeyMayhem Set with comprehensive state object
   const [monkeyMayhemState, setMonkeyMayhemState] = useState({
-    wasOffered: false, // Was the opportunity ever offered to any player
-    wasUsed: false, // Was monkey mayhem actually triggered
-    offeredTo: null, // Which player was offered the opportunity
-    usedBy: null, // Which player actually used it (if any)
+    wasOffered: false,
+    wasUsed: false,
+    offeredTo: null,
+    usedBy: null,
   });
   const [isMonkeyAnimating, setIsMonkeyAnimating] = useState(false);
   const [monkeyVoiceLine, setMonkeyVoiceLine] = useState("");
+  const [isGravityFalling, setIsGravityFalling] = useState(false);
 
   const monkeyButtonTimerRef = useRef(null);
 
@@ -51,14 +51,14 @@ export const useFunModeConnect4 = () => {
         monkeyMayhemState,
         showMonkeyButton,
         monkeyButtonPlayer,
+        isGravityFalling,
       });
 
-      // CHANGE: Use appropriate validation based on board state
       const isValidMoveCheck = isUpsideDown
         ? isValidMoveUpsideDown(board, col)
         : isValidMove(board, col);
 
-      if (winner || isDraw || !isValidMoveCheck || isMonkeyAnimating) {
+      if (winner || isDraw || !isValidMoveCheck || isMonkeyAnimating || isGravityFalling) {
         console.log("❌ MOVE BLOCKED:", {
           reason: winner
             ? "winner exists"
@@ -66,7 +66,9 @@ export const useFunModeConnect4 = () => {
               ? "draw"
               : !isValidMoveCheck
                 ? "invalid move"
-                : "monkey animating",
+                : isMonkeyAnimating
+                  ? "monkey animating"
+                  : "gravity falling",
         });
         return false;
       }
@@ -76,7 +78,6 @@ export const useFunModeConnect4 = () => {
         board.map((row) => row.join("")),
       );
 
-      // CHANGE: Use appropriate drop function based on board state
       const dropResult = isUpsideDown
         ? dropPieceUpsideDown(board, col, currentPlayer)
         : dropPiece(board, col, currentPlayer);
@@ -84,7 +85,7 @@ export const useFunModeConnect4 = () => {
       const { newBoard, row } = dropResult;
       if (row === -1) {
         console.log("❌ COLUMN FULL:", { column: col });
-        return false; // Column full
+        return false;
       }
 
       console.log(
@@ -94,18 +95,15 @@ export const useFunModeConnect4 = () => {
 
       let newState = { ...gameState, board: newBoard };
 
-      // CHANGE: Pass isUpsideDown parameter to checkWin
       if (checkWin(newBoard, row, col, currentPlayer, isUpsideDown)) {
         newState.winner = currentPlayer;
         console.log("🏆 WINNER DETECTED:", currentPlayer);
 
-        // Check if it's a monkey winner
         if (isMonkeyWinner(currentPlayer, isUpsideDown)) {
           newState.isMonkeyWinner = true;
           console.log("🐒 MONKEY WINNER!", currentPlayer);
         }
       } else {
-        // CHANGE: Use appropriate board full check based on board state
         const isBoardFullCheck = isUpsideDown
           ? isBoardFullUpsideDown(newBoard)
           : isBoardFull(newBoard);
@@ -126,7 +124,6 @@ export const useFunModeConnect4 = () => {
 
       setGameState(newState);
 
-      // Handle upside-down mode turn countdown
       if (isUpsideDown && upsideDownTurnsLeft > 0) {
         const newTurnsLeft = upsideDownTurnsLeft - 1;
         setUpsideDownTurnsLeft(newTurnsLeft);
@@ -137,12 +134,14 @@ export const useFunModeConnect4 = () => {
         });
 
         if (newTurnsLeft === 0) {
-          // Flip back to normal
           setTimeout(() => {
             setIsMonkeyAnimating(true);
             setMonkeyVoiceLine("Phew! Back to normal!");
 
             setTimeout(() => {
+              setIsGravityFalling(true);
+              console.log("🌊 STARTING GRAVITY FALLING ANIMATION");
+
               setGameState((prev) => ({
                 ...prev,
                 board: flipBoardUpsideDown(prev.board),
@@ -150,17 +149,21 @@ export const useFunModeConnect4 = () => {
               setIsUpsideDown(false);
               setIsMonkeyAnimating(false);
               setMonkeyVoiceLine("");
+
+              setTimeout(() => {
+                setIsGravityFalling(false);
+                console.log("✅ GRAVITY FALLING ANIMATION COMPLETE - NORMAL GAMEPLAY RESUMED");
+              }, 1500);
+
               console.log("🔄 BOARD FLIPPED BACK TO NORMAL");
             }, 2500);
           }, 500);
         }
       }
 
-      // CHANGE: Check for Monkey Mayhem trigger with new state management
-      if (!newState.winner && !newState.isDraw && !isMonkeyAnimating) {
+      if (!newState.winner && !newState.isDraw && !isMonkeyAnimating && !isGravityFalling) {
         console.log("🔍 CHECKING MONKEY MAYHEM TRIGGER...");
 
-        // Only check for the player who just made the move
         if (
           shouldTriggerMonkeyMayhem(newBoard, currentPlayer, monkeyMayhemState)
         ) {
@@ -169,21 +172,18 @@ export const useFunModeConnect4 = () => {
             currentPlayer,
           );
 
-          // CHANGE: Clear any existing timer before setting new state
           if (monkeyButtonTimerRef.current) {
             clearTimeout(monkeyButtonTimerRef.current);
             monkeyButtonTimerRef.current = null;
             console.log("⏰ CLEARED EXISTING MONKEY BUTTON TIMER");
           }
 
-          // CHANGE: Update monkey mayhem state to mark as offered
           setMonkeyMayhemState((prev) => ({
             ...prev,
             wasOffered: true,
             offeredTo: currentPlayer,
           }));
 
-          // CHANGE: Set button state immediately
           setShowMonkeyButton(true);
           setMonkeyButtonPlayer(currentPlayer);
 
@@ -197,15 +197,13 @@ export const useFunModeConnect4 = () => {
             },
           });
 
-          // CHANGE: Set timer after state update - when timer expires, mark opportunity as lost
           monkeyButtonTimerRef.current = setTimeout(() => {
             console.log("⏰ MONKEY BUTTON TIMEOUT - OPPORTUNITY LOST");
             setShowMonkeyButton(false);
             setMonkeyButtonPlayer(null);
-            // CHANGE: Mark opportunity as lost forever
             setMonkeyMayhemState((prev) => ({
               ...prev,
-              wasOffered: true, // Keep this true so no future triggers
+              wasOffered: true,
             }));
           }, 10000);
 
@@ -219,7 +217,9 @@ export const useFunModeConnect4 = () => {
             ? "game won"
             : newState.isDraw
               ? "game draw"
-              : "monkey animating",
+              : isMonkeyAnimating
+                ? "monkey animating"
+                : "gravity falling",
         });
       }
 
@@ -235,8 +235,9 @@ export const useFunModeConnect4 = () => {
       gameState,
       isUpsideDown,
       upsideDownTurnsLeft,
-      monkeyMayhemState, // CHANGE: Updated dependency
+      monkeyMayhemState,
       isMonkeyAnimating,
+      isGravityFalling,
     ],
   );
 
@@ -257,17 +258,14 @@ export const useFunModeConnect4 = () => {
       return;
     }
 
-    // Clear the timer
     if (monkeyButtonTimerRef.current) {
       clearTimeout(monkeyButtonTimerRef.current);
       monkeyButtonTimerRef.current = null;
       console.log("⏰ CLEARED MONKEY BUTTON TIMER");
     }
 
-    // Hide button
     setShowMonkeyButton(false);
 
-    // CHANGE: Mark monkey mayhem as used and by whom
     setMonkeyMayhemState((prev) => ({
       ...prev,
       wasUsed: true,
@@ -283,17 +281,14 @@ export const useFunModeConnect4 = () => {
       },
     });
 
-    // Start animation sequence
     setIsMonkeyAnimating(true);
     const voiceLine = getRandomMonkeyVoiceLine();
     setMonkeyVoiceLine(voiceLine);
     console.log("🎬 STARTING MONKEY ANIMATION:", voiceLine);
 
-    // After animation completes, flip the board
     setTimeout(() => {
       setGameState((prev) => {
         let flippedBoard = flipBoardUpsideDown(prev.board);
-        // CHANGE: Pass the triggering player and board orientation to maybeStealDisc
         flippedBoard = maybeStealDisc(flippedBoard, monkeyButtonPlayer, true);
 
         console.log("🔄 BOARD FLIPPED:", {
@@ -308,16 +303,16 @@ export const useFunModeConnect4 = () => {
       });
 
       setIsUpsideDown(true);
-      setUpsideDownTurnsLeft(6); // 3 turns for each player = 6 total moves
+      setUpsideDownTurnsLeft(2);
       setIsMonkeyAnimating(false);
       setMonkeyButtonPlayer(null);
-      setMonkeyVoiceLine(""); // Clear voice line after animation
+      setMonkeyVoiceLine("");
 
       console.log("🙃 UPSIDE DOWN MODE ACTIVATED:", {
-        turnsLeft: 6,
+        turnsLeft: 2,
         isUpsideDown: true,
       });
-    }, 2500); // Animation duration
+    }, 2500);
   }, [
     showMonkeyButton,
     monkeyButtonPlayer,
@@ -338,7 +333,6 @@ export const useFunModeConnect4 = () => {
     setMonkeyButtonPlayer(null);
     setIsUpsideDown(false);
     setUpsideDownTurnsLeft(0);
-    // CHANGE: Reset monkey mayhem state to initial values
     setMonkeyMayhemState({
       wasOffered: false,
       wasUsed: false,
@@ -348,6 +342,7 @@ export const useFunModeConnect4 = () => {
 
     setIsMonkeyAnimating(false);
     setMonkeyVoiceLine("");
+    setIsGravityFalling(false);
   }, []);
 
   return {
@@ -361,6 +356,7 @@ export const useFunModeConnect4 = () => {
     upsideDownTurnsLeft,
     isMonkeyAnimating,
     monkeyVoiceLine,
-    monkeyMayhemState, // CHANGE: Return new state instead of usedMonkeyMayhem
+    monkeyMayhemState,
+    isGravityFalling,
   };
 };

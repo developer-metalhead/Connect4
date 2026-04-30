@@ -9,7 +9,6 @@ const MONKEY_VOICE_LINES = [
   "Let's turn this upside down!",
 ];
 
-// CHANGE: Completely rewritten 3-in-a-row detection with robust overlap prevention
 export const countSeparateThreeInARows = (board, player) => {
   console.log("🔍 COUNTING 3-IN-A-ROWS FOR PLAYER:", player);
   console.log(
@@ -19,8 +18,6 @@ export const countSeparateThreeInARows = (board, player) => {
 
   const usedCells = new Set();
   let count = 0;
-
-  // Check all directions: horizontal, vertical, diagonal down-right, diagonal up-right
 
   const directions = [
     [0, 1], // horizontal
@@ -44,7 +41,6 @@ export const countSeparateThreeInARows = (board, player) => {
         const [dr, dc] = directions[dirIndex];
         const dirName = directionNames[dirIndex];
 
-        // CHANGE: Check if we can form a 3-in-a-row starting from this position
         const cells = [];
         let valid = true;
 
@@ -78,7 +74,6 @@ export const countSeparateThreeInARows = (board, player) => {
         }
 
         if (valid) {
-          // Mark these cells as used to prevent overlap
           cells.forEach((cell) => usedCells.add(cell));
           count++;
 
@@ -102,14 +97,12 @@ export const countSeparateThreeInARows = (board, player) => {
   return count;
 };
 
-// CHANGE: Modified to check global monkey mayhem state - only first eligible player can trigger
 export const shouldTriggerMonkeyMayhem = (board, player, monkeyMayhemState) => {
   console.log("🐒 CHECKING MONKEY MAYHEM TRIGGER:", {
     player,
     monkeyMayhemState,
   });
 
-  // CHANGE: If monkey mayhem was already offered or used, no more triggers
   if (monkeyMayhemState.wasOffered || monkeyMayhemState.wasUsed) {
     console.log("❌ MONKEY MAYHEM ALREADY OFFERED/USED:", monkeyMayhemState);
     return false;
@@ -129,7 +122,6 @@ export const shouldTriggerMonkeyMayhem = (board, player, monkeyMayhemState) => {
   return shouldTrigger;
 };
 
-// CHANGE: Enhanced board flip with proper gravity reversal
 export const flipBoardUpsideDown = (board) => {
   console.log("🔄 FLIPPING BOARD UPSIDE DOWN");
   console.log(
@@ -141,11 +133,9 @@ export const flipBoardUpsideDown = (board) => {
     .fill()
     .map(() => Array(COLS).fill(EMPTY));
 
-  // For each column, collect all non-empty pieces and drop them from the new "top"
   for (let col = 0; col < COLS; col++) {
     const pieces = [];
 
-    // Collect pieces from bottom to top (original gravity)
     for (let row = ROWS - 1; row >= 0; row--) {
       if (board[row][col] !== EMPTY) {
         pieces.push(board[row][col]);
@@ -154,7 +144,7 @@ export const flipBoardUpsideDown = (board) => {
 
     console.log(`📍 COLUMN ${col} PIECES:`, pieces);
 
-    // CHANGE: Drop pieces from new top (flipped gravity) - pieces stack from top down
+    // Drop pieces from new top (flipped gravity) - pieces stack from top down
     for (let i = 0; i < pieces.length; i++) {
       newBoard[i][col] = pieces[i];
     }
@@ -167,22 +157,16 @@ export const flipBoardUpsideDown = (board) => {
   return newBoard;
 };
 
-// CHANGE: Fixed disc stealing to apply correct gravity based on board orientation
-export const maybeStealDisc = (
-  board,
-  triggeringPlayer,
-  isUpsideDown = false,
-) => {
+export const maybeStealDisc = (board, triggeringPlayer, isUpsideDown = false) => {
   if (Math.random() > 0.5) {
     console.log("🍌 NO DISC STOLEN (50% chance)");
-    return board; // 50% chance no steal
+    return board;
   }
 
   console.log("🍌 MONKEY STEALING A DISC! (50% chance)");
 
-  // CHANGE: Only steal from the opponent who didn't trigger monkey mayhem
   const opponentPlayer = triggeringPlayer === "🔴" ? "🟡" : "🔴";
-
+  
   const opponentCells = [];
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
@@ -202,17 +186,16 @@ export const maybeStealDisc = (
   const newBoard = board.map((row) => [...row]);
   newBoard[randomCell.row][randomCell.col] = EMPTY;
 
-  console.log("🍌 STOLE DISC FROM OPPONENT:", {
-    cell: randomCell,
+  console.log("🍌 STOLE DISC FROM OPPONENT:", { 
+    cell: randomCell, 
     opponent: opponentPlayer,
     triggeredBy: triggeringPlayer,
-    isUpsideDown,
+    isUpsideDown 
   });
 
-  // CHANGE: Apply gravity based on board orientation
+  // Apply gravity based on board orientation
   const pieces = [];
-
-  // Collect all pieces in the affected column
+  
   for (let row = 0; row < ROWS; row++) {
     if (newBoard[row][randomCell.col] !== EMPTY) {
       pieces.push(newBoard[row][randomCell.col]);
@@ -220,7 +203,7 @@ export const maybeStealDisc = (
     }
   }
 
-  // CHANGE: Re-drop pieces according to current gravity orientation
+  // Re-drop pieces according to current gravity orientation
   if (isUpsideDown) {
     // In upside-down mode, pieces stack from top (row 0) downward
     for (let i = 0; i < pieces.length; i++) {
@@ -242,63 +225,45 @@ export const maybeStealDisc = (
   return newBoard;
 };
 
-// Get random monkey voice line
 export const getRandomMonkeyVoiceLine = () => {
   return MONKEY_VOICE_LINES[
     Math.floor(Math.random() * MONKEY_VOICE_LINES.length)
   ];
 };
 
-// Check if game is won during upside-down mode
 export const isMonkeyWinner = (winner, isUpsideDown) => {
   return winner && isUpsideDown;
 };
 
-// CHANGE: Fixed upside-down drop logic to properly stack pieces from top to bottom
-// CHANGE: Fixed upside-down drop logic to properly stack pieces from top to bottom
 export const dropPieceUpsideDown = (board, col, player) => {
   console.log("🙃 DROPPING PIECE UPSIDE DOWN:", { col, player });
-  console.log(
-    "🙃 COLUMN STATE BEFORE DROP:",
-    board.map((row) => row[col]),
-  );
+  console.log("🙃 COLUMN STATE BEFORE DROP:", board.map(row => row[col]));
 
-  // In upside-down mode, pieces stack from top (row 0) downward
-  // Find the first empty row from top to bottom
   for (let row = 0; row < ROWS; row++) {
     if (board[row][col] === EMPTY) {
       const newBoard = board.map((r) => [...r]);
       newBoard[row][col] = player;
       console.log("✅ UPSIDE DOWN DROP SUCCESS:", { row, col, player });
-      console.log(
-        "🙃 COLUMN STATE AFTER DROP:",
-        newBoard.map((r) => r[col]),
-      );
+      console.log("🙃 COLUMN STATE AFTER DROP:", newBoard.map(r => r[col]));
       return { newBoard, row };
     }
   }
 
   console.log("❌ UPSIDE DOWN COLUMN FULL:", col);
-  return { newBoard: board, row: -1 }; // Column full
+  return { newBoard: board, row: -1 };
 };
 
-// CHANGE: Fixed validation to check if bottom row is full in upside-down mode
 export const isValidMoveUpsideDown = (board, col) => {
   if (col < 0 || col >= COLS) return false;
-  // In upside-down mode, check if there's any empty space in the column
-  // Since pieces stack from top, we need to check if there's any empty cell
   for (let row = 0; row < ROWS; row++) {
     if (board[row][col] === EMPTY) {
       return true;
     }
   }
-  return false; // Column is completely full
+  return false;
 };
 
-// CHANGE: Fixed board full check for upside-down mode
 export const isBoardFullUpsideDown = (board) => {
-  // In upside-down mode, board is full when all cells are occupied
-  // Check every cell in the board
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
       if (board[row][col] === EMPTY) {

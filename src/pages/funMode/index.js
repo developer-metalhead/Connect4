@@ -32,14 +32,14 @@ const FunMode = () => {
     upsideDownTurnsLeft,
     isMonkeyAnimating,
     monkeyVoiceLine,
-    monkeyMayhemState, // CHANGE: Updated from usedMonkeyMayhem
+    monkeyMayhemState,
+    isGravityFalling,
   } = useFunModeConnect4();
 
   const { board, currentPlayer, winner, isDraw, isMonkeyWinner } = gameState;
   const soundManager = useSoundManager();
   const [monkeyButtonTimer, setMonkeyButtonTimer] = useState(10);
 
-  // CHANGE: Add logging for component state changes
   useEffect(() => {
     console.log("🎮 FUN MODE STATE UPDATE:", {
       showMonkeyButton,
@@ -48,8 +48,8 @@ const FunMode = () => {
       isUpsideDown,
       upsideDownTurnsLeft,
       isMonkeyAnimating,
-      monkeyMayhemState, // CHANGE: Updated from usedMonkeyMayhem
-
+      monkeyMayhemState,
+      isGravityFalling,
       winner,
       isDraw,
     });
@@ -60,13 +60,12 @@ const FunMode = () => {
     isUpsideDown,
     upsideDownTurnsLeft,
     isMonkeyAnimating,
-    monkeyMayhemState, // CHANGE: Updated dependency
-
+    monkeyMayhemState,
+    isGravityFalling,
     winner,
     isDraw,
   ]);
 
-  // Handle monkey button timer
   useEffect(() => {
     if (showMonkeyButton) {
       console.log("⏰ STARTING MONKEY BUTTON TIMER");
@@ -91,13 +90,11 @@ const FunMode = () => {
     }
   }, [showMonkeyButton]);
 
-  // Play win/lose/draw sounds when game ends
   useEffect(() => {
     if (winner) {
       if (isMonkeyWinner) {
-        // Special monkey winner sound (could be a custom sound)
         soundManager.playWinSound();
-        setTimeout(() => soundManager.playSound("click"), 500); // Extra celebration
+        setTimeout(() => soundManager.playSound("click"), 500);
       } else {
         soundManager.playWinSound();
       }
@@ -106,11 +103,9 @@ const FunMode = () => {
     }
   }, [winner, isDraw, isMonkeyWinner, soundManager]);
 
-  // Play monkey sounds during animation
   useEffect(() => {
     if (isMonkeyAnimating && monkeyVoiceLine) {
-      // Play monkey scream sound
-      soundManager.playSound("click"); // Using click as placeholder for monkey sound
+      soundManager.playSound("click");
     }
   }, [isMonkeyAnimating, monkeyVoiceLine, soundManager]);
 
@@ -123,7 +118,6 @@ const FunMode = () => {
   const getPlayerNames = () => {
     const names = { "🔴": "Player 1", "🟡": "Player 2" };
 
-    // CHANGE: Update monkey mayhem indicators based on new state structure
     if (monkeyMayhemState.usedBy === "🔴") {
       names["🔴"] += " 🐒";
     }
@@ -134,7 +128,6 @@ const FunMode = () => {
     return names;
   };
 
-  // CHANGE: Add logging for render conditions
   console.log("🎨 RENDER CONDITIONS:", {
     shouldShowMonkeyButton:
       showMonkeyButton && monkeyButtonPlayer === currentPlayer,
@@ -149,10 +142,7 @@ const FunMode = () => {
       <HeaderContainer>Connect 4 - Fun Mode</HeaderContainer>
       <BodyContainer>Monkey Mayhem Enabled! 🐒</BodyContainer>
 
-      {/* CHANGE: Add background overlay when monkey button is shown */}
       {showMonkeyButton && <MonkeyModeOverlay />}
-
-      {/* CHANGE: Simplified monkey button condition and added debug info */}
 
       {showMonkeyButton && (
         <div>
@@ -173,14 +163,18 @@ const FunMode = () => {
         </div>
       )}
 
-      {/* Monkey Flip Animation */}
       <MonkeyFlipAnimation
         isAnimating={isMonkeyAnimating}
         voiceLine={monkeyVoiceLine}
         isFlippingBack={monkeyVoiceLine.includes("normal")}
       />
 
-      {/* Upside Down Mode Indicator */}
+      {isGravityFalling && (
+        <UpsideDownIndicator>
+          🌊 GRAVITY RESTORED - Discs falling back! 🌊
+        </UpsideDownIndicator>
+      )}
+
       {isUpsideDown && (
         <UpsideDownIndicator>
           🙃 UPSIDE DOWN MODE - {Math.ceil(upsideDownTurnsLeft / 2)} turns left
@@ -196,14 +190,13 @@ const FunMode = () => {
       />
 
       <FunModeBoard isUpsideDown={isUpsideDown}>
-        {/* CHANGE: Pass isUpsideDown prop to Board component */}
         <Board
           board={board}
           currentPlayer={currentPlayer}
           winner={winner}
           isDraw={isDraw}
           onDrop={makeMove}
-          canInteract={!isMonkeyAnimating && !showMonkeyButton} // CHANGE: Disable interaction when monkey button is shown
+          canInteract={!isMonkeyAnimating && !showMonkeyButton && !isGravityFalling}
           soundManager={soundManager}
           isUpsideDown={isUpsideDown}
         />
@@ -221,13 +214,11 @@ const FunMode = () => {
         </CustomButton>
       </ButtonContainer>
 
-      {/* CHANGE: Updated instructions to reflect one-time usage */}
       <BodyContainer
         style={{ fontSize: "16px", marginTop: "20px", textAlign: "center" }}
       >
         Get 1 separate 3-in-a-row to trigger Monkey Mayhem! 🐒
         <br />
-        {/* CHANGE: Add status indicator for monkey mayhem availability */}
         {monkeyMayhemState.wasUsed ? (
           <span style={{ color: "#ff6b6b" }}>
             Monkey Mayhem was used by{" "}
