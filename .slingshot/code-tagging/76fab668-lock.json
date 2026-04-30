@@ -1,0 +1,36 @@
+{
+  ".env": {
+    "filename": ".env",
+    "path": ".env",
+    "version": "1.2",
+    "contextFile": null,
+    "chunks": {
+      "9d44e6": {
+        "user": "Kumar Satwik",
+        "model": "gpt-5",
+        "timestamp": 1777549577,
+        "platform": "VisualStudioCode",
+        "product": "AIPP",
+        "productVersion": "2.4.1",
+        "source": "chat",
+        "type": "pasteCode",
+        "extraContext": {
+          "promptMessage": "dfb5ff89",
+          "files": "9b121862"
+        },
+        "hash": "41ab963d",
+        "messageId": "system_8f822c70-4488-11f1-9ca6-316e4010ddf7",
+        "codeBlockId": "system_8f822c70-4488-11f1-9ca6-316e4010ddf7-Codeblock-8",
+        "isActive": true
+      }
+    },
+    "lines": {
+      "0": {
+        "chunkId": "9d44e6",
+        "hash": "ced43c7d",
+        "encoded": "setx%20REACT_APP_WS_URL%20%22http://localhost:4000%22",
+        "prevChunkIds": []
+      }
+    }
+  }
+}

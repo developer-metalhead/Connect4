@@ -21,7 +21,12 @@ const Game2P = () => {
       <HeaderContainer>Connect 4</HeaderContainer>
       <BodyContainer>2 Players Mode</BodyContainer>
 
-      <Status winner={winner} isDraw={isDraw} currentPlayer={currentPlayer} />
+      <Status
+        winner={winner}
+        isDraw={isDraw}
+        currentPlayer={currentPlayer}
+        playerNames={{ "🔴": "Player 1", "🟡": "Player 2" }}
+      />
 
       <Board
         board={board}
