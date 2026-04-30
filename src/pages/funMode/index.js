@@ -32,7 +32,7 @@ const FunMode = () => {
     upsideDownTurnsLeft,
     isMonkeyAnimating,
     monkeyVoiceLine,
-    usedMonkeyMayhem,
+    monkeyMayhemState, // CHANGE: Updated from usedMonkeyMayhem
   } = useFunModeConnect4();
 
   const { board, currentPlayer, winner, isDraw, isMonkeyWinner } = gameState;
@@ -48,7 +48,8 @@ const FunMode = () => {
       isUpsideDown,
       upsideDownTurnsLeft,
       isMonkeyAnimating,
-      usedMonkeyMayhem: Array.from(usedMonkeyMayhem),
+      monkeyMayhemState, // CHANGE: Updated from usedMonkeyMayhem
+
       winner,
       isDraw,
     });
@@ -59,7 +60,8 @@ const FunMode = () => {
     isUpsideDown,
     upsideDownTurnsLeft,
     isMonkeyAnimating,
-    usedMonkeyMayhem,
+    monkeyMayhemState, // CHANGE: Updated dependency
+
     winner,
     isDraw,
   ]);
@@ -121,11 +123,11 @@ const FunMode = () => {
   const getPlayerNames = () => {
     const names = { "🔴": "Player 1", "🟡": "Player 2" };
 
-    // Add monkey mayhem indicators
-    if (usedMonkeyMayhem.has("🔴")) {
+    // CHANGE: Update monkey mayhem indicators based on new state structure
+    if (monkeyMayhemState.usedBy === "🔴") {
       names["🔴"] += " 🐒";
     }
-    if (usedMonkeyMayhem.has("🟡")) {
+    if (monkeyMayhemState.usedBy === "🟡") {
       names["🟡"] += " 🐒";
     }
 
@@ -219,13 +221,27 @@ const FunMode = () => {
         </CustomButton>
       </ButtonContainer>
 
-      {/* CHANGE: Updated instructions to reflect new trigger requirement */}
+      {/* CHANGE: Updated instructions to reflect one-time usage */}
       <BodyContainer
         style={{ fontSize: "16px", marginTop: "20px", textAlign: "center" }}
       >
         Get 1 separate 3-in-a-row to trigger Monkey Mayhem! 🐒
         <br />
-        The monkey will flip the board upside down for 3 turns!
+        {/* CHANGE: Add status indicator for monkey mayhem availability */}
+        {monkeyMayhemState.wasUsed ? (
+          <span style={{ color: "#ff6b6b" }}>
+            Monkey Mayhem was used by{" "}
+            {monkeyMayhemState.usedBy === "🔴" ? "Player 1" : "Player 2"}!
+          </span>
+        ) : monkeyMayhemState.wasOffered ? (
+          <span style={{ color: "#ffa500" }}>
+            Monkey Mayhem opportunity expired!
+          </span>
+        ) : (
+          <span style={{ color: "#4caf50" }}>
+            First player to get 3-in-a-row can trigger it once!
+          </span>
+        )}
       </BodyContainer>
     </PageContainer>
   );
