@@ -13,7 +13,7 @@ const Board = ({ board, currentPlayer, winner, isDraw, onDrop }) => {
     setTimeout(() => {
       onDrop(col);
       setDroppingCol(null);
-    }, 280);
+    }, 400);
   };
 
   return (
