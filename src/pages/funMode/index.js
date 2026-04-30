@@ -217,7 +217,7 @@ const FunMode = () => {
       <BodyContainer
         style={{ fontSize: "16px", marginTop: "20px", textAlign: "center" }}
       >
-        Get 1 separate 3-in-a-row to trigger Monkey Mayhem! 🐒
+        Get 2 separate 3-in-a-row to trigger Monkey Mayhem! 🐒
         <br />
         {monkeyMayhemState.wasUsed ? (
           <span style={{ color: "#ff6b6b" }}>

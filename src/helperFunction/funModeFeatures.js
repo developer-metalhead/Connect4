@@ -109,7 +109,7 @@ export const shouldTriggerMonkeyMayhem = (board, player, monkeyMayhemState) => {
   }
 
   const threeInARowCount = countSeparateThreeInARows(board, player);
-  const shouldTrigger = threeInARowCount >= 1;
+  const shouldTrigger = threeInARowCount >= 2;
 
   console.log("🎯 MONKEY MAYHEM DECISION:", {
     player,
