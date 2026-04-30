@@ -22,10 +22,10 @@ const getOrCreatePlayerId = () => {
 
 const defaultName = () => {
   const k = "c4_display_name";
-  const existing = localStorage.getItem(k);
+  const existing = sessionStorage.getItem(k);
   if (existing) return existing;
   const name = `Guest${Math.floor(1000 + Math.random() * 9000)}`;
-  localStorage.setItem(k, name);
+  sessionStorage.setItem(k, name);
   return name;
 };
 
@@ -65,7 +65,7 @@ const useOnlineConnect4 = () => {
   const setDisplayName = useCallback((n) => {
     const name = (n || "").trim().slice(0, 24) || defaultName();
     nameRef.current = name;
-    localStorage.setItem("c4_display_name", name);
+    sessionStorage.setItem("c4_display_name", name);
   }, []);
 
   // Socket lifecycle
