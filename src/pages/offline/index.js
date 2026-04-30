@@ -23,6 +23,9 @@ const Offline = () => {
         <CustomButton onClick={() => navigate("/play-offline/cpu")}>
           Play VS CPU
         </CustomButton>
+        <CustomButton onClick={() => navigate("/play-fun")}>
+          Fun Mode
+        </CustomButton>
         <CustomButton onClick={() => navigate("/")}>Main Menu</CustomButton>
       </ButtonContainer>
     </PageContainer>

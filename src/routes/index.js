@@ -5,6 +5,7 @@ import Offline from "../pages/offline/index";
 import Online from "../pages/online/index";
 import Player from "../pages/offline/vs2P/index";
 import PlayCPU from "../pages/offline/vsCPU";
+import FunMode from "../pages/funMode";
 
 const AppRoutes = () => {
   return (
@@ -14,6 +15,7 @@ const AppRoutes = () => {
       <Route path="/play-online" element={<Online />} />
       <Route path="/play-offline/2p" element={<Player />} />
       <Route path="/play-offline/cpu" element={<PlayCPU />} />
+      <Route path="/play-fun" element={<FunMode />} />
     </Routes>
   );
 };
