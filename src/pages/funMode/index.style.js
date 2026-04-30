@@ -72,21 +72,27 @@ export const UpsideDownIndicator = styled("div")({
   boxShadow: "0 8px 20px rgba(255, 107, 53, 0.4)",
 });
 
+// CHANGE: Removed CSS transform that was blocking pointer events
 export const FunModeBoard = styled("div")(({ isUpsideDown }) => ({
-  transform: isUpsideDown ? "rotateX(180deg)" : "rotateX(0deg)",
-  transition: "transform 0.5s ease-in-out",
   position: "relative",
 
-  // Add vine decorations when upside down
+  // CHANGE: Use visual indicators instead of transform to maintain interactivity
   ...(isUpsideDown && {
     "&::before": {
-      content: '"🌿"',
+      content: '"🙃 GRAVITY REVERSED 🙃"',
       position: "absolute",
-      top: "-30px",
-      left: "-20px",
-      fontSize: "30px",
-      animation: `${vine} 2s infinite`,
+      top: "-50px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      fontSize: "16px",
+      color: "#ffa500",
+      fontWeight: "bold",
       zIndex: 1,
+      background: "rgba(0,0,0,0.8)",
+      padding: "5px 15px",
+      borderRadius: "15px",
+      border: "2px solid #ffa500",
+      animation: `${glow} 2s infinite`,
     },
     "&::after": {
       content: '"🌿"',
