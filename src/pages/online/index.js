@@ -2,10 +2,10 @@
 import { useMemo, useRef, useState, useEffect } from "react";
 
 import { useNavigate, useLocation } from "react-router-dom";
-import CustomButton from "../../components/buttonComponent";
-import Status from "../../components/status";
-import Board from "../../components/boardStyles";
-import SoundSettings from "../../components/SoundSettings";
+import CustomButton from "../../components/organisms/buttonComponent";
+import Status from "../../components/organisms/status";
+import Board from "../../components/organisms/boardStyles";
+import SoundSettings from "../../components/organisms/SoundSettings";
 import useSoundManager from "../../hooks/core/useSoundManager";
 
 import {

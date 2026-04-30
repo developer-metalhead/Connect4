@@ -1,6 +1,6 @@
 import "./App.css";
 import AppRoutes from "./routes/index";
-import { GlobalStyles } from "./components/boardStyles/index.style";
+import { GlobalStyles } from "./components/organisms/boardStyles/index.style";
 
 function App() {
   return (

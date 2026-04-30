@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import CustomButton from "../../../components/buttonComponent";
-import Status from "../../../components/status";
-import Board from "../../../components/boardStyles";
+import CustomButton from "../../../components/organisms/buttonComponent";
+import Status from "../../../components/organisms/status";
+import Board from "../../../components/organisms/boardStyles";
 import useSoundManager from "../../../hooks/core/useSoundManager";
 
 import { useConnect4 } from "../../../hooks/core/useConnect4";

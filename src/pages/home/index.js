@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import CustomButton from "../../components/buttonComponent";
+import CustomButton from "../../components/organisms/buttonComponent/index.js";
 
 import {
   PageContainer,
@@ -7,7 +7,7 @@ import {
   ButtonContainer,
   BodyContainer,
 } from "./index.style";
-import FunModeSettings from "../../components/funModeSettings/funModeSettings.js";
+import FunModeSettings from "../../components/organisms/funModeSettings/funModeSettings.js";
 import { useState } from "react";
 import useSoundManager from "../../hooks/core/useSoundManager.js";
 
