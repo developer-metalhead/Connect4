@@ -13,6 +13,8 @@ export const useVideoManager = () => {
   const videoInstancesRef = useRef({});
   const [isPlaying, setIsPlaying] = useState({});
   const [isLoaded, setIsLoaded] = useState({});
+  // CHANGE: Add state to control video modal visibility
+  const [showVideoModal, setShowVideoModal] = useState({});
 
   // Create video instance
   const createVideoInstance = useCallback((videoKey, config) => {
@@ -23,16 +25,11 @@ export const useVideoManager = () => {
       video.volume = config.volume || 1;
       video.loop = config.loop || false;
       
-      // Add video to DOM but keep it hidden
-      video.style.position = 'fixed';
-      video.style.top = '-9999px';
-      video.style.left = '-9999px';
-      video.style.width = '1px';
-      video.style.height = '1px';
-      video.style.opacity = '0';
-      video.style.pointerEvents = 'none';
-      
-      document.body.appendChild(video);
+      // CHANGE: Remove hidden positioning - we'll control visibility via modal
+      video.style.width = '100%';
+      video.style.height = '100%';
+      video.style.objectFit = 'contain';
+      video.controls = true; // CHANGE: Add video controls
 
       // Event listeners
       video.addEventListener('loadeddata', () => {
@@ -42,6 +39,7 @@ export const useVideoManager = () => {
 
       video.addEventListener('play', () => {
         setIsPlaying(prev => ({ ...prev, [videoKey]: true }));
+        setShowVideoModal(prev => ({ ...prev, [videoKey]: true })); // CHANGE: Show modal when playing
         console.log(`▶️ Video playing: ${videoKey}`);
       });
 
@@ -52,12 +50,14 @@ export const useVideoManager = () => {
 
       video.addEventListener('ended', () => {
         setIsPlaying(prev => ({ ...prev, [videoKey]: false }));
+        setShowVideoModal(prev => ({ ...prev, [videoKey]: false })); // CHANGE: Hide modal when ended
         console.log(`🏁 Video ended: ${videoKey}`);
       });
 
       video.addEventListener('error', (e) => {
         console.warn(`❌ Video error for ${videoKey}:`, e);
         setIsLoaded(prev => ({ ...prev, [videoKey]: false }));
+        setShowVideoModal(prev => ({ ...prev, [videoKey]: false })); // CHANGE: Hide modal on error
       });
 
       return video;
@@ -140,15 +140,27 @@ export const useVideoManager = () => {
     try {
       video.pause();
       video.currentTime = 0;
+      setShowVideoModal(prev => ({ ...prev, [videoKey]: false })); // CHANGE: Hide modal when stopped
     } catch (error) {
       console.warn(`Error stopping video ${videoKey}:`, error);
     }
   }, []);
 
+  // CHANGE: Add function to close video modal
+  const closeVideoModal = useCallback((videoKey) => {
+    setShowVideoModal(prev => ({ ...prev, [videoKey]: false }));
+    stopVideo(videoKey);
+  }, [stopVideo]);
+
   // Play bored video specifically
   const playBoredVideo = useCallback(() => {
     playVideo('bored');
   }, [playVideo]);
+
+  // CHANGE: Add function to get video element for rendering in modal
+  const getVideoElement = useCallback((videoKey) => {
+    return videoInstancesRef.current[videoKey];
+  }, []);
 
   return {
     // Video controls
@@ -156,13 +168,16 @@ export const useVideoManager = () => {
     pauseVideo,
     stopVideo,
     playBoredVideo,
+    closeVideoModal, // CHANGE: Export close modal function
     
     // State
     isPlaying,
     isLoaded,
+    showVideoModal, // CHANGE: Export modal visibility state
     
     // Utility
     isVideoSupported: Object.keys(videoInstancesRef.current).length > 0,
+    getVideoElement, // CHANGE: Export function to get video element
   };
 };
 
