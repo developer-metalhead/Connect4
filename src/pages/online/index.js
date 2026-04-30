@@ -221,7 +221,7 @@ const Online = () => {
             winner={gameState.winner}
             isDraw={gameState.isDraw}
             onDrop={makeMove}
-            // canInteract={myTurn}
+            canInteract={myTurn}
           />
 
           <ButtonContainer>
