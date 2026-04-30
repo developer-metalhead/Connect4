@@ -15,6 +15,7 @@ import {
   ButtonContainer,
   BodyContainer,
 } from "./index.style";
+import BoredVideoButton from "../../../components/organisms/VideoButton";
 
 const PlayCPU = () => {
   const navigate = useNavigate();
@@ -65,6 +66,9 @@ const PlayCPU = () => {
         >
           Main Menu
         </CustomButton>
+        <BoredVideoButton onGameReset={reset}>
+          Extremely Fun Button!
+        </BoredVideoButton>
       </ButtonContainer>
     </PageContainer>
   );
