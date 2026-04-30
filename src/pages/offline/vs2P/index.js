@@ -1,78 +1,38 @@
-/* eslint-disable no-unused-vars */
+import { useNavigate } from "react-router-dom";
 import CustomButton from "../../../components/buttonComponent";
-import { useState } from "react";
+import Status from "../../../components/status";
+import Board from "../../../components/boardStyles";
 
+import { useConnect4 } from "../../../hooks/useConnect4";
 import {
   PageContainer,
   HeaderContainer,
-  ButtonContainer,
   BodyContainer,
+  ButtonContainer,
 } from "./index.style";
-import {
-  checkWin,
-  dropPiece,
-  isBoardFull,
-  isValidMove,
-  PLAYER1,
-  PLAYER2,
-  resetGame,
-} from "../../../helperFunction/helperFunction";
-import Status from "../../../components/status";
-import { BoardContainer, Cell, Row } from "../../../components/boardStyles";
-import { useNavigate } from "react-router-dom";
 
-const Player = () => {
-  // Initialize using resetGame helper
+const Game2P = () => {
   const navigate = useNavigate();
-  const [gameState, setGameState] = useState(resetGame);
-
+  const { gameState, makeMove, reset } = useConnect4();
   const { board, currentPlayer, winner, isDraw } = gameState;
-
-  const handleDrop = (col) => {
-    if (winner || isDraw || !isValidMove(board, col)) return;
-
-    const { newBoard, row } = dropPiece(board, col, currentPlayer);
-
-    if (checkWin(newBoard, row, col, currentPlayer)) {
-      setGameState((prev) => ({
-        ...prev,
-        board: newBoard,
-        winner: currentPlayer,
-      }));
-    } else if (isBoardFull(newBoard)) {
-      setGameState((prev) => ({ ...prev, board: newBoard, isDraw: true }));
-    } else {
-      setGameState((prev) => ({
-        ...prev,
-        board: newBoard,
-        currentPlayer: prev.currentPlayer === PLAYER1 ? PLAYER2 : PLAYER1,
-      }));
-    }
-  };
-
-  const handleReset = () => {
-    setGameState(resetGame());
-  };
 
   return (
     <PageContainer>
-      <HeaderContainer>Connect 4 </HeaderContainer>
-      <BodyContainer>2 Players</BodyContainer>
+      <HeaderContainer>Connect 4</HeaderContainer>
+      <BodyContainer>2 Players Mode</BodyContainer>
+
       <Status winner={winner} isDraw={isDraw} currentPlayer={currentPlayer} />
-      <BoardContainer>
-        {board.map((row, rowIndex) => (
-          <Row key={rowIndex}>
-            {row.map((cell, colIndex) => (
-              <Cell key={colIndex} onClick={() => handleDrop(colIndex)}>
-                {cell}
-              </Cell>
-            ))}
-          </Row>
-        ))}
-      </BoardContainer>
+
+      <Board
+        board={board}
+        currentPlayer={currentPlayer}
+        winner={winner}
+        isDraw={isDraw}
+        onDrop={makeMove}
+      />
 
       <ButtonContainer>
-        <CustomButton onClick={handleReset}>New Game</CustomButton>
+        <CustomButton onClick={reset}>New Game</CustomButton>
         <CustomButton onClick={() => navigate("/play-offline")}>
           Back to Menu
         </CustomButton>
@@ -81,4 +41,4 @@ const Player = () => {
   );
 };
 
-export default Player;
+export default Game2P;

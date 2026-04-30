@@ -78,4 +78,7 @@ export const isBoardFull = (board) => {
   return board[0].every((cell) => cell !== EMPTY);
 };
 
+export const getNextPlayer = (player) =>
+  player === PLAYER1 ? PLAYER2 : PLAYER1;
+
 export { ROWS, COLS, PLAYER1, PLAYER2, EMPTY };

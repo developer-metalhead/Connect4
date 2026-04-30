@@ -1,44 +1,58 @@
-import { styled } from "@mui/material/styles";
+import { useState } from "react";
+import { BoardContainer, Row, Cell, PreviewRow } from "./index.style"; // Make sure path is correct
 
-export const StatusContainer = styled("div")({
-  fontSize: "28px",
-  fontWeight: "600",
-  textAlign: "center",
-  margin: "20px 0",
-  minHeight: "50px",
-});
+const Board = ({ board, currentPlayer, winner, isDraw, onDrop }) => {
+  const [hoverCol, setHoverCol] = useState(null);
+  const [droppingCol, setDroppingCol] = useState(null);
 
-export const BoardContainer = styled("div")({
-  background: "#0a1f45",
-  padding: "16px",
-  borderRadius: "20px",
-  boxShadow: "0 15px 35px rgba(0, 0, 0, 0.6)",
-  display: "inline-grid",
-  gridTemplateRows: "repeat(6, 75px)",
-  gap: "10px",
-});
+  const handleClick = (col) => {
+    if (winner || isDraw) return;
 
-export const Row = styled("div")({
-  display: "grid",
-  gridTemplateColumns: "repeat(7, 75px)",
-  gap: "10px",
-});
+    setDroppingCol(col);
 
-export const Cell = styled("div")({
-  width: "75px",
-  height: "75px",
-  background: "#1e90ff",
-  borderRadius: "50%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: "55px",
-  cursor: "pointer",
-  transition: "all 0.2s ease",
-  boxShadow: "inset 0 6px 12px rgba(0,0,0,0.4)",
+    setTimeout(() => {
+      onDrop(col);
+      setDroppingCol(null);
+    }, 280);
+  };
 
-  "&:hover": {
-    background: "#4fc3f7",
-    transform: "scale(1.08)",
-  },
-});
+  return (
+    <>
+      <PreviewRow>
+        {Array.from({ length: 7 }).map((_, col) => (
+          <div
+            key={col}
+            className="preview-cell"
+            onMouseEnter={() => setHoverCol(col)}
+            onMouseLeave={() => setHoverCol(null)}
+            onClick={() => handleClick(col)}
+          >
+            {hoverCol === col && !winner && !isDraw && (
+              <span className="preview-piece">{currentPlayer}</span>
+            )}
+          </div>
+        ))}
+      </PreviewRow>
+
+      <BoardContainer>
+        {board.map((row, r) => (
+          <Row key={r}>
+            {row.map((cell, c) => (
+              <Cell
+                key={c}
+                onClick={() => handleClick(c)}
+                onMouseEnter={() => setHoverCol(c)}
+                onMouseLeave={() => setHoverCol(null)}
+                className={droppingCol === c ? "dropping" : ""}
+              >
+                {cell}
+              </Cell>
+            ))}
+          </Row>
+        ))}
+      </BoardContainer>
+    </>
+  );
+};
+
+export default Board;
