@@ -63,8 +63,14 @@ const VolumeDisplay = styled('span')({
 });
 
 const FunModeSettings = ({ soundManager, onClose }) => {
-  // Fun Mode feature toggles
-  const { monkeyModeEnabled, toggleMonkeyMode } = useFunModeSettings();
+  // CHANGE: Added chaos chicken settings
+  const { 
+    monkeyModeEnabled, 
+    toggleMonkeyMode,
+    chaosChickenEnabled,
+    toggleChaosChicken
+  } = useFunModeSettings();
+
 
   const {
     isMuted,
@@ -126,11 +132,23 @@ const FunModeSettings = ({ soundManager, onClose }) => {
         </CustomButton>
       </SettingRow>
 
-      
-     
+      {/* CHANGE: Added Chaos Chicken toggle */}
+      <SettingRow>
+        <Label>Chaos Chicken</Label>
+        <CustomButton
+          onClick={toggleChaosChicken}
+          style={{
+            backgroundColor: chaosChickenEnabled ? '#4caf50' : '#ff6b6b',
+            minWidth: '80px',
+          }}
+        >
+          {chaosChickenEnabled ? 'On' : 'Off'}
+        </CustomButton>
+      </SettingRow>
+
 
       <SettingRow>
-      
+
         <CustomButton onClick={onClose}>
           Close
         </CustomButton>

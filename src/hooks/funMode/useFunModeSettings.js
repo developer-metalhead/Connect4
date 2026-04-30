@@ -3,7 +3,9 @@ import { useCallback, useEffect, useState } from "react";
 const STORAGE_KEY = "c4_fun_mode_settings_v1";
 const DEFAULTS = {
   monkeyModeEnabled: true,
+  chaosChickenEnabled: true,
 };
+
 
 const load = () => {
   try {
@@ -39,13 +41,26 @@ const useFunModeSettings = () => {
     setSettings((s) => ({ ...s, monkeyModeEnabled: !s.monkeyModeEnabled }));
   }, []);
 
+  const setChaosChickenEnabled = useCallback((v) => {
+    setSettings((s) => ({ ...s, chaosChickenEnabled: !!v }));
+  }, []);
+
+  const toggleChaosChicken = useCallback(() => {
+    setSettings((s) => ({ ...s, chaosChickenEnabled: !s.chaosChickenEnabled }));
+  }, []);
+
+
   return {
     settings,
     // Direct accessors for convenience
     monkeyModeEnabled: settings.monkeyModeEnabled,
+    chaosChickenEnabled: settings.chaosChickenEnabled,
     setMonkeyModeEnabled,
     toggleMonkeyMode,
+    setChaosChickenEnabled,
+    toggleChaosChicken,
   };
+
 };
 
 export default useFunModeSettings;
