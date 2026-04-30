@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import CustomButton from "../../components/organisms/buttonComponent/index.js";
+import BoredVideoButton from "../../components/organisms/VideoButton/index.js";
 
 import {
   PageContainer,
@@ -11,13 +12,11 @@ import FunModeSettings from "../../components/organisms/funModeSettings/funModeS
 import { useState } from "react";
 import useSoundManager from "../../hooks/core/useSoundManager.js";
 
-
 const Home = () => {
   const navigate = useNavigate();
   const [showFunModeSettings, setShowFunModeSettings] = useState(false)
 
   const soundManager = useSoundManager();
-
 
   return (
     <PageContainer>
@@ -34,6 +33,9 @@ const Home = () => {
         <CustomButton onClick={() => setShowFunModeSettings(true)}>
           Fun Mode Settings
         </CustomButton>
+        <BoredVideoButton>
+          Play Bored Video 🎬
+        </BoredVideoButton>
       </ButtonContainer>
       {showFunModeSettings && (
         <div
@@ -57,8 +59,6 @@ const Home = () => {
         </div>
       )}
     </PageContainer>
-
-    
   );
 };
 
