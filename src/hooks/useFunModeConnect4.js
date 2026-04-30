@@ -317,13 +317,13 @@ export const useFunModeConnect4 = () => {
       });
 
       setIsUpsideDown(true);
-      setUpsideDownTurnsLeft(2);
+      setUpsideDownTurnsLeft(4);
       setIsMonkeyAnimating(false);
       setMonkeyButtonPlayer(null);
       setMonkeyVoiceLine("");
 
       console.log("🙃 UPSIDE DOWN MODE ACTIVATED:", {
-        turnsLeft: 2,
+        turnsLeft: 4,
         isUpsideDown: true,
       });
     }, 2500);
