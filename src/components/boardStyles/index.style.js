@@ -11,6 +11,7 @@ export const BoardContainer = styled("div")({
   boxShadow: "0 12px 28px rgba(0, 0, 0, 0.5)",
   display: "inline-block",
   maxWidth: "100%",
+  position: "relative", // For absolute positioning of highlights and falling discs
 });
 
 export const Row = styled("div")({
@@ -29,7 +30,6 @@ export const Cell = styled("div")({
   alignItems: "center",
   justifyContent: "center",
   fontSize: "calc(var(--cell) * 0.72)",
-  cursor: "pointer",
   transition: "transform 0.15s ease, background 0.15s ease, opacity 0.15s ease",
   boxShadow: "inset 0 6px 12px rgba(0,0,0,0.4)",
 
@@ -37,11 +37,9 @@ export const Cell = styled("div")({
     background: "#4fc3f7",
     transform: "scale(1.06)",
   },
-
-  "&.dropping": {
-    animation: "fall 0.35s ease-in",
-  },
 });
+
+// Removed the dropping class animation to eliminate column bounce
 
 export const PreviewRow = styled("div")({
   display: "grid",
@@ -67,19 +65,50 @@ export const PreviewRow = styled("div")({
   },
 });
 
+export const ColumnHighlight = styled("div")({
+  position: "absolute",
+  top: "clamp(8px, 2.5vmin, 16px)",
+  bottom: "clamp(8px, 2.5vmin, 10px)",
+  width: "calc(var(--cell) + 6px)",
+  borderRadius: "120px",
+
+  pointerEvents: "none",
+  transition: "all 0.2s ease",
+  zIndex: 1,
+});
+
+export const FallingDisc = styled("div")({
+  position: "absolute",
+  top: "clamp(8px, 2.5vmin, 16px)",
+  width: "var(--cell)",
+  height: "var(--cell)",
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "calc(var(--cell) * 0.72)",
+  pointerEvents: "none",
+  zIndex: 10,
+  animation: "discFall ease-in forwards",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+});
+
 // Global Keyframes
 export const GlobalStyles = `
-  @keyframes fall {
+  @keyframes discFall {
     0% {
-      transform: translateY(-350px);
-      opacity: 0;
+      transform: translateY(-80px);
+      opacity: 1;
     }
-    70% {
-      transform: translateY(20px);
+    85% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) + 10px));
+    }
+    95% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 5px));
     }
     100% {
-      transform: translateY(0);
-      opacity: 1;
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      opacity: 0;
     }
   }
 `;

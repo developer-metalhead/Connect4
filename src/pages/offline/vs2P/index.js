@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import CustomButton from "../../../components/buttonComponent";
 import Status from "../../../components/status";
 import Board from "../../../components/boardStyles";
+import useSoundManager from "../../../hooks/useSoundManager";
 
 import { useConnect4 } from "../../../hooks/useConnect4";
 import {
@@ -15,6 +17,16 @@ const Game2P = () => {
   const navigate = useNavigate();
   const { gameState, makeMove, reset } = useConnect4();
   const { board, currentPlayer, winner, isDraw } = gameState;
+  const soundManager = useSoundManager();
+
+  // Play win/lose/draw sounds when game ends
+  useEffect(() => {
+    if (winner) {
+      soundManager.playWinSound();
+    } else if (isDraw) {
+      soundManager.playDrawSound();
+    }
+  }, [winner, isDraw, soundManager]);
 
   return (
     <PageContainer>
@@ -34,11 +46,17 @@ const Game2P = () => {
         winner={winner}
         isDraw={isDraw}
         onDrop={makeMove}
+        soundManager={soundManager}
       />
 
       <ButtonContainer>
-        <CustomButton onClick={reset}>New Game</CustomButton>
-        <CustomButton onClick={() => navigate("/play-offline")}>
+        <CustomButton onClick={reset} soundManager={soundManager}>
+          New Game
+        </CustomButton>
+        <CustomButton
+          onClick={() => navigate("/play-offline")}
+          soundManager={soundManager}
+        >
           Back to Menu
         </CustomButton>
       </ButtonContainer>
