@@ -232,7 +232,7 @@ const FunModeV2 = () => {
 
           <ControlGroup>
             <Button variant="secondary" fullWidth onClick={enhancedReset} soundManager={soundManager}>
-              New Game
+          Reset
             </Button>
           </ControlGroup>
 

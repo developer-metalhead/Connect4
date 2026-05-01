@@ -23,6 +23,12 @@ const BackButtonWrapper = styled("button")({
   boxShadow: tokens.shadows.md,
   padding: 0,
 
+  "@media (max-width: 768px)": {
+    top: "4px",
+    left: "8px",
+    borderRadius: "8px",
+  },
+
   "&:hover": {
     background: "rgba(255, 255, 255, 0.15)",
     transform: "translateX(-4px)",

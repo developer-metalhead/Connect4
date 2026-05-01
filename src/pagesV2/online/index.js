@@ -146,7 +146,7 @@ const OnlineV2 = () => {
       ) : (
         <RefreshIconButton 
           onClick={() => window.location.reload()} 
-          style={{ position: 'fixed', top: '12px', right: '12px', zIndex: 1001 }}
+          style={{ position: 'fixed', top: '10px', right: '12px', zIndex: 1001 }}
         >
           <svg viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" /></svg>
         </RefreshIconButton>
@@ -170,17 +170,17 @@ const OnlineV2 = () => {
         {!connected && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
             <GameStatus message="Connecting to server..." />
-            <Button variant="outline" size="sm" onClick={() => window.location.reload()} soundManager={soundManager}>
+            {/* <Button variant="outline" size="sm" onClick={() => window.location.reload()} soundManager={soundManager}>
               Refresh Server
-            </Button>
+            </Button> */}
           </div>
         )}
         {error && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
             <GameStatus message={`Error: ${error}`} />
-            <Button variant="outline" size="sm" onClick={() => window.location.reload()} soundManager={soundManager}>
+            {/* <Button variant="outline" size="sm" onClick={() => window.location.reload()} soundManager={soundManager}>
               Try Refreshing
-            </Button>
+            </Button> */}
           </div>
         )}
 

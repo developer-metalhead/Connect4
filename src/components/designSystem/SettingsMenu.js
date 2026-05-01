@@ -12,6 +12,13 @@ const MenuWrapper = styled("div")({
   top: "12px",
   right: "12px",
   zIndex: 1500,
+
+  "@media (max-width: 768px)": {
+    top: "8px",
+    right: "8px",
+    borderRadius: "8px",
+
+  },
 });
 
 const MenuButton = styled("button")(({ active }) => ({
@@ -36,6 +43,10 @@ const MenuButton = styled("button")(({ active }) => ({
   "&:hover": {
     background: "rgba(255, 255, 255, 0.2)",
     transform: active ? "rotate(90deg) scale(1.1)" : "scale(1.1)",
+  },
+
+  "@media (max-width: 768px)": {
+    borderRadius: "8px",
   },
 
   "& span": {
