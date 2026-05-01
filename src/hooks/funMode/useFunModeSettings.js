@@ -4,7 +4,6 @@ const STORAGE_KEY = "c4_fun_mode_settings_v1";
 const DEFAULTS = {
   monkeyModeEnabled: true,
   // CHANGE: Ready for future features to be added here
-  chaosChickenEnabled: false,
   powerUpsEnabled: false,
   chaosChickenEnabled: true,
 };

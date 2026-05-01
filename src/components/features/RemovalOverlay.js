@@ -57,7 +57,7 @@ const Particle = styled.div`
   --x: ${(props) => props.destX}px;
   --y: ${(props) => props.destY}px;
   --rot: ${(props) => props.rot}deg;
-  animation: ${flyAway} 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: ${flyAway} ${(props) => props.duration}ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
   animation-delay: ${(props) => props.delay}ms;
   opacity: 0;
 `;
@@ -71,22 +71,27 @@ const RemovalOverlay = ({ data, onComplete }) => {
 
     // Generate random flying disc particles
     const newParticles = [];
+
+    
     for (let i = 0; i < (data.count || 1) * 3; i++) {
         newParticles.push({
             id: i,
             disc: data.player || "⚪",
-            size: Math.random() * 20 + 20,
+    
+            size:  Math.random() * 40 + 70,
             destX: (Math.random() - 0.5) * 400,
             destY: (Math.random() - 0.5) * 400,
             rot: Math.random() * 360,
-            delay: Math.random() * 400
+            delay: Math.random() * 400,
+        
+            duration: 1600
         });
     }
     setParticles(newParticles);
 
     const timer = setTimeout(() => {
       onComplete();
-    }, 10000);
+    }, 65000);
 
     return () => clearTimeout(timer);
   }, [data, onComplete]);
@@ -100,8 +105,8 @@ const RemovalOverlay = ({ data, onComplete }) => {
       </Emojis>
       <Text>
         {data.type === "monkey"
-          ? `Monkey stole ${data.count} disc(s) from column ${data.col}!`
-          : `Rooster of Rage removed ${data.count} opponent disc(s) from row ${data.row}!`}
+          ? `Monkey stole ${data.player} disc from ${data.row} row ${data.col} col!`
+          : `Rooster of Rage gawked at ${data.count} ${data.player}  disc(s) from row ${data.row}!`}
       </Text>
       
       {particles.map((p) => (
@@ -112,6 +117,7 @@ const RemovalOverlay = ({ data, onComplete }) => {
           destY={p.destY}
           rot={p.rot}
           delay={p.delay}
+          duration={p.duration}
         >
           {p.disc}
         </Particle>
