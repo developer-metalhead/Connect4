@@ -37,6 +37,7 @@ const initialState = () => ({
     .map(() => Array(7).fill(EMPTY)),
   currentPlayer: PLAYER1,
   winner: null,
+  winningLine: null,
   isDraw: false,
 });
 

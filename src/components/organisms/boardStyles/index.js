@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useMemo } from "react";
 import {
   BoardContainer,
   Row,
@@ -6,6 +6,9 @@ import {
   PreviewRow,
   ColumnHighlight,
   FallingDisc,
+  WinningLineWrapper,
+  WinningLine,
+  GhostDisc,
 } from "./index.style";
 import PoopBlockIndicator from "../../features/ChaosChicken/PoopBlockIndicator";
 
@@ -16,12 +19,10 @@ const Board = ({
   isDraw,
   onDrop,
   canInteract = true,
-  soundManager,
-  isUpsideDown = false,
-  gravityAnimation = null,
-  // CHANGE: Add Chaos Chicken props
-  blockedColumns = [],
-  onBlockedColumnAttempt,
+  soundManager, // Add sound manager prop
+  isUpsideDown = false, // CHANGE: Add isUpsideDown prop
+  gravityAnimation = null, // NEW: batch animation plan for restoring gravity
+
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
@@ -199,8 +200,83 @@ const Board = ({
 
   const activeCol = hoverCol !== null ? hoverCol : touchCol;
 
+  // Calculate target row for the active column highlight
+  let activeTargetRow = -1;
+  if (activeCol !== null) {
+    if (isUpsideDown) {
+      for (let row = 0; row < board.length; row++) {
+        if (board[row][activeCol] === "⚪") {
+          activeTargetRow = row;
+          break;
+        }
+      }
+    } else {
+      for (let row = board.length - 1; row >= 0; row--) {
+        if (board[row][activeCol] === "⚪") {
+          activeTargetRow = row;
+          break;
+        }
+      }
+    }
+  }
+
+  // CHANGE: Create CPU falling disc animation when CPU is dropping
+  const cpuFallingDisc = isCpuDropping && cpuDroppingCol !== null ? (() => {
+    // Find target row for CPU drop
+    let targetRow = -1;
+    if (isUpsideDown) {
+      for (let row = 0; row < board.length; row++) {
+        if (board[row][cpuDroppingCol] === "⚪") {
+          targetRow = row;
+          break;
+        }
+      }
+    } else {
+      for (let row = board.length - 1; row >= 0; row--) {
+        if (board[row][cpuDroppingCol] === "⚪") {
+          targetRow = row;
+          break;
+        }
+      }
+    }
+    
+    if (targetRow === -1) return null;
+    
+    const startRow = isUpsideDown ? board.length : -1;
+    const distance = isUpsideDown ? targetRow + 1 : board.length - targetRow;
+    
+    return {
+      col: cpuDroppingCol,
+      targetRow,
+      currentRow: startRow,
+      player: "🟡", // CPU player emoji
+      // CHANGE: Calculate exact animation duration to match useConnect4CPU timing
+      animationDuration: 400 + Math.abs(distance) * 50,
+    };
+  })() : null;
+
+
+  // Preview row for "ghost" disc
+  const previewRow = useMemo(() => {
+    if (activeCol === null || winner || isDraw || !canInteract) return null;
+
+    if (isUpsideDown) {
+      // Find top-most empty cell
+      for (let r = 0; r < 6; r++) {
+        if (board[r][activeCol] === "⚪") return r;
+      }
+    } else {
+      // Find bottom-most empty cell
+      for (let r = 5; r >= 0; r--) {
+        if (board[r][activeCol] === "⚪") return r;
+      }
+    }
+    return null;
+  }, [activeCol, board, winner, isDraw, canInteract, isUpsideDown]);
+
   return (
     <>
+      {/* CHANGE: Conditionally render preview row based on board orientation */}
       {!isUpsideDown && (
         <PreviewRow>
           {Array.from({ length: 7 }).map((_, col) => (
@@ -238,10 +314,21 @@ const Board = ({
         ))}
 
         {/* Column highlights */}
-        {activeCol !== null && droppingCol === null && !isColumnBlockedByPoop(activeCol) && (
+        {activeCol !== null && droppingCol === null && (
           <ColumnHighlight
             style={{
-              left: `calc(${activeCol} * (var(--cell) + var(--gap)) + var(--gap))`,
+              left: `calc(var(--board-padding) + ${activeCol} * (var(--cell) + var(--gap)) - 3px)`,
+              ...(isUpsideDown
+                ? {
+                    top: "auto",
+                    bottom: "calc(var(--board-padding) - 3px)",
+                    height: `calc(${board.length - 1 - activeTargetRow} * (var(--cell) + var(--gap)) + var(--cell) + 6px)`,
+                  }
+                : {
+                    top: "calc(var(--board-padding) - 3px)",
+                    bottom: "auto",
+                    height: `calc(${activeTargetRow} * (var(--cell) + var(--gap)) + var(--cell) + 6px)`,
+                  }),
               backgroundColor:
                 currentPlayer === "🔴"
                   ? "rgba(255, 68, 68, 0.35)"
@@ -263,6 +350,23 @@ const Board = ({
             {fallingDisc.player}
           </FallingDisc>
         )}
+
+        {/* CHANGE: Add CPU falling disc animation with synchronized timing */}
+        {cpuFallingDisc && (
+          <FallingDisc
+            style={{
+              left: `calc(${cpuFallingDisc.col} * (var(--cell) + var(--gap)) + var(--gap))`,
+              // CHANGE: Use calculated duration from cpuFallingDisc object
+              animationDuration: `${cpuFallingDisc.animationDuration}ms`,
+              "--target-row": cpuFallingDisc.targetRow,
+              "--start-row": cpuFallingDisc.currentRow,
+              "--is-upside-down": isUpsideDown ? 1 : 0,
+            }}
+          >
+            {cpuFallingDisc.player}
+          </FallingDisc>
+        )}
+
 
         {Array.isArray(gravityAnimation) &&
           gravityAnimation.length > 0 &&
@@ -309,10 +413,48 @@ const Board = ({
               >
                 {/* Hide original from-cells while overlay is animating */}
                 {maskedKeys && maskedKeys.has(`${r},${c}`) ? "⚪" : cell}
+
               </Cell>
             ))}
           </Row>
         ))}
+
+        {/* Render a single connecting line if there's a winner and a winning line */}
+        {(() => {
+          if (!winner || !winningLine || winningLine.length < 4) return null;
+
+          // Find start and end cells by sorting by column then row
+          const sorted = [...winningLine].sort((a, b) => a.col - b.col || a.row - b.row);
+          const first = sorted[0];
+          const last = sorted[sorted.length - 1];
+
+          // Vector from first to last
+          const dRow = last.row - first.row;
+          const dCol = last.col - first.col;
+
+          // Calculate visual parameters
+          const angle = Math.atan2(dRow, dCol) * (180 / Math.PI);
+          const distance = Math.sqrt(dRow * dRow + dCol * dCol);
+          
+          // Center point between the two extreme discs
+          const midCol = (first.col + last.col) / 2;
+          const midRow = (first.row + last.row) / 2;
+
+          return (
+            <WinningLineWrapper
+              style={{
+                left: `calc(var(--board-padding) + ${midCol} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
+                top: `calc(var(--board-padding) + ${midRow} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
+                width: `calc(${distance} * (var(--cell) + var(--gap)) + var(--cell))`,
+                height: "var(--cell)",
+                transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+              }}
+            >
+              <WinningLine />
+            </WinningLineWrapper>
+          );
+        })()}
+
       </BoardContainer>
 
       {/* CHANGE: Add preview row at bottom for upside-down mode */}
@@ -341,7 +483,7 @@ const Board = ({
           ))}
         </PreviewRow>
       )}
-    </>
+    </div>
   );
 };
 

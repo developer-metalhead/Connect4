@@ -13,6 +13,8 @@ import {
   HeaderContainer,
   ButtonContainer,
   BodyContainer,
+  HeaderContainerNotInRoom,
+  BodyContainerNotInRoom,
 } from "./index.style";
 import useOnlineConnect4 from "../../hooks/core/useOnlineConnect4";
 import { PLAYER1 } from "../../helperFunction/helperFunction";
@@ -87,8 +89,7 @@ const Online = () => {
 
   return (
     <PageContainer>
-      <HeaderContainer>Connect 4</HeaderContainer>
-      <BodyContainer>Online Play</BodyContainer>
+      
 
       {!connected && <BodyContainer>Connecting...</BodyContainer>}
       {error && (
@@ -119,7 +120,9 @@ const Online = () => {
       )}
 
       {!inRoom && (
-        <>
+        <div>
+        <HeaderContainerNotInRoom>Connect 4</HeaderContainerNotInRoom>
+        <BodyContainerNotInRoom>Online Play</BodyContainerNotInRoom>
           <div
             style={{
               display: "flex",
@@ -210,16 +213,19 @@ const Online = () => {
                 aria-label="Back to Main Menu"
                 onClick={() => navigate("/")}
                 soundManager={soundManager}
+
               >
                 Back
               </CustomButton>
             </ButtonContainer>
           </div>
-        </>
+        </div>
       )}
 
       {inRoom && (
         <>
+        <HeaderContainerNotInRoom>Connect 4</HeaderContainerNotInRoom>
+        <BodyContainerNotInRoom>Online Play</BodyContainerNotInRoom>
           <BodyContainer>
             Room: <strong>{roomId}</strong>
           </BodyContainer>
@@ -285,23 +291,24 @@ const Online = () => {
             onDrop={makeMove}
             canInteract={myTurn}
             soundManager={soundManager}
+            winningLine={gameState.winningLine}
           />
 
           <ButtonContainer>
-            <CustomButton
+            {/* <CustomButton
               aria-label="Start a new game"
               onClick={resetRoom}
               soundManager={soundManager}
             >
               New Game
-            </CustomButton>
-            <CustomButton
+            </CustomButton> */}
+            {/* <CustomButton
               aria-label="Sound Settings"
               onClick={() => setShowSoundSettings(true)}
               soundManager={soundManager}
             >
               🔊 Settings
-            </CustomButton>
+            </CustomButton> */}
             <CustomButton
               aria-label="Leave this room"
               onClick={leaveRoom}
@@ -309,13 +316,13 @@ const Online = () => {
             >
               Leave Room
             </CustomButton>
-            <CustomButton
+            {/* <CustomButton
               aria-label="Back to menu"
               onClick={() => navigate("/")}
               soundManager={soundManager}
             >
               Main Menu
-            </CustomButton>
+            </CustomButton> */}
           </ButtonContainer>
 
           {!myTurn && !gameState.winner && !gameState.isDraw && (

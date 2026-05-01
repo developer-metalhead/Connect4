@@ -3,51 +3,63 @@ import { styled } from '@mui/material/styles';
 import useVideoManager from '../../../hooks/core/useVideoManager';
 import FunConfirmationModal from '../ConfirmationModal';
 import CustomButton from '../buttonComponent';
+// CHANGE: Import the new post-video overlay component
+import PostVideoOverlay from '../postVideoOverlay';
+import useSoundManager from '../../../hooks/core/useSoundManager';
 
+// Fullscreen video modal that stretches to entire screen
 const VideoModal = styled('div')({
   position: 'fixed',
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  width: '100vw',
+  height: '100vh',
+  backgroundColor: '#000',
+  zIndex: 9999,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  zIndex: 9999,
-  padding: '20px',
+  userSelect: 'none',
+  WebkitUserSelect: 'none',
+  MozUserSelect: 'none',
+  msUserSelect: 'none',
 });
 
+// Container that fills entire screen for video stretching
 const VideoContainer = styled('div')({
   position: 'relative',
-  width: '90vw',
-  height: '90vh',
-  maxWidth: '1200px',
-  maxHeight: '800px',
+  width: '100vw',
+  height: '100vh',
   backgroundColor: '#000',
-  borderRadius: '12px',
   overflow: 'hidden',
+  '&:focus': {
+    outline: 'none',
+  },
 });
 
+// Close button positioned absolutely and always visible
 const CloseButton = styled('button')({
   position: 'absolute',
-  top: '10px',
-  right: '10px',
-  background: 'rgba(255, 255, 255, 0.2)',
+  top: '20px',
+  right: '20px',
+  background: 'rgba(255, 255, 255, 0.8)',
   border: 'none',
   borderRadius: '50%',
-  width: '40px',
-  height: '40px',
-  color: '#fff',
-  fontSize: '20px',
+  width: '50px',
+  height: '50px',
+  color: '#000',
+  fontSize: '24px',
   cursor: 'pointer',
   zIndex: 10000,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  fontWeight: 'bold',
   
   '&:hover': {
-    background: 'rgba(255, 255, 255, 0.3)',
+    background: 'rgba(255, 255, 255, 1)',
   },
 });
 
@@ -58,10 +70,15 @@ const BoredVideoButton = ({ children = "Extremely Fun Button!", onGameReset, ...
     isLoaded, 
     showVideoModal, 
     closeVideoModal, 
-    getVideoElement 
+    getVideoElement,
+    // CHANGE: Get post-video overlay state and controls
+    showPostVideoOverlay,
+    closePostVideoOverlay
   } = useVideoManager();
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  // CHANGE: Get sound manager for post-video overlay
+  const soundManager = useSoundManager();
 
   const handleClick = () => {
     console.log("🎬 Fun button clicked - showing confirmation modal...");
@@ -94,11 +111,39 @@ const BoredVideoButton = ({ children = "Extremely Fun Button!", onGameReset, ...
     closeVideoModal('bored');
   };
 
-  const handleVideoBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
-      handleCloseVideoModal();
-    }
+  // CHANGE: Handle post-video overlay close
+  const handleClosePostVideoOverlay = () => {
+    closePostVideoOverlay();
   };
+
+  // Prevent any background clicks from interfering with video
+  const handleVideoBackdropClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  // Handle escape key to close video
+  React.useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && showVideoModal.bored) {
+        handleCloseVideoModal();
+      }
+      // CHANGE: Also handle escape for post-video overlay
+      if (e.key === 'Escape' && showPostVideoOverlay) {
+        handleClosePostVideoOverlay();
+      }
+    };
+
+    if (showVideoModal.bored || showPostVideoOverlay) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [showVideoModal.bored]);
 
   const isBoredPlaying = isPlaying.bored;
   const isBoredLoaded = isLoaded.bored;
@@ -138,17 +183,16 @@ const BoredVideoButton = ({ children = "Extremely Fun Button!", onGameReset, ...
         onClose={handleCloseConfirmModal}
       />
 
-      {/* Video Modal */}
+      {/* Fullscreen Video Modal */}
       {showBoredModal && (
         <VideoModal onClick={handleVideoBackdropClick}>
           <VideoContainer>
-            <CloseButton onClick={handleCloseVideoModal}>
-              ×
-            </CloseButton>
             <VideoRenderer videoElement={getVideoElement('bored')} />
           </VideoContainer>
         </VideoModal>
       )}
+
+   
     </>
   );
 };

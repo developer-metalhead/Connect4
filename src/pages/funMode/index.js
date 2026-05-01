@@ -199,6 +199,7 @@ const FunMode = () => {
           isUpsideDown={isUpsideDown}
           blockedColumns={chaosChickenEnabled ? blockedColumns : []}
           onBlockedColumnAttempt={chaosChickenEnabled ? handleBlockedColumnDrop : undefined}
+          winningLine={gameState.winningLine}
         />
       </FunModeBoard>
 
