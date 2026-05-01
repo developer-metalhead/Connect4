@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { styled, keyframes } from '@mui/material/styles';
-import { tokens } from '../tokens';
-import Button from '../Button';
+import { tokens } from "../../tokens";
+import Button from '../../Button';
 
 // Animations
 const shake = keyframes`

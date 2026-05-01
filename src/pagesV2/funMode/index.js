@@ -22,11 +22,11 @@ import {
 // Original Fun Mode Logic & Components
 import { useMonkeyMode } from "../../hooks/funMode/useMonkeyMode";
 import { useChaosChicken } from "../../hooks/funMode/useChaosChicken";
-import { MonkeyModeContainer } from "../../components/designSystem/Features/MonkeyMode";
-import MonkeyAnimation from "../../components/designSystem/Features/MonkeyAnimation";
-import ChickenAnimation from "../../components/designSystem/Features/ChickenAnimation";
-import ChickenIndicators from "../../components/designSystem/Features/ChickenIndicators";
-import RemovalOverlay from "../../components/designSystem/Features/RemovalOverlay";
+import { MonkeyModeContainer } from "../../components/designSystem/Features/monkeyMayhem/MonkeyMode";
+import MonkeyAnimation from "../../components/designSystem/Features/monkeyMayhem/MonkeyAnimation";
+import ChickenAnimation from "../../components/designSystem/Features/chaosChicken/ChickenAnimation";
+import ChickenIndicators from "../../components/designSystem/Features/chaosChicken/ChickenIndicators";
+import RemovalOverlay from "../../components/designSystem/Features/core/RemovalOverlay";
 import useFunModeSettings from "../../hooks/funMode/useFunModeSettings";
 import { useFunModeEffects } from "../../hooks/funMode/useFunModeEffects";
 import { getPlayerNames, createMonkeyButtonHandler, canInteractWithBoard } from "../../helperFunction/funMode/monkeyModeFeatures";

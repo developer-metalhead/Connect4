@@ -1,6 +1,6 @@
 import React from "react";
 import { styled, keyframes } from "@mui/material/styles";
-import { tokens } from "../tokens";
+import { tokens } from "../../tokens";
 
 const wobble = keyframes`
   0%, 100% { transform: rotate(0deg) scale(1); }

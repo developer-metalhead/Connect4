@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { styled, keyframes } from "@mui/material/styles";
-import { tokens } from "../tokens";
+import { tokens } from "../../tokens";
 
 const chickenRun = keyframes`
   0% { transform: translateX(-300px) translateY(0px) rotate(0deg); opacity: 0; }

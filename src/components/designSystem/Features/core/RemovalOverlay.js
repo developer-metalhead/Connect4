@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { styled, keyframes } from "@mui/material/styles";
-import { tokens } from "../tokens";
+import { tokens } from "../../tokens";
+
 
 const slideIn = keyframes`
   0% { transform: translate(-50%, -150%) scale(0.8); opacity: 0; }

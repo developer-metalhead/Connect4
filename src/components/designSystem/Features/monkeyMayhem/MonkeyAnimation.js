@@ -1,6 +1,7 @@
 import React from "react";
 import { styled, keyframes } from "@mui/material/styles";
-import { tokens } from "../tokens";
+import { tokens } from "../../tokens";
+
 
 const swingIn = keyframes`
   0% { transform: translateX(-300px) translateY(-100px) rotate(-30deg); opacity: 0; }

@@ -1,6 +1,7 @@
 import React from "react";
 import { styled, keyframes } from "@mui/material/styles";
-import { tokens } from "../tokens";
+import { tokens } from "../../tokens";
+
 
 const IndicatorsContainer = styled("div")({
   display: "flex",
