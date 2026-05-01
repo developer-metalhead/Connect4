@@ -65,7 +65,7 @@ const HomeV2 = () => {
       <Decoration style={{ top: '20%', left: '10%' }} />
       <Decoration style={{ bottom: '20%', right: '10%', background: '#6366f1' }} />
       
-      <MainContent style={{ justifyContent: 'center', minHeight: '100vh' }}>
+      <MainContent style={{ justifyContent: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <HomeHeader>Connect 4</HomeHeader>
           <HomeSubtitle>

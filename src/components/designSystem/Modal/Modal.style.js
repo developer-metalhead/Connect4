@@ -13,7 +13,8 @@ export const ModalBackdrop = styled("div")({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  padding: "20px",
+  padding: "16px", // Slightly less padding to allow more space for content
+  boxSizing: "border-box",
   animation: "modalFadeIn 0.3s ease-out",
   
   "@keyframes modalFadeIn": {
@@ -23,8 +24,9 @@ export const ModalBackdrop = styled("div")({
 });
 
 export const ModalContainer = styled("div")({
-  width: "100%",
-  maxWidth: "500px",
+  width: "calc(100% - 48px)", // Safe margin for mobile
+  maxWidth: "500px", 
+  maxHeight: "90vh",
   backgroundColor: tokens.colors.surface,
   backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0))",
   border: tokens.glass.border,
@@ -33,11 +35,15 @@ export const ModalContainer = styled("div")({
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
+  position: "fixed", // Ensure it's positioned relative to viewport
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)", // Perfect centering
   animation: "modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
   
   "@keyframes modalSlideUp": {
-    from: { opacity: 0, transform: "scale(0.95) translateY(10px)" },
-    to: { opacity: 1, transform: "scale(1) translateY(0)" },
+    from: { opacity: 0, transform: "translate(-50%, calc(-50% + 20px)) scale(0.95)" },
+    to: { opacity: 1, transform: "translate(-50%, -50%) scale(1)" },
   }
 });
 

@@ -2,7 +2,7 @@ import { styled } from "@mui/material/styles";
 import { tokens } from "./tokens";
 
 export const PageWrapper = styled("div")({
-  minHeight: "100vh",
+  height: "100vh",
   width: "100%",
   backgroundColor: tokens.colors.background,
   backgroundImage: `radial-gradient(circle at 50% 0%, #1e293b 0%, ${tokens.colors.background} 70%)`,
@@ -10,7 +10,8 @@ export const PageWrapper = styled("div")({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  overflowX: "hidden",
+  overflow: "hidden", // Prevent any page-level scrolling
+  position: "relative",
 });
 
 export const Header = styled("header")({
@@ -26,6 +27,11 @@ export const Header = styled("header")({
   backgroundColor: tokens.glass.background,
   backdropFilter: tokens.glass.blur,
   borderBottom: tokens.glass.border,
+
+  "@media (max-width: 768px)": {
+    height: "56px",
+    padding: "0 16px",
+  }
 });
 
 export const HeaderContent = styled("div")({
@@ -57,8 +63,21 @@ export const MainContent = styled("main")({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  padding: "40px 24px",
-  gap: "32px",
+  padding: "12px 16px", // Minimized for 1080x2400
+  gap: "16px",
+  overflow: "hidden", // Keep game content contained
+  justifyContent: "center",
+
+  "@media (max-width: 768px)": {
+    padding: "8px 12px",
+    justifyContent: "flex-start", // Start from top on mobile to avoid being cut off
+    gap: "8px",
+  },
+
+  "@media (min-width: 768px)": {
+    padding: "40px 24px",
+    gap: "32px",
+  }
 });
 
 export const GameContainer = styled("div")({

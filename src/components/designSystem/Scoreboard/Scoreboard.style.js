@@ -5,15 +5,21 @@ export const ScoreboardCard = styled("div")({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  padding: "16px 32px",
+  padding: "12px 24px",
   backgroundColor: tokens.glass.background,
   backdropFilter: tokens.glass.blur,
   border: tokens.glass.border,
   borderRadius: tokens.radius.lg,
   width: "100%",
   maxWidth: "600px",
-  gap: "24px",
+  gap: "16px",
   boxShadow: tokens.shadows.xl,
+
+  "@media (max-width: 768px)": {
+    padding: "8px 16px",
+    gap: "8px",
+    borderRadius: tokens.radius.md,
+  }
 });
 
 export const PlayerInfo = styled("div", {
@@ -46,15 +52,15 @@ export const PlayerInfo = styled("div", {
 export const Avatar = styled("div", {
   shouldForwardProp: (prop) => prop !== "color",
 })(({ color }) => ({
-  width: "48px",
-  height: "48px",
+  width: "clamp(32px, 8vw, 48px)",
+  height: "clamp(32px, 8vw, 48px)",
   borderRadius: "50%",
   backgroundColor: color === "red" ? "rgba(239, 68, 68, 0.15)" : "rgba(255, 221, 0, 0.15)",
   border: `2px solid ${color === "red" ? "#ef4444" : "#ffdd00"}`,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  fontSize: "24px",
+  fontSize: "clamp(18px, 5vw, 24px)",
   boxShadow: `0 0 20px ${color === "red" ? "rgba(239, 68, 68, 0.2)" : "rgba(255, 221, 0, 0.2)"}`,
 }));
 

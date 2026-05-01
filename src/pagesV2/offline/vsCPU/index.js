@@ -89,7 +89,6 @@ const PlayCPUV2 = () => {
 
   return (
     <PageWrapper>
-      <BackButton soundManager={soundManager} />
       <GiveUpButton 
         onGiveUp={() => {
           if (monkeyAnimationEnabled) {

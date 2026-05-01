@@ -62,7 +62,6 @@ const Game2PV2 = () => {
 
   return (
     <PageWrapper>
-      <BackButton soundManager={soundManager} />
       <GiveUpButton onGiveUp={handleSurrender} soundManager={soundManager} />
       <Header>
         <HeaderContent>

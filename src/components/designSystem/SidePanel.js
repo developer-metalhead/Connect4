@@ -36,8 +36,9 @@ const PanelContainer = styled("div", {
   top: 0,
   right: 0,
   height: "100%",
-  width: "min(90vw, 380px)",
-  backgroundColor: tokens.glass.background,
+  width: "100%", // Full screen for mobile
+  backgroundColor: tokens.colors.surface,
+  backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0))",
   backdropFilter: tokens.glass.blur,
   borderLeft: tokens.glass.border,
   boxShadow: tokens.shadows.lg,
@@ -47,6 +48,16 @@ const PanelContainer = styled("div", {
   animation: `${isClosing ? slideOut : slideIn} 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards`,
   padding: "24px",
   color: "#fff",
+  boxSizing: "border-box",
+
+  "@media (min-width: 768px)": {
+    width: "380px", // Fixed width for desktop
+    height: "calc(100% - 40px)", // Floating effect
+    top: "20px",
+    right: "20px",
+    borderRadius: tokens.radius.lg,
+    border: tokens.glass.border,
+  }
 }));
 
 const Header = styled("div")({

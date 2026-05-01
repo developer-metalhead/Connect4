@@ -12,21 +12,33 @@ const IconButton = styled("button")({
   width: "48px",
   height: "48px",
   borderRadius: "50%",
-  background: "rgba(239, 68, 68, 0.2)", // Subtle red tint for give up
-  backdropFilter: tokens.glass.blur,
-  border: tokens.glass.border,
- 
+  backgroundColor: "rgba(15, 23, 42, 0.6)",
+  backdropFilter: "blur(8px)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   cursor: "pointer",
-  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-  zIndex: 1500,
+  zIndex: 3000,
+  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  color: "#ef4444",
+
+  "@media (max-width: 768px)": {
+    width: "40px",
+    height: "40px",
+    top: "8px",
+    right: "8px",
+  },
+
+  "@media (max-width: 768px)": {
+    width: "40px",
+    height: "40px",
+    top: "8px",
+    right: "8px",
+  },
   boxShadow: tokens.shadows.md,
   padding: 0,
   borderColor: "rgba(239, 68, 68, 0.4)",
-  color: "#ef4444",
-
 
   "&:hover": {
     background: "rgba(239, 68, 68, 0.25)",
@@ -49,6 +61,11 @@ const IconButton = styled("button")({
     strokeWidth: 2.5,
     strokeLinecap: "round",
     strokeLinejoin: "round",
+
+    "@media (max-width: 768px)": {
+      width: "20px",
+      height: "20px",
+    }
   },
 });
 

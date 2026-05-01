@@ -5,16 +5,25 @@ export const GameLayout = styled("div")({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  gap: "32px",
+  gap: "24px",
   width: "100%",
   maxWidth: "800px",
   margin: "0 auto",
+
+  "@media (max-width: 768px)": {
+    gap: "8px", // Very tight for mobile
+  }
 });
 
 export const FeatureRow = styled("div")({
   display: "flex",
   gap: "12px",
   marginBottom: "16px",
+  
+  "@media (max-width: 768px)": {
+    gap: "8px",
+    marginBottom: "8px",
+  }
 });
 
 export const FeatureBadge = styled("div", {
@@ -32,6 +41,11 @@ export const FeatureBadge = styled("div", {
   color: enabled ? tokens.colors.success : tokens.colors.danger,
   textTransform: "uppercase",
   letterSpacing: "0.5px",
+
+  "@media (max-width: 768px)": {
+    padding: "4px 10px",
+    fontSize: "10px",
+  }
 }));
 
 export const InstructionCard = styled("div")({
@@ -47,6 +61,10 @@ export const InstructionCard = styled("div")({
   flexDirection: "column",
   gap: "20px",
   boxShadow: tokens.shadows.lg,
+
+  "@media (max-width: 768px)": {
+    display: "none", // Hide instructions on small screens to save space
+  }
 });
 
 export const InstructionSection = styled("div")({
@@ -70,4 +88,8 @@ export const ControlGroup = styled("div")({
   width: "100%",
   maxWidth: "320px",
   justifyContent: "center",
+  
+  "@media (max-width: 768px)": {
+    marginTop: "8px",
+  }
 });

@@ -5,10 +5,14 @@ export const GameLayout = styled("div")({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  gap: "32px",
+  gap: "24px",
   width: "100%",
   maxWidth: "800px",
   margin: "0 auto",
+
+  "@media (max-width: 768px)": {
+    gap: "12px", // Tighten gaps for mobile
+  }
 });
 
 export const ControlGroup = styled("div")({
