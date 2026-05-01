@@ -1,25 +1,30 @@
 /* eslint-disable no-unused-vars */
 import { useMemo, useRef, useState, useEffect } from "react";
-
 import { useNavigate, useLocation } from "react-router-dom";
-import CustomButton from "../../components/organisms/buttonComponent";
-import Status from "../../components/organisms/status";
+
+// New UI Components
+import { PageWrapper, Header, HeaderContent, AppLogo, MainContent } from "../../components/designSystem/Layout.style";
+import Button from "../../components/designSystem/Button";
+import Scoreboard from "../../components/designSystem/Scoreboard";
+import { GameStatus, MatchResultOverlay } from "../../components/designSystem/Status";
+import Modal from "../../components/designSystem/Modal";
+import Input from "../../components/designSystem/Input";
+import { 
+  GameLayout, 
+  LobbyCard, 
+  RoomBadge, 
+  InviteSection, 
+  SectionTitle 
+} from "./index.style";
+
+// Original Logic
 import Board from "../../components/organisms/boardStyles";
 import SoundSettings from "../../components/organisms/SoundSettings";
 import useSoundManager from "../../hooks/core/useSoundManager";
-
-import {
-  PageContainer,
-  HeaderContainer,
-  ButtonContainer,
-  BodyContainer,
-  HeaderContainerNotInRoom,
-  BodyContainerNotInRoom,
-} from "./index.style";
 import useOnlineConnect4 from "../../hooks/core/useOnlineConnect4";
-import { PLAYER1 } from "../../helperFunction/helperFunction";
+import { PLAYER1, PLAYER2 } from "../../helperFunction/helperFunction";
 
-const Online = () => {
+const OnlineV2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const soundManager = useSoundManager();
@@ -53,30 +58,26 @@ const Online = () => {
     [players],
   );
 
-  // Prefill from query ?room=ABCD
   const params = new URLSearchParams(location.search);
   const prefillRoom = params.get("room") || "";
-
   const [name, setName] = useState("");
   const codeRef = useRef(prefillRoom);
-
   const inRoom = status === "room";
 
   const inviteLink = useMemo(() => {
     if (!roomId) return "";
     const url = new URL(window.location.href);
     url.searchParams.set("room", roomId);
-    url.pathname = "/play-online";
+    url.pathname = "/v2/play-online"; // Update path for V2
     return url.toString();
   }, [roomId]);
 
-  // Play appropriate sounds when game ends
   useEffect(() => {
     if (gameState.winner) {
       if (gameState.winner === myDisc) {
-        soundManager.playWinSound(); // I win
+        soundManager.playWinSound();
       } else {
-        soundManager.playLoseSound(); // Opponent wins
+        soundManager.playLoseSound();
       }
     } else if (gameState.isDraw) {
       soundManager.playDrawSound();
@@ -84,256 +85,180 @@ const Online = () => {
   }, [gameState.winner, gameState.isDraw, myDisc, soundManager]);
 
   const handleSetName = () => {
-    setDisplayName(name);
+    if (name.trim()) setDisplayName(name);
   };
 
+  // Prepare data for Scoreboard
+  const p1Data = useMemo(() => {
+    const p1 = players?.find(p => p.disc === PLAYER1) || { name: "Waiting...", score: 0 };
+    return {
+      name: p1.name || "Guest",
+      score: gameState.scores?.[PLAYER1] || 0,
+      active: gameState.currentPlayer === PLAYER1 && !gameState.winner && !gameState.isDraw,
+      emoji: PLAYER1
+    };
+  }, [players, gameState]);
+
+  const p2Data = useMemo(() => {
+    const p2 = players?.find(p => p.disc === PLAYER2) || { name: "Waiting...", score: 0 };
+    return {
+      name: p2.name || "Guest",
+      score: gameState.scores?.[PLAYER2] || 0,
+      active: gameState.currentPlayer === PLAYER2 && !gameState.winner && !gameState.isDraw,
+      emoji: PLAYER2
+    };
+  }, [players, gameState]);
+
   return (
-    <PageContainer>
-      
+    <PageWrapper>
+      <Header>
+        <HeaderContent>
+          <AppLogo onClick={() => navigate("/v2")}>
+            Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>Online</span>
+          </AppLogo>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <Button variant="ghost" size="sm" onClick={() => setShowSoundSettings(true)} soundManager={soundManager}>
+              🔊 Sound
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/v2")} soundManager={soundManager}>
+              Exit
+            </Button>
+          </div>
+        </HeaderContent>
+      </Header>
 
-      {!connected && <BodyContainer>Connecting...</BodyContainer>}
-      {error && (
-        <BodyContainer style={{ color: "#ff6b6b" }}>{error}</BodyContainer>
-      )}
+      <MainContent>
+        {!connected && <GameStatus message="Connecting to server..." />}
+        {error && <GameStatus message={`Error: ${error}`} />}
 
-      {/* Sound Settings Modal */}
-      {showSoundSettings && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.8)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <SoundSettings
-            soundManager={soundManager}
-            onClose={() => setShowSoundSettings(false)}
-          />
-        </div>
-      )}
+        {!inRoom && connected && (
+          <LobbyCard>
+            <div style={{ textAlign: 'center' }}>
+              <SectionTitle>Online Multiplayer</SectionTitle>
+              <p style={{ color: '#94a3b8', fontSize: '14px', marginTop: '8px' }}>
+                Create a private room or find a quick match.
+              </p>
+            </div>
 
-      {!inRoom && (
-        <div>
-        <HeaderContainerNotInRoom>Connect 4</HeaderContainerNotInRoom>
-        <BodyContainerNotInRoom>Online Play</BodyContainerNotInRoom>
-          <div
-            style={{
-              display: "flex",
-              gap: 12,
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <input
-              aria-label="Your display name"
-              placeholder="Your name (optional)"
-              style={{
-                padding: "10px 14px",
-                borderRadius: 12,
-                border: "1px solid #444",
-                width: 260,
-              }}
+            <Input 
+              label="Display Name"
+              placeholder="Enter your name..."
               value={name}
               onChange={(e) => setName(e.target.value)}
               onBlur={handleSetName}
             />
 
-            <ButtonContainer>
-              <CustomButton
-                aria-label="Create a new room"
-                onClick={createRoom}
-                soundManager={soundManager}
-              >
-                Create Room
-              </CustomButton>
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: 8,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <input
-                  aria-label="Enter room code"
-                  placeholder="Enter code (e.g., ABC123)"
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <Button variant="primary" fullWidth onClick={createRoom} soundManager={soundManager}>
+                Create Private Room
+              </Button>
+              
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Input 
+                  placeholder="Room Code"
                   defaultValue={prefillRoom}
                   ref={codeRef}
-                  style={{
-                    padding: "10px 14px",
-                    borderRadius: 12,
-                    border: "1px solid #444",
-                    width: 260,
-                  }}
+                  style={{ flex: 1 }}
                 />
-                <CustomButton
-                  aria-label="Join room by code"
-                  onClick={() => joinRoomByCode(codeRef.current?.value)}
-                  soundManager={soundManager}
-                >
+                <Button variant="secondary" onClick={() => joinRoomByCode(codeRef.current?.value)} soundManager={soundManager}>
                   Join
-                </CustomButton>
+                </Button>
               </div>
 
+              <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.05)', margin: '8px 0' }} />
+
               {status !== "searching" ? (
-                <CustomButton
-                  aria-label="Find a match"
-                  onClick={startQueue}
-                  soundManager={soundManager}
-                >
-                  Find Match (Queue)
-                </CustomButton>
+                <Button variant="outline" fullWidth onClick={startQueue} soundManager={soundManager}>
+                  Find Quick Match
+                </Button>
               ) : (
-                <CustomButton
-                  aria-label="Cancel matchmaking"
-                  onClick={stopQueue}
-                  soundManager={soundManager}
-                >
-                  Cancel Search…
-                </CustomButton>
+                <Button variant="danger" fullWidth onClick={stopQueue} soundManager={soundManager}>
+                  Cancel Search...
+                </Button>
               )}
-
-              <CustomButton
-                aria-label="Sound Settings"
-                onClick={() => setShowSoundSettings(true)}
-                soundManager={soundManager}
-              >
-                🔊 Sound Settings
-              </CustomButton>
-
-              <CustomButton
-                aria-label="Back to Main Menu"
-                onClick={() => navigate("/")}
-                soundManager={soundManager}
-
-              >
-                Back
-              </CustomButton>
-            </ButtonContainer>
-          </div>
-        </div>
-      )}
-
-      {inRoom && (
-        <>
-        <HeaderContainerNotInRoom>Connect 4</HeaderContainerNotInRoom>
-        <BodyContainerNotInRoom>Online Play</BodyContainerNotInRoom>
-          <BodyContainer>
-            Room: <strong>{roomId}</strong>
-          </BodyContainer>
-
-          {inviteLink && myDisc === PLAYER1 && (
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <input
-                aria-label="Invite link"
-                readOnly
-                value={inviteLink}
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: 10,
-                  border: "1px solid #444",
-                  width: "min(88vw, 520px)",
-                  background: "#111",
-                  color: "#ddd",
-                }}
-                onFocus={(e) => e.target.select()}
-              />
-              <CustomButton
-                aria-label="Copy invite link"
-                onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(inviteLink);
-                  } catch {
-                    // ignore
-                  }
-                }}
-                soundManager={soundManager}
-              >
-                Copy
-              </CustomButton>
             </div>
-          )}
+          </LobbyCard>
+        )}
 
-          <div style={{ fontSize: 16, opacity: 0.8, marginTop: 6 }}>
-            Players:{" "}
-            {(players || [])
-              .map((p) => `${p.name || "Guest"} ${p.disc || ""}`)
-              .join(" vs ")}
-          </div>
-
-          <Status
-            winner={gameState.winner}
-            isDraw={gameState.isDraw}
-            currentPlayer={gameState.currentPlayer}
-            playerNames={nameByDisc}
-          />
-
-          <Board
-            board={gameState.board}
-            currentPlayer={myDisc || PLAYER1}
-            winner={gameState.winner}
-            isDraw={gameState.isDraw}
-            onDrop={makeMove}
-            canInteract={myTurn}
-            soundManager={soundManager}
-            winningLine={gameState.winningLine}
-          />
-
-          <ButtonContainer>
-            {/* <CustomButton
-              aria-label="Start a new game"
-              onClick={resetRoom}
-              soundManager={soundManager}
-            >
-              New Game
-            </CustomButton> */}
-            {/* <CustomButton
-              aria-label="Sound Settings"
-              onClick={() => setShowSoundSettings(true)}
-              soundManager={soundManager}
-            >
-              🔊 Settings
-            </CustomButton> */}
-            <CustomButton
-              aria-label="Leave this room"
-              onClick={leaveRoom}
-              soundManager={soundManager}
-            >
-              Leave Room
-            </CustomButton>
-            {/* <CustomButton
-              aria-label="Back to menu"
-              onClick={() => navigate("/")}
-              soundManager={soundManager}
-            >
-              Main Menu
-            </CustomButton> */}
-          </ButtonContainer>
-
-          {!myTurn && !gameState.winner && !gameState.isDraw && (
-            <div style={{ marginTop: 8, opacity: 0.8 }}>
-              Waiting for opponent…
+        {inRoom && (
+          <GameLayout>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+              <RoomBadge>Room ID: {roomId}</RoomBadge>
+              <Button variant="ghost" size="sm" onClick={leaveRoom} soundManager={soundManager}>
+                Leave Room
+              </Button>
             </div>
-          )}
-        </>
+
+            <Scoreboard p1={p1Data} p2={p2Data} />
+
+            <Board
+              board={gameState.board}
+              currentPlayer={myDisc || PLAYER1}
+              winner={gameState.winner}
+              isDraw={gameState.isDraw}
+              onDrop={makeMove}
+              canInteract={myTurn}
+              soundManager={soundManager}
+              winningLine={gameState.winningLine}
+            />
+
+            <GameStatus 
+              message={
+                gameState.winner 
+                  ? `${nameByDisc[gameState.winner]} Wins!` 
+                  : gameState.isDraw 
+                  ? "It's a Draw!" 
+                  : myTurn 
+                  ? "Your Turn" 
+                  : `Waiting for ${nameByDisc[gameState.currentPlayer]}...`
+              }
+              currentPlayerColor={gameState.currentPlayer === PLAYER1 ? "red" : "yellow"}
+            />
+
+            {inviteLink && myDisc === PLAYER1 && !players.find(p => p.disc === PLAYER2) && (
+              <InviteSection>
+                <SectionTitle>Invite a Friend</SectionTitle>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <Input 
+                    readOnly 
+                    value={inviteLink} 
+                    onFocus={(e) => e.target.select()}
+                    style={{ flex: 1 }}
+                  />
+                  <Button variant="secondary" size="sm" onClick={() => navigator.clipboard.writeText(inviteLink)}>
+                    Copy
+                  </Button>
+                </div>
+              </InviteSection>
+            )}
+          </GameLayout>
+        )}
+      </MainContent>
+
+      <Modal 
+        isOpen={showSoundSettings} 
+        onClose={() => setShowSoundSettings(false)}
+        title="Sound Settings"
+      >
+        <SoundSettings
+          soundManager={soundManager}
+          onClose={() => setShowSoundSettings(false)}
+        />
+      </Modal>
+
+      {(gameState.winner || gameState.isDraw) && (
+        <MatchResultOverlay 
+          title={gameState.winner ? (gameState.winner === myDisc ? "VICTORY" : "DEFEAT") : "DRAW"}
+          subtitle={gameState.winner ? `${nameByDisc[gameState.winner]} dominated the board!` : "A perfect stalemate."}
+          variant={gameState.winner ? (gameState.winner === myDisc ? "win" : "default") : "draw"}
+          onPrimaryAction={resetRoom}
+          primaryActionLabel="Rematch"
+          onSecondaryAction={() => navigate("/v2")}
+          soundManager={soundManager}
+        />
       )}
-    </PageContainer>
+    </PageWrapper>
   );
 };
 
-export default Online;
+export default OnlineV2;
