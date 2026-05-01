@@ -5,6 +5,7 @@ import useSoundManager from "../../hooks/core/useSoundManager.js";
 // New UI Components
 import { PageWrapper, MainContent } from "../../components/designSystem/Layout.style";
 import Button from "../../components/designSystem/Button";
+import BackButton from "../../components/designSystem/BackButton";
 import Modal from "../../components/designSystem/Modal";
 import { 
   HomeHeader, 
@@ -24,6 +25,7 @@ const HomeV2 = () => {
 
   return (
     <PageWrapper>
+      <BackButton onClick={() => navigate("/")} soundManager={soundManager} />
       <Decoration style={{ top: '20%', left: '10%' }} />
       <Decoration style={{ bottom: '20%', right: '10%', background: '#6366f1' }} />
       

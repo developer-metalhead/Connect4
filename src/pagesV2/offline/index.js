@@ -5,6 +5,7 @@ import useSoundManager from "../../hooks/core/useSoundManager";
 // New UI Components
 import { PageWrapper, MainContent } from "../../components/designSystem/Layout.style";
 import Button from "../../components/designSystem/Button";
+import BackButton from "../../components/designSystem/BackButton";
 import { 
   OfflineHeader, 
   OfflineSubtitle, 
@@ -17,6 +18,7 @@ const OfflineV2 = () => {
 
   return (
     <PageWrapper>
+      <BackButton soundManager={soundManager} />
       <MainContent style={{ justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
           <OfflineHeader>Offline Mode</OfflineHeader>
@@ -51,18 +53,6 @@ const OfflineV2 = () => {
               soundManager={soundManager}
             >
               Fun Mode (Chaos)
-            </Button>
-
-            <div style={{ height: '8px' }} />
-
-            <Button 
-              variant="ghost" 
-              size="md" 
-              fullWidth 
-              onClick={() => navigate("/home")}
-              soundManager={soundManager}
-            >
-              Back to Main Menu
             </Button>
           </SelectionGrid>
         </div>

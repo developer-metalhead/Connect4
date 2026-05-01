@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import CustomButton from "../../components/organisms/buttonComponent";
+import BackButton from "../../components/designSystem/BackButton";
+import useSoundManager from "../../hooks/core/useSoundManager";
 
 import {
   PageContainer,
@@ -10,9 +12,11 @@ import {
 
 const Offline = () => {
   const navigate = useNavigate();
+  const soundManager = useSoundManager();
 
   return (
     <PageContainer>
+      <BackButton soundManager={soundManager} />
       <HeaderContainer>Connect 4</HeaderContainer>
       <BodyContainer>Choose Game Mode</BodyContainer>
 
@@ -26,7 +30,6 @@ const Offline = () => {
         <CustomButton onClick={() => navigate("/legacy/play-fun")}>
           Fun Mode
         </CustomButton>
-        <CustomButton onClick={() => navigate("/legacy")}>Back to Home</CustomButton>
       </ButtonContainer>
     </PageContainer>
   );
