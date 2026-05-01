@@ -3,6 +3,9 @@ import { useCallback, useEffect, useState } from "react";
 const STORAGE_KEY = "c4_fun_mode_settings_v1";
 const DEFAULTS = {
   monkeyModeEnabled: true,
+  // CHANGE: Ready for future features to be added here
+  chaosChickenEnabled: false,
+  powerUpsEnabled: false,
 };
 
 const load = () => {
@@ -24,6 +27,7 @@ const save = (settings) => {
   }
 };
 
+// CHANGE: Enhanced to support multiple fun mode features
 const useFunModeSettings = () => {
   const [settings, setSettings] = useState(load);
 
@@ -31,20 +35,39 @@ const useFunModeSettings = () => {
     save(settings);
   }, [settings]);
 
-  const setMonkeyModeEnabled = useCallback((v) => {
-    setSettings((s) => ({ ...s, monkeyModeEnabled: !!v }));
+  // CHANGE: Generic feature toggle function
+  const toggleFeature = useCallback((featureName) => {
+    setSettings((s) => ({ ...s, [featureName]: !s[featureName] }));
   }, []);
 
-  const toggleMonkeyMode = useCallback(() => {
-    setSettings((s) => ({ ...s, monkeyModeEnabled: !s.monkeyModeEnabled }));
+  const setFeature = useCallback((featureName, value) => {
+    setSettings((s) => ({ ...s, [featureName]: !!value }));
   }, []);
+
+  // Specific feature accessors for convenience
+  const setMonkeyModeEnabled = useCallback((v) => {
+    setFeature('monkeyModeEnabled', v);
+  }, [setFeature]);
+
+  const toggleMonkeyMode = useCallback(() => {
+    toggleFeature('monkeyModeEnabled');
+  }, [toggleFeature]);
 
   return {
     settings,
+    
+    // Generic feature management
+    toggleFeature,
+    setFeature,
+    
     // Direct accessors for convenience
     monkeyModeEnabled: settings.monkeyModeEnabled,
     setMonkeyModeEnabled,
     toggleMonkeyMode,
+    
+    // CHANGE: Ready for future features
+    chaosChickenEnabled: settings.chaosChickenEnabled,
+    powerUpsEnabled: settings.powerUpsEnabled,
   };
 };
 

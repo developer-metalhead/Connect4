@@ -11,7 +11,6 @@ import { MonkeyModeContainer } from "../../components/features/MayhemMonkey/Monk
 import { useFunModeEffects } from "../../hooks/funMode/useFunModeEffects";
 import { getPlayerNames,createMonkeyButtonHandler,canInteractWithBoard } from "../../helperFunction/funMode/monkeyModeFeatures";
 
-
 import {
   PageContainer,
   HeaderContainer,
@@ -20,22 +19,23 @@ import {
   FunModeBoard,
 } from "./index.style";
 
-
 const FunMode = () => {
   const navigate = useNavigate();
   const { monkeyModeEnabled } = useFunModeSettings();
+  
+  // CHANGE: Using unified monkey mode hook (no more separate mayhem hook)
   const {
     gameState,
     makeMove,
     reset,
     showMonkeyButton,
     monkeyButtonPlayer,
-    triggerMonkeyMayhem,
+    triggerMonkeyMayhem, // CHANGE: This is now triggerMonkeyMode internally but kept for compatibility
     isUpsideDown,
     upsideDownTurnsLeft,
     isMonkeyAnimating,
     monkeyVoiceLine,
-    monkeyMayhemState,
+    monkeyMayhemState, // CHANGE: This is now monkeyState internally but kept for compatibility
     isGravityFalling,
   } = useMonkeyMode({ monkeyModeEnabled });
 
@@ -58,12 +58,9 @@ const FunMode = () => {
   const handleMonkeyButtonClick = useMemo(() => createMonkeyButtonHandler(soundManager, triggerMonkeyMayhem), [soundManager, triggerMonkeyMayhem]);
   const canInteract = useMemo(() => canInteractWithBoard(isMonkeyAnimating, showMonkeyButton, isGravityFalling), [isMonkeyAnimating, showMonkeyButton, isGravityFalling]);
 
-
   return (
     <PageContainer>
       <HeaderContainer>Connect 4 - Fun Mode</HeaderContainer>
-    
-
 
       {/* Feature status */}
       <BodyContainer style={{ fontSize: "14px" }}>
@@ -73,8 +70,7 @@ const FunMode = () => {
         </span>
       </BodyContainer>
 
-
-      {/* Monkey Mode Components - Conditionally rendered based on settings */}
+      {/* CHANGE: Monkey Mode Components - unified terminology */}
       <MonkeyModeContainer
         monkeyModeEnabled={monkeyModeEnabled}
         showMonkeyButton={showMonkeyButton}
@@ -89,14 +85,12 @@ const FunMode = () => {
         upsideDownTurnsLeft={upsideDownTurnsLeft}
       />
 
-
       <Status
         winner={winner}
         isDraw={isDraw}
         currentPlayer={currentPlayer}
         playerNames={playerNames}
       />
-
 
       <FunModeBoard isUpsideDown={isUpsideDown}>
         <Board
@@ -106,7 +100,6 @@ const FunMode = () => {
           isDraw={isDraw}
           onDrop={makeMove}
           canInteract={canInteract}
-
           soundManager={soundManager}
           isUpsideDown={isUpsideDown}
         />
