@@ -9,8 +9,8 @@ const fadeIn = keyframes`
 
 const MenuWrapper = styled("div")({
   position: "fixed",
-  top: "24px",
-  right: "24px",
+  top: "12px",
+  right: "12px",
   zIndex: 1500,
 });
 

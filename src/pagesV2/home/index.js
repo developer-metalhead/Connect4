@@ -10,6 +10,7 @@ import SettingsMenu from "../../components/designSystem/SettingsMenu";
 import SidePanel from "../../components/designSystem/SidePanel";
 import CPUSettings from "../../components/designSystem/CPUSettings";
 import FunModeSettings from "../../components/designSystem/FunModeSettings";
+import OnlineSettings from "../../components/designSystem/OnlineSettings";
 import SoundSettings from "../../components/designSystem/SoundSettings";
 import Modal from "../../components/designSystem/Modal";
 import { 
@@ -40,6 +41,7 @@ const HomeV2 = () => {
         options={[
           { id: 'cpu', label: 'CPU Settings', icon: <span>🤖</span> },
           { id: 'fun', label: 'Fun Mode Settings', icon: <span>🔥</span> },
+          { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
           { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
         ]}
       />
@@ -50,11 +52,13 @@ const HomeV2 = () => {
         title={
           activePanel === 'cpu' ? 'CPU Settings' :
           activePanel === 'fun' ? 'Fun Mode Settings' :
+          activePanel === 'online' ? 'Online Settings' :
           'Sound Settings'
         }
       >
         {activePanel === 'cpu' && <CPUSettings soundManager={soundManager} />}
         {activePanel === 'fun' && <FunModeSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'online' && <OnlineSettings soundManager={soundManager} />}
         {activePanel === 'sound' && <SoundSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
       </SidePanel>
 

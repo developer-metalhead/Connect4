@@ -5,8 +5,8 @@ import { tokens } from "./tokens";
 
 const BackButtonWrapper = styled("button")({
   position: "fixed",
-  top: "24px",
-  left: "24px",
+  top: "12px",
+  left: "12px",
   width: "48px",
   height: "48px",
   borderRadius: "50%",

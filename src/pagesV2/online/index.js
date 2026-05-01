@@ -7,6 +7,10 @@ import { PageWrapper, Header, HeaderContent, AppLogo, MainContent } from "../../
 import Button from "../../components/designSystem/Button";
 import BackButton from "../../components/designSystem/BackButton";
 import GiveUpButton from "../../components/designSystem/GiveUpButton";
+import SettingsMenu from "../../components/designSystem/SettingsMenu";
+import SidePanel from "../../components/designSystem/SidePanel";
+import OnlineSettings from "../../components/designSystem/OnlineSettings";
+import SoundSettings from "../../components/designSystem/SoundSettings";
 import Scoreboard from "../../components/designSystem/Scoreboard";
 import { GameStatus, MatchResultOverlay } from "../../components/designSystem/Status";
 import Modal from "../../components/designSystem/Modal";
@@ -113,21 +117,41 @@ const OnlineV2 = () => {
 
   return (
     <PageWrapper>
+ 
+      
+      {inRoom ? (
+        <GiveUpButton 
+          onGiveUp={() => {
+            leaveRoom();
+            navigate("/home");
+          }} 
+          soundManager={soundManager} 
+        />
+      ) : (
+        <SettingsMenu
+          soundManager={soundManager}
+          activeOption={activePanel}
+          onOptionClick={(id) => setActivePanel(activePanel === id ? null : id)}
+          options={[
+            { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
+            { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
+          ]}
+        />
+      )}
+
+      <Header/>
+        
+   
       <BackButton soundManager={soundManager} />
-      <GiveUpButton 
-        onGiveUp={() => {
-          leaveRoom();
-          navigate("/home");
-        }} 
-        soundManager={soundManager} 
-      />
-      <Header>
-        <HeaderContent>
-          <AppLogo onClick={() => navigate("/home")}>
-            Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>Online</span>
-          </AppLogo>
-        </HeaderContent>
-      </Header>
+
+      <SidePanel 
+        isOpen={activePanel !== null} 
+        onClose={() => setActivePanel(null)}
+        title={activePanel === 'online' ? 'Online Settings' : 'Sound Settings'}
+      >
+        {activePanel === 'online' && <OnlineSettings soundManager={soundManager} />}
+        {activePanel === 'sound' && <SoundSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+      </SidePanel>
 
       <MainContent>
         {!connected && <GameStatus message="Connecting to server..." />}

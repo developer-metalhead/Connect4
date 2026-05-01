@@ -8,7 +8,7 @@ import ConfirmationModal from "./ConfirmationModal";
 const IconButton = styled("button")({
   position: "fixed",
   top: "11px",
-  right: "24px",
+  right: "12px",
   width: "48px",
   height: "48px",
   borderRadius: "50%",
@@ -29,18 +29,16 @@ const IconButton = styled("button")({
 
 
   "&:hover": {
-    boxShadow: tokens.shadows.lg,
- 
-
-    color: "black",
-
-  background: tokens.glass.background,
-  borderColor: "black",
-
+    background: "rgba(239, 68, 68, 0.25)",
+    borderColor: "#ef4444",
+    color: "#fff",
+    boxShadow: "0 0 20px rgba(239, 68, 68, 0.4), inset 0 0 10px rgba(239, 68, 68, 0.2)",
+    transform: "translateY(-2px) scale(1.03)",
   },
 
   "&:active": {
     transform: "scale(0.95)",
+    boxShadow: tokens.shadows.sm,
   },
 
   "& svg": {
