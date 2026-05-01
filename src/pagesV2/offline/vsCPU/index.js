@@ -79,7 +79,7 @@ const PlayCPUV2 = () => {
   return (
     <PageWrapper>
       <BackButton soundManager={soundManager} />
-      <GiveUpButton onClick={reset} soundManager={soundManager} />
+      <GiveUpButton onGiveUp={() => navigate("/play-offline")} soundManager={soundManager} />
       <Header>
         <HeaderContent>
           <AppLogo onClick={() => navigate("/home")}>

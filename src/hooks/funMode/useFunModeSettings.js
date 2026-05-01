@@ -6,6 +6,7 @@ const DEFAULTS = {
   // CHANGE: Ready for future features to be added here
   powerUpsEnabled: false,
   chaosChickenEnabled: true,
+  monkeyAnimationEnabled: true,
 };
 
 const load = () => {
@@ -71,13 +72,14 @@ const useFunModeSettings = () => {
     // Direct accessors for convenience
     monkeyModeEnabled: settings.monkeyModeEnabled,
     chaosChickenEnabled: settings.chaosChickenEnabled,
+    monkeyAnimationEnabled: settings.monkeyAnimationEnabled,
     setMonkeyModeEnabled,
     setChaosChickenEnabled,
     toggleMonkeyMode,
     toggleChaosChicken,
+    toggleMonkeyAnimation: () => toggleFeature('monkeyAnimationEnabled'),
     
     // CHANGE: Ready for future features
-    chaosChickenEnabled: settings.chaosChickenEnabled,
     powerUpsEnabled: settings.powerUpsEnabled,
   };
 };

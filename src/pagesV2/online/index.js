@@ -114,7 +114,13 @@ const OnlineV2 = () => {
   return (
     <PageWrapper>
       <BackButton soundManager={soundManager} />
-      <GiveUpButton onClick={leaveRoom} soundManager={soundManager} />
+      <GiveUpButton 
+        onGiveUp={() => {
+          leaveRoom();
+          navigate("/home");
+        }} 
+        soundManager={soundManager} 
+      />
       <Header>
         <HeaderContent>
           <AppLogo onClick={() => navigate("/home")}>
