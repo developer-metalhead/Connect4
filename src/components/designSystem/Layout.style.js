@@ -39,6 +39,7 @@ export const HeaderContent = styled("div")({
 export const AppLogo = styled("div")({
   display: "flex",
   alignItems: "center",
+  marginLeft:'12px',
   gap: "12px",
   fontSize: "20px",
   fontWeight: 700,

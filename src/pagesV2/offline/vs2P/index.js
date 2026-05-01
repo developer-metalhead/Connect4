@@ -51,12 +51,12 @@ const Game2PV2 = () => {
 
   return (
     <PageWrapper>
-      <BackButton soundManager={soundManager} />
+
       <GiveUpButton onGiveUp={() => navigate("/play-offline")} soundManager={soundManager} />
       <Header>
         <HeaderContent>
           <AppLogo onClick={() => navigate("/home")}>
-            Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>2 Players</span>
+            Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', marginfontWeight: 400 }}>2 Players</span>
           </AppLogo>
         </HeaderContent>
       </Header>
