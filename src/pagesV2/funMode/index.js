@@ -22,11 +22,12 @@ import {
 // Original Fun Mode Logic & Components
 import { useMonkeyMode } from "../../hooks/funMode/useMonkeyMode";
 import { useChaosChicken } from "../../hooks/funMode/useChaosChicken";
+import { MonkeyModeContainer } from "../../components/designSystem/Features/MonkeyMode";
+import MonkeyAnimation from "../../components/designSystem/Features/MonkeyAnimation";
+import ChickenAnimation from "../../components/designSystem/Features/ChickenAnimation";
+import ChickenIndicators from "../../components/designSystem/Features/ChickenIndicators";
+import RemovalOverlay from "../../components/designSystem/Features/RemovalOverlay";
 import useFunModeSettings from "../../hooks/funMode/useFunModeSettings";
-import { MonkeyModeContainer } from "../../components/features/MayhemMonkey/MonkeyModeComponent";
-import ChickenAnimation from "../../components/features/ChaosChicken/ChickenAnimation";
-import ChickenIndicators from "../../components/features/ChaosChicken/ChickenIndicators";
-import RemovalOverlay from "../../components/features/RemovalOverlay";
 import { useFunModeEffects } from "../../hooks/funMode/useFunModeEffects";
 import { getPlayerNames, createMonkeyButtonHandler, canInteractWithBoard } from "../../helperFunction/funMode/monkeyModeFeatures";
 import Board from "../../components/organisms/boardStyles";
@@ -170,15 +171,17 @@ const FunModeV2 = () => {
           <MonkeyModeContainer
             monkeyModeEnabled={monkeyModeEnabled}
             showMonkeyButton={showMonkeyButton}
-            monkeyButtonPlayer={monkeyButtonPlayer}
-            currentPlayer={currentPlayer}
             monkeyButtonTimer={monkeyButtonTimer}
             handleMonkeyButtonClick={handleMonkeyButtonClick}
-            isMonkeyAnimating={isMonkeyAnimating}
-            monkeyVoiceLine={monkeyVoiceLine}
             isGravityFalling={isGravityFalling}
             isUpsideDown={isUpsideDown}
             upsideDownTurnsLeft={upsideDownTurnsLeft}
+          />
+
+          <MonkeyAnimation
+            isAnimating={isMonkeyAnimating}
+            voiceLine={monkeyVoiceLine}
+            isFlippingBack={monkeyVoiceLine.includes("normal")}
           />
 
           {chaosChickenEnabled && (
