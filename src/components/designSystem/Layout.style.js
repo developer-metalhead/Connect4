@@ -1,5 +1,5 @@
 import { styled } from "@mui/material/styles";
-import { tokens } from "../tokens";
+import { tokens } from "./tokens";
 
 export const PageWrapper = styled("div")({
   minHeight: "100vh",
