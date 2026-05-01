@@ -71,8 +71,10 @@ export const useFunMode = (options = {}) => {
       let newState = { ...gameState, board: newBoard };
 
       // CHANGE: Check win condition with extension data
-      if (checkWin(newBoard, row, col, currentPlayer)) {
+      const winResult = checkWin(newBoard, row, col, currentPlayer);
+      if (winResult) {
         newState.winner = currentPlayer;
+        newState.winningLine = winResult;
         console.log("🏆 WINNER DETECTED:", currentPlayer);
         
         if (onGameEnd && enableExtensions) {

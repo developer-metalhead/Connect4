@@ -6,6 +6,7 @@ import {
   PreviewRow,
   ColumnHighlight,
   FallingDisc,
+  WinningDiscHighlight,
 } from "./index.style";
 
 const Board = ({
@@ -21,6 +22,7 @@ const Board = ({
   // CHANGE: Add CPU dropping props for animation
   isCpuDropping = false,
   cpuDroppingCol = null,
+  winningLine = null, // CHANGE: Add winningLine prop
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
@@ -366,6 +368,18 @@ const Board = ({
             ))}
           </Row>
         ))}
+
+        {/* Render winning highlights if there's a winner and a winning line */}
+        {winner && winningLine && winningLine.map((pos, i) => (
+          <WinningDiscHighlight
+            key={`win-${i}`}
+            style={{
+              left: `calc(${pos.col} * (var(--cell) + var(--gap)) + var(--board-padding))`,
+              top: `calc(${pos.row} * (var(--cell) + var(--gap)) + var(--board-padding))`,
+            }}
+          />
+        ))}
+
       </BoardContainer>
 
       {/* CHANGE: Add preview row at bottom for upside-down mode */}

@@ -291,6 +291,7 @@ const Online = () => {
             onDrop={makeMove}
             canInteract={myTurn}
             soundManager={soundManager}
+            winningLine={gameState.winningLine}
           />
 
           <ButtonContainer>

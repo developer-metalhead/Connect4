@@ -146,6 +146,20 @@ export const FallingDisc = styled("div")({
   WebkitUserSelect: "none",
 });
 
+export const WinningDiscHighlight = styled("div")({
+  position: "absolute",
+  width: "var(--cell)",
+  height: "var(--cell)",
+  borderRadius: "50%",
+  border: "3px solid rgba(255, 255, 255, 0.9)",
+  boxShadow: "0 0 15px rgba(255, 255, 255, 0.4)",
+  transform: "scale(1.08)",
+  zIndex: 20,
+  pointerEvents: "none",
+  boxSizing: "border-box",
+  animation: "highlightPulse 1.5s infinite ease-in-out",
+});
+
 // CHANGE: Updated keyframes to handle both normal and upside-down falling
 export const GlobalStyles = `
   @keyframes discFall {
@@ -180,6 +194,21 @@ export const GlobalStyles = `
     100% {
       transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
       opacity: 0;
+    }
+  }
+
+  @keyframes highlightPulse {
+    0% {
+      transform: scale(1.08);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    }
+    50% {
+      transform: scale(1.12);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+    }
+    100% {
+      transform: scale(1.08);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
     }
   }
 `;

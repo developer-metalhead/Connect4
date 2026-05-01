@@ -17,6 +17,7 @@ export const resetGame = () => {
     board: createEmptyBoard(),
     currentPlayer: PLAYER1,
     winner: null,
+    winningLine: null,
     isDraw: false,
   };
 };
@@ -41,20 +42,22 @@ export const isValidMove = (board, col) => {
 // CHANGE: Added upside-down mode parameter to check win function
 export const checkWin = (board, row, col, player, isUpsideDown = false) => {
   const directions = [
-    [0, 1],
-    [1, 0],
-    [1, 1],
-    [1, -1],
+    [0, 1], // Horizontal
+    [1, 0], // Vertical
+    [1, 1], // Diagonal \
+    [1, -1], // Diagonal /
   ];
 
   for (let [dr, dc] of directions) {
     let count = 1;
+    let winningLine = [{ row, col }];
 
     // Positive direction
     let r = row + dr,
       c = col + dc;
     while (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r][c] === player) {
       count++;
+      winningLine.push({ row: r, col: c });
       r += dr;
       c += dc;
     }
@@ -64,13 +67,14 @@ export const checkWin = (board, row, col, player, isUpsideDown = false) => {
     c = col - dc;
     while (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r][c] === player) {
       count++;
+      winningLine.push({ row: r, col: c });
       r -= dr;
       c -= dc;
     }
 
-    if (count >= 4) return true;
+    if (count >= 4) return winningLine;
   }
-  return false;
+  return null;
 };
 
 // Check draw

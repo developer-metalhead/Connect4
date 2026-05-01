@@ -102,6 +102,7 @@ const FunMode = () => {
           canInteract={canInteract}
           soundManager={soundManager}
           isUpsideDown={isUpsideDown}
+          winningLine={gameState.winningLine}
         />
       </FunModeBoard>
 
