@@ -16,7 +16,7 @@ import { isValidMove,dropPiece } from "../../helperFunction/helperFunction";
 
 // CHANGE: Unified monkey mode hook (no more separate "mayhem" terminology)
 export const useMonkeyMode = (options = {}) => {
-  const { monkeyModeEnabled = true, onPiecePlaced, soundManager, onOverlayShow } = options;
+  const { monkeyModeEnabled = true, onPiecePlaced, soundManager, onOverlayShow, useRotation = false } = options;
 
   // CHANGE: Monkey-specific state (consolidated from previous separate hooks)
   const [showMonkeyButton, setShowMonkeyButton] = useState(false);
@@ -38,19 +38,21 @@ export const useMonkeyMode = (options = {}) => {
 
   // CHANGE: Custom validation for upside-down mode
   const customValidation = useCallback((board, col, extensionData) => {
+    if (useRotation) return isValidMove(board, col);
     const upsideDown = extensionData?.isUpsideDown || isUpsideDown;
     return upsideDown 
       ? isValidMoveUpsideDown(board, col)
       : isValidMove(board, col);
-  }, [isUpsideDown]);
+  }, [isUpsideDown, useRotation]);
 
   // CHANGE: Custom drop logic for upside-down mode
   const customDropLogic = useCallback((board, col, player, extensionData) => {
+    if (useRotation) return dropPiece(board, col, player);
     const upsideDown = extensionData?.isUpsideDown || isUpsideDown;
     return upsideDown 
       ? dropPieceUpsideDown(board, col, player)
       : dropPiece(board, col, player);
-  }, [isUpsideDown]);
+  }, [isUpsideDown, useRotation]);
 
   // CHANGE: Handle move completion for monkey triggers
   const handleMoveComplete = useCallback((newState, moveData, extensionData) => {
@@ -73,28 +75,33 @@ export const useMonkeyMode = (options = {}) => {
           setIsMonkeyAnimating(true);
           setMonkeyVoiceLine("Phew! Back to normal!");
 
-          setTimeout(() => {
-            setIsGravityFalling(true);
-            console.log("🌊 STARTING GRAVITY RESTORE ANIMATION");
-
-            const { finalBoard, animations, durationMs } = returnToNormalGravity(
-              newState.board,
-              { isUpsideDown: true }
-            );
-
-            setGravityAnimation(animations);
-
+          if (useRotation) {
+            // In rotation mode, we just rotate back, no board logic flip needed
             setTimeout(() => {
-              funModeHook.updateBoard(finalBoard);
               setIsUpsideDown(false);
               setIsMonkeyAnimating(false);
               setMonkeyVoiceLine("");
-              setGravityAnimation(null);
-              setIsGravityFalling(false);
               funModeHook.updateExtensionData('isUpsideDown', false);
-              console.log("✅ GRAVITY RESTORE COMPLETE");
-            }, durationMs + 50);
-          }, 2500);
+            }, 2500);
+          } else {
+            setTimeout(() => {
+              setIsGravityFalling(true);
+              const { finalBoard, animations, durationMs } = returnToNormalGravity(
+                newState.board,
+                { isUpsideDown: true }
+              );
+              setGravityAnimation(animations);
+              setTimeout(() => {
+                funModeHook.updateBoard(finalBoard);
+                setIsUpsideDown(false);
+                setIsMonkeyAnimating(false);
+                setMonkeyVoiceLine("");
+                setGravityAnimation(null);
+                setIsGravityFalling(false);
+                funModeHook.updateExtensionData('isUpsideDown', false);
+              }, durationMs + 50);
+            }, 2500);
+          }
         }, 500);
       }
     }
@@ -175,9 +182,10 @@ export const useMonkeyMode = (options = {}) => {
     console.log("🎬 STARTING MONKEY ANIMATION:", voiceLine);
 
     setTimeout(() => {
-      let flippedBoard = flipBoardUpsideDown(funModeHook.gameState.board);
+      let currentBoard = funModeHook.gameState.board;
+      let flippedBoard = useRotation ? currentBoard : flipBoardUpsideDown(currentBoard);
       
-      const { newBoard: afterStealBoard, stolenCell, opponentPlayer } = maybeStealDisc(flippedBoard, monkeyButtonPlayer, true);
+      const { newBoard: afterStealBoard, stolenCell, opponentPlayer } = maybeStealDisc(flippedBoard, monkeyButtonPlayer, !useRotation);
       flippedBoard = afterStealBoard;
 
       // === MONKEY MAYHEM OVERLAY ===
@@ -187,6 +195,7 @@ export const useMonkeyMode = (options = {}) => {
         onOverlayShow({
           type: "monkey",
           count: 1,
+          row: stolenCell.row,
           col: stolenCell.col,
           player: opponentPlayer
         });

@@ -185,7 +185,7 @@ export const GhostDisc = styled("span")({
 export const GlobalStyles = `
   @keyframes discFall {
     0% {
-      transform: translateY(calc(var(--start-row, -1) * (var(--cell) + var(--gap)) - 80px));
+      transform: translateY(calc(var(--start-row, -1) * (var(--cell) + var(--gap)) + 80px * (var(--is-upside-down, 0) * 2 - 1)));
       opacity: 1;
     }
     85% {

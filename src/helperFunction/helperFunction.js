@@ -85,4 +85,10 @@ export const isBoardFull = (board) => {
 export const getNextPlayer = (player) =>
   player === PLAYER1 ? PLAYER2 : PLAYER1;
 
+export const formatCoords = (row, col) => {
+  const columnLetter = String.fromCharCode(65 + col); // 0 -> A, 1 -> B...
+  const rowNumber = ROWS - row; // Row 0 (top) -> 6, Row 5 (bottom) -> 1
+  return `${columnLetter}${rowNumber}`;
+};
+
 export { ROWS, COLS, PLAYER1, PLAYER2, EMPTY };

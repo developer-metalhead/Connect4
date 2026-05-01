@@ -27,6 +27,7 @@ const Board = ({
   winningLine = null,
   blockedColumns = [],
   onBlockedColumnAttempt = null,
+  PoopBlockIndicatorComponent = PoopBlockIndicator,
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
@@ -310,7 +311,7 @@ const Board = ({
       <BoardContainer data-board-container>
         {/* CHANGE: Add poop block indicators */}
         {(blockedColumns || []).map((block) => (
-          <PoopBlockIndicator
+          <PoopBlockIndicatorComponent
             key={`poop-${block.columnIndex}`}
             columnIndex={block.columnIndex}
             turnsLeft={block.turnsLeft}

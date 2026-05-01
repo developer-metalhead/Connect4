@@ -381,13 +381,8 @@ export const useConnect4CPU = () => {
         setIsCpuDropping(false);
         setCpuDroppingCol(null);
 
-        // CHANGE: Check if CPU won and trigger PostVideoOverlay after 0.5 seconds
-        const { newBoard: finalBoard, row: finalRow } = dropPiece(board, col, CPU);
-        if (checkWin(finalBoard, finalRow, col, CPU)) {
-          setTimeout(() => {
-            setShouldShowPostVideoOverlay(true);
-          }, 1000);
-        }
+        // CPU won naturally - we just let the page handle it via gameState.winner
+        // PostVideoOverlay is now reserved for surrender (animation disabled)
       }, animationDuration);
     }, 350); // small delay for UX
 
@@ -432,6 +427,7 @@ export const useConnect4CPU = () => {
     cpuDroppingCol,
     // CHANGE: Export PostVideoOverlay state and controls
     shouldShowPostVideoOverlay,
+    setShouldShowPostVideoOverlay, // Added setter for surrender case
     closePostVideoOverlay
   };
 };

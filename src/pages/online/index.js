@@ -66,7 +66,7 @@ const Online = () => {
     if (!roomId) return "";
     const url = new URL(window.location.href);
     url.searchParams.set("room", roomId);
-    url.pathname = "/play-online";
+    url.pathname = "/legacy/play-online";
     return url.toString();
   }, [roomId]);
 
@@ -318,7 +318,7 @@ const Online = () => {
             </CustomButton>
             {/* <CustomButton
               aria-label="Back to menu"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/legacy")}
               soundManager={soundManager}
             >
               Main Menu

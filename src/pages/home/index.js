@@ -11,6 +11,7 @@ import {
 import FunModeSettings from "../../components/organisms/funModeSettings/funModeSettings.js";
 import { useState } from "react";
 import useSoundManager from "../../hooks/core/useSoundManager.js";
+import BackButton from "../../components/designSystem/BackButton.js";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -20,14 +21,15 @@ const Home = () => {
 
   return (
     <PageContainer>
+      <BackButton onClick={() => navigate("/")} soundManager={soundManager} />
       <HeaderContainer>Connect 4</HeaderContainer>
       <BodyContainer>Choose Game Mode</BodyContainer>
 
       <ButtonContainer>
-        <CustomButton onClick={() => navigate("/play-offline")}>
+        <CustomButton onClick={() => navigate("/legacy/play-offline")}>
           Play Offline
         </CustomButton>
-        <CustomButton onClick={() => navigate("/play-online")}>
+        <CustomButton onClick={() => navigate("/legacy/play-online")}>
           Play Online
         </CustomButton>
         <CustomButton onClick={() => setShowFunModeSettings(true)}>

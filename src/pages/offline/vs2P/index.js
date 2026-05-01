@@ -56,7 +56,7 @@ const Game2P = () => {
         Give Up!
         </BoredVideoButton>
         <CustomButton
-          onClick={() => navigate("/play-offline")}
+          onClick={() => navigate("/legacy/play-offline")}
           soundManager={soundManager}
         >
           Back to Menu
