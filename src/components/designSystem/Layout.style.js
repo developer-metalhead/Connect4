@@ -109,9 +109,9 @@ export const MainContent = styled("main")({
   justifyContent: "flex-start",
 
   "@media (min-width: 768px)": {
-    padding: "24px", 
-    gap: "24px",
-    justifyContent: "center",
+    padding: "16px", 
+    gap: "16px",
+    justifyContent: "flex-start",
   }
 });
 

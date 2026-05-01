@@ -5,13 +5,13 @@ export const GameLayout = styled("div")({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  gap: "24px",
+  gap: "16px", // Tightened for desktop
   width: "100%",
   maxWidth: "800px",
-  margin: "0 auto",
+  margin: "auto",
 
   "@media (max-width: 768px)": {
-    gap: "8px", // Very tight for mobile
+    gap: "0px", 
   }
 });
 
@@ -53,13 +53,13 @@ export const InstructionCard = styled("div")({
   backdropFilter: tokens.glass.blur,
   border: tokens.glass.border,
   borderRadius: tokens.radius.lg,
-  padding: "24px",
+  padding: "16px",
   width: "100%",
   maxWidth: "600px",
-  marginTop: "40px",
+  marginTop: "12px",
   display: "flex",
   flexDirection: "column",
-  gap: "20px",
+  gap: "12px",
   boxShadow: tokens.shadows.lg,
 
   "@media (max-width: 768px)": {
@@ -70,7 +70,9 @@ export const InstructionCard = styled("div")({
 export const InstructionSection = styled("div")({
   display: "flex",
   flexDirection: "column",
-  gap: "8px",
+  gap: "4px",
+  "& h3": { fontSize: "14px", margin: 0 },
+  "& p": { fontSize: "12px", opacity: 0.8, margin: 0 },
 });
 
 export const FunModeBoardWrapper = styled("div", {
