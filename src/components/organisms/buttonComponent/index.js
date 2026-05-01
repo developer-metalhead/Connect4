@@ -19,7 +19,13 @@ const CustomButton = styled(Button)(({ theme }) => ({
   boxShadow: "none",
   minHeight: "44px",
   width: "100%",
-
+  // CHANGE: Disable text selection and touch callouts for buttons
+  userSelect: "none",
+  WebkitUserSelect: "none",
+  MozUserSelect: "none",
+  msUserSelect: "none",
+  WebkitTouchCallout: "none",
+  WebkitTapHighlightColor: "transparent",
 
   "&:hover": {
     backgroundColor: "#d4d7db",
@@ -47,7 +53,6 @@ const CustomButton = styled(Button)(({ theme }) => ({
     minHeight: "40px",
   },
 }));
-
 
 // Enhanced button component with sound integration
 const SoundAwareButton = ({ children, onClick, soundManager, ...props }) => {
