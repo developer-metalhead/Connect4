@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useMemo } from "react";
 import {
   BoardContainer,
   Row,
@@ -8,6 +8,7 @@ import {
   FallingDisc,
   WinningLineWrapper,
   WinningLine,
+  GhostDisc,
 } from "./index.style";
 
 const Board = ({
@@ -233,8 +234,26 @@ const Board = ({
   })() : null;
 
 
+  // Preview row for "ghost" disc
+  const previewRow = useMemo(() => {
+    if (activeCol === null || winner || isDraw || !canInteract) return null;
+
+    if (isUpsideDown) {
+      // Find top-most empty cell
+      for (let r = 0; r < 6; r++) {
+        if (board[r][activeCol] === "⚪") return r;
+      }
+    } else {
+      // Find bottom-most empty cell
+      for (let r = 5; r >= 0; r--) {
+        if (board[r][activeCol] === "⚪") return r;
+      }
+    }
+    return null;
+  }, [activeCol, board, winner, isDraw, canInteract, isUpsideDown]);
+
   return (
-    <>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
       {/* CHANGE: Conditionally render preview row based on board orientation */}
       {!isUpsideDown && (
         <PreviewRow>
@@ -365,6 +384,10 @@ const Board = ({
                 {/* Hide original from-cells while overlay is animating */}
                 {maskedKeys && maskedKeys.has(`${r},${c}`) ? "⚪" : cell}
 
+                {/* Ghost Preview Disc */}
+                {previewRow === r && activeCol === c && (
+                  <GhostDisc>{currentPlayer}</GhostDisc>
+                )}
               </Cell>
             ))}
           </Row>
@@ -433,7 +456,7 @@ const Board = ({
           ))}
         </PreviewRow>
       )}
-    </>
+    </div>
   );
 };
 
