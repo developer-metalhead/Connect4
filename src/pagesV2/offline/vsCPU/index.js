@@ -26,6 +26,7 @@ const PlayCPUV2 = () => {
   const soundManager = useSoundManager();
   const { monkeyAnimationEnabled } = useFunModeSettings();
   const [activePanel, setActivePanel] = useState(null); // 'cpu', 'fun', 'sound' or null
+  const [surrendered, setSurrendered] = useState(false);
 
   const { 
     gameState, 
@@ -63,6 +64,11 @@ const PlayCPUV2 = () => {
 
   const handleClosePostVideoOverlay = () => {
     closePostVideoOverlay();
+    navigate("/play-offline");
+  };
+
+  const handleReset = () => {
+    setSurrendered(false);
     reset();
   };
 
@@ -87,8 +93,10 @@ const PlayCPUV2 = () => {
       <GiveUpButton 
         onGiveUp={() => {
           if (monkeyAnimationEnabled) {
-            navigate("/play-offline");
+            // After video ends, show the minimalistic result card
+            setSurrendered(true);
           } else {
+            // Show the crazy/chaotic overlay
             setShouldShowPostVideoOverlay(true);
           }
         }} 
@@ -134,32 +142,35 @@ const PlayCPUV2 = () => {
           />
 
           <ControlGroup>
-            <Button variant="secondary" fullWidth onClick={reset} soundManager={soundManager}>
+            <Button variant="secondary" fullWidth onClick={handleReset} soundManager={soundManager}>
               Reset
             </Button>
           </ControlGroup>
         </GameLayout>
       </MainContent>
 
-      {/* Human Win/Draw/CPU Win Overlay */}
-      {(winner || isDraw) && (
+      {/* Human Win/Draw/CPU Win/Surrender Overlay */}
+      {(winner || isDraw || surrendered) && (
         <MatchResultOverlay 
           title={
+            surrendered ? "SURRENDER" :
             winner === PLAYER1 ? "VICTORY" : 
             winner === PLAYER2 ? "DEFEAT" :
             "DRAW"
           }
           subtitle={
+            surrendered ? "You've conceded to the machine. Better luck next time!" :
             winner === PLAYER1 ? "You outsmarted the machine!" : 
             winner === PLAYER2 ? "The CPU has claimed this victory." :
             "A tactical stalemate."
           }
           variant={
-            winner === PLAYER1 ? "win" : 
-            winner === PLAYER2 ? "loss" :
+            (winner === PLAYER1) ? "win" : 
+            (winner === PLAYER2 || surrendered) ? "loss" :
             "draw"
           }
-          onPrimaryAction={reset}
+          icon={surrendered ? "🏳️" : (winner === PLAYER1 ? "🏆" : (winner === PLAYER2 ? "🤖" : "🤝"))}
+          onPrimaryAction={handleReset}
           primaryActionLabel="Rematch"
           onSecondaryAction={() => navigate("/play-offline")}
           soundManager={soundManager}

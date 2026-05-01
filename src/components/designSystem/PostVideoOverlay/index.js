@@ -145,7 +145,7 @@ const PostVideoOverlay = ({ isVisible, onClose, soundManager }) => {
       </TauntMessage>
       
       <DismissPrompt>
-        Click anywhere to skip
+       Tap anywhere to go back
       </DismissPrompt>
     </OverlayContainer>
   );
