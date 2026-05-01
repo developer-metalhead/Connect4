@@ -386,7 +386,7 @@ export const useConnect4CPU = () => {
         if (checkWin(finalBoard, finalRow, col, CPU)) {
           setTimeout(() => {
             setShouldShowPostVideoOverlay(true);
-          }, 800);
+          }, 1000);
         }
       }, animationDuration);
     }, 350); // small delay for UX

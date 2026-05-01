@@ -146,16 +146,22 @@ export const FallingDisc = styled("div")({
   WebkitUserSelect: "none",
 });
 
-export const WinningDiscHighlight = styled("div")({
+export const WinningLineWrapper = styled("div")({
   position: "absolute",
-  width: "var(--cell)",
-  height: "var(--cell)",
-  borderRadius: "50%",
-  border: "3px solid rgba(255, 255, 255, 0.9)",
-  boxShadow: "0 0 15px rgba(255, 255, 255, 0.4)",
-  transform: "scale(1.08)",
-  zIndex: 20,
+  zIndex: 100,
   pointerEvents: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transformOrigin: "center center",
+});
+
+export const WinningLine = styled("div")({
+  width: "100%",
+  height: "100%",
+  borderRadius: "999px",
+  border: "4px solid #ffffff",
+  boxShadow: "0 0 20px rgba(255, 255, 255, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3)",
   boxSizing: "border-box",
   animation: "highlightPulse 1.5s infinite ease-in-out",
 });

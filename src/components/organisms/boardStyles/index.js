@@ -6,7 +6,8 @@ import {
   PreviewRow,
   ColumnHighlight,
   FallingDisc,
-  WinningDiscHighlight,
+  WinningLineWrapper,
+  WinningLine,
 } from "./index.style";
 
 const Board = ({
@@ -369,16 +370,41 @@ const Board = ({
           </Row>
         ))}
 
-        {/* Render winning highlights if there's a winner and a winning line */}
-        {winner && winningLine && winningLine.map((pos, i) => (
-          <WinningDiscHighlight
-            key={`win-${i}`}
-            style={{
-              left: `calc(${pos.col} * (var(--cell) + var(--gap)) + var(--board-padding))`,
-              top: `calc(${pos.row} * (var(--cell) + var(--gap)) + var(--board-padding))`,
-            }}
-          />
-        ))}
+        {/* Render a single connecting line if there's a winner and a winning line */}
+        {(() => {
+          if (!winner || !winningLine || winningLine.length < 4) return null;
+
+          // Find start and end cells by sorting by column then row
+          const sorted = [...winningLine].sort((a, b) => a.col - b.col || a.row - b.row);
+          const first = sorted[0];
+          const last = sorted[sorted.length - 1];
+
+          // Vector from first to last
+          const dRow = last.row - first.row;
+          const dCol = last.col - first.col;
+
+          // Calculate visual parameters
+          const angle = Math.atan2(dRow, dCol) * (180 / Math.PI);
+          const distance = Math.sqrt(dRow * dRow + dCol * dCol);
+          
+          // Center point between the two extreme discs
+          const midCol = (first.col + last.col) / 2;
+          const midRow = (first.row + last.row) / 2;
+
+          return (
+            <WinningLineWrapper
+              style={{
+                left: `calc(var(--board-padding) + ${midCol} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
+                top: `calc(var(--board-padding) + ${midRow} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
+                width: `calc(${distance} * (var(--cell) + var(--gap)) + var(--cell))`,
+                height: "var(--cell)",
+                transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+              }}
+            >
+              <WinningLine />
+            </WinningLineWrapper>
+          );
+        })()}
 
       </BoardContainer>
 
