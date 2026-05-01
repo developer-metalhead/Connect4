@@ -43,6 +43,8 @@ export const useSoundManager = () => {
   const audioInstancesRef = useRef({});
   const dropSoundQueueRef = useRef([]);
   const isPlayingDropRef = useRef(false);
+  // CHANGE: Add ref to track currently playing sounds for stopping
+  const playingSoundsRef = useRef({});
 
   // State management with localStorage persistence
   const [isMuted, setIsMuted] = useState(() => {
@@ -219,6 +221,20 @@ export const useSoundManager = () => {
     );
   }, [isMusicEnabled]);
 
+  // CHANGE: Add stopSound method to stop specific sounds
+  const stopSound = useCallback(
+    (soundKey) => {
+      const playingAudio = playingSoundsRef.current[soundKey];
+      if (playingAudio) {
+        playingAudio.pause();
+        playingAudio.currentTime = 0;
+        delete playingSoundsRef.current[soundKey];
+        logSoundEvent(soundKey, "STOPPED");
+      }
+    },
+    [logSoundEvent],
+  );
+
   // Play sound with pitch variation support
   const playSound = useCallback(
     (soundKey, options = {}) => {
@@ -259,6 +275,16 @@ export const useSoundManager = () => {
         } else {
           audioToPlay.playbackRate = 1.0;
         }
+
+        // CHANGE: Track playing sound for stopping capability
+        playingSoundsRef.current[soundKey] = audioToPlay;
+
+        // CHANGE: Add event listener to clean up tracking when sound ends
+        const handleEnded = () => {
+          delete playingSoundsRef.current[soundKey];
+          audioToPlay.removeEventListener('ended', handleEnded);
+        };
+        audioToPlay.addEventListener('ended', handleEnded);
 
         logSoundEvent(soundKey, "PLAYING", {
           pitchRate: appliedPitchRate.toFixed(3),
@@ -375,10 +401,14 @@ export const useSoundManager = () => {
     }
   }, [isMuted, isMusicEnabled, logSoundEvent]);
 
+  
+
   // Public API
   return {
     // Sound controls
     playSound,
+    // CHANGE: Add stopSound to public API
+    stopSound,
     playDropSound,
     playHoverSound: () => playSound("hover"),
     playWinSound: () => playSound("win"),

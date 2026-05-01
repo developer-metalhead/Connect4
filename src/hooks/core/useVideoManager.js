@@ -26,7 +26,7 @@ export const useVideoManager = () => {
       video.volume = config.volume || 1;
       video.loop = config.loop || false;
       // CHANGE: Set faster playback rate for snappier feel
-      video.playbackRate = 1.55;
+      video.playbackRate = 1.3;
       
       // CHANGE: Remove controls and make it behave like an animation
       video.controls = false;
@@ -115,7 +115,7 @@ export const useVideoManager = () => {
     try {
       video.currentTime = 0;
       // CHANGE: Ensure playback rate is set when playing
-      video.playbackRate = 1.55;
+      video.playbackRate = 1.3;
       const playPromise = video.play();
       
       if (playPromise) {

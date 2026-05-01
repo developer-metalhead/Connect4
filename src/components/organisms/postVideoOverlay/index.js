@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { styled, keyframes } from '@mui/material/styles';
 
 // CHANGE: Chaotic animations for party vibe
@@ -121,7 +121,7 @@ const DismissText = styled('div')({
 // CHANGE: Array of funny/mean taunt voice lines
 const TAUNT_LINES = [
   "Better luck next time, loser! 🍌",
-  "Monkey says: Git Gud bozo 😂",
+  "Git Gud bozo 😂",
   "Resetting your trash play 🐒",
   "Even a banana could play better! 🍌💀",
   "Time to start over, scrub! 🧽",
@@ -136,6 +136,15 @@ const TAUNT_LINES = [
 
 const PostVideoOverlay = ({ isVisible, onClose, soundManager }) => {
   const [tauntLine, setTauntLine] = useState('');
+  // CHANGE: Remove soundPlayingRef as it's now handled by soundManager
+  
+  // CHANGE: Simplified close handler that uses soundManager.stopSound
+  const handleClose = () => {
+    if (soundManager) {
+      soundManager.stopSound('monkeylaugh');
+    }
+    onClose();
+  };
 
   useEffect(() => {
     if (isVisible) {
@@ -148,26 +157,37 @@ const PostVideoOverlay = ({ isVisible, onClose, soundManager }) => {
         soundManager.playSound('monkeylaugh');
       }
       
-      // CHANGE: Auto-dismiss after 4.5 seconds
+      // CHANGE: Auto-dismiss after 4.5 seconds with sound cleanup
       const timer = setTimeout(() => {
-        onClose();
+        handleClose();
       }, 4500);
       
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        // CHANGE: Stop sound when component unmounts or visibility changes
+        if (soundManager) {
+          soundManager.stopSound('monkeylaugh');
+        }
+      };
+    } else {
+      // CHANGE: Stop sound when overlay becomes invisible
+      if (soundManager) {
+        soundManager.stopSound('monkeylaugh');
+      }
     }
   }, [isVisible, onClose, soundManager]);
 
   if (!isVisible) return null;
 
   return (
-    <OverlayContainer onClick={onClose}>
+    <OverlayContainer onClick={handleClose}>
       <MainTitle>
-        GAME RESET BOZO
+        YOU LOSE BOZO
       </MainTitle>
       
       <IconContainer>
-        <span>🐒</span>
         <span>🍾</span>
+        <span>🐒</span>
         <span>🍺</span>
       </IconContainer>
       
