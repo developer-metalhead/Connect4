@@ -60,7 +60,7 @@ export const useChaosChicken = (options = {}) => {
 
       const playerKey = player === "🔴" ? "player1" : "player2";
       const currentActivations = chaosChickenState.chickenActivations[playerKey];
-      const willBeRooster = currentActivations === 0; // TEST MODE: Rooster of Rage activates after 1 chicken activation
+      const willBeRooster = currentActivations === 1; // TEST MODE: Rooster of Rage activates after 1 chicken activation
 
       // Play appropriate sound
       if (soundManager) {
