@@ -1,10 +1,25 @@
 /* eslint-disable no-unused-vars */
 import { useNavigate } from "react-router-dom";
-import { useMemo, useState } from "react";
-import CustomButton from "../../components/organisms/buttonComponent";
-import Status from "../../components/organisms/status";
-import Board from "../../components/organisms/boardStyles";
+import { useMemo, useState, useEffect } from "react";
 import useSoundManager from "../../hooks/core/useSoundManager";
+import { PLAYER1, PLAYER2 } from "../../helperFunction/helperFunction";
+
+// New UI Components
+import { PageWrapper, Header, HeaderContent, AppLogo, MainContent } from "../../components/designSystem/Layout.style";
+import Button from "../../components/designSystem/Button";
+import Scoreboard from "../../components/designSystem/Scoreboard";
+import { GameStatus, MatchResultOverlay } from "../../components/designSystem/Status";
+import { 
+  GameLayout, 
+  FeatureRow, 
+  FeatureBadge, 
+  InstructionCard, 
+  InstructionSection,
+  FunModeBoardWrapper,
+  ControlGroup
+} from "./index.style";
+
+// Original Fun Mode Logic & Components
 import { useMonkeyMode } from "../../hooks/funMode/useMonkeyMode";
 import { useChaosChicken } from "../../hooks/funMode/useChaosChicken";
 import useFunModeSettings from "../../hooks/funMode/useFunModeSettings";
@@ -13,17 +28,10 @@ import ChickenAnimation from "../../components/features/ChaosChicken/ChickenAnim
 import ChickenIndicators from "../../components/features/ChaosChicken/ChickenIndicators";
 import RemovalOverlay from "../../components/features/RemovalOverlay";
 import { useFunModeEffects } from "../../hooks/funMode/useFunModeEffects";
-import { getPlayerNames,createMonkeyButtonHandler,canInteractWithBoard } from "../../helperFunction/funMode/monkeyModeFeatures";
+import { getPlayerNames, createMonkeyButtonHandler, canInteractWithBoard } from "../../helperFunction/funMode/monkeyModeFeatures";
+import Board from "../../components/organisms/boardStyles";
 
-import {
-  PageContainer,
-  HeaderContainer,
-  ButtonContainer,
-  BodyContainer,
-  FunModeBoard,
-} from "./index.style";
-
-const FunMode = () => {
+const FunModeV2 = () => {
   const navigate = useNavigate();
   const [removalOverlay, setRemovalOverlay] = useState(null);
   const { monkeyModeEnabled, chaosChickenEnabled } = useFunModeSettings();
@@ -53,12 +61,12 @@ const FunMode = () => {
     reset,
     showMonkeyButton,
     monkeyButtonPlayer,
-    triggerMonkeyMayhem, // CHANGE: This is now triggerMonkeyMode internally but kept for compatibility
+    triggerMonkeyMayhem,
     isUpsideDown,
     upsideDownTurnsLeft,
     isMonkeyAnimating,
     monkeyVoiceLine,
-    monkeyMayhemState, // CHANGE: This is now monkeyState internally but kept for compatibility
+    monkeyMayhemState,
     isGravityFalling,
     updateBoard,
   } = useMonkeyMode({ 
@@ -66,7 +74,6 @@ const FunMode = () => {
     soundManager,
     onOverlayShow: setRemovalOverlay,
     onPiecePlaced: (newBoard, row, col, player, extensionData) => {
-      // Execute immediately synchronously on piece drop
       if (chaosChickenEnabled && checkChaosChickenTrigger(newBoard, row, col, player)) {
         triggerChaosChicken(newBoard, player, soundManager, (updatedBoard) => {
           updateBoard(updatedBoard);
@@ -77,7 +84,6 @@ const FunMode = () => {
 
   const { board, currentPlayer, winner, isDraw, isMonkeyWinner } = gameState;
 
-  // CHANGE: Moved all effects to custom hook
   const { monkeyButtonTimer } = useFunModeEffects({
     showMonkeyButton,
     winner,
@@ -88,33 +94,26 @@ const FunMode = () => {
     soundManager
   });
 
-  // CHANGE: Memoized computed values to avoid recalculation
   const playerNames = useMemo(() => getPlayerNames(monkeyMayhemState), [monkeyMayhemState]);
   const handleMonkeyButtonClick = useMemo(() => createMonkeyButtonHandler(soundManager, triggerMonkeyMayhem), [soundManager, triggerMonkeyMayhem]);
   const canInteract = useMemo(() => canInteractWithBoard(isMonkeyAnimating, showMonkeyButton, isGravityFalling), [isMonkeyAnimating, showMonkeyButton, isGravityFalling]);
 
-  // Enhanced makeMove with Chaos Chicken integration
   const enhancedMakeMove = (col) => {
-    // Handle blocked column redirection if Chaos Chicken is enabled
     if (chaosChickenEnabled) {
       const redirectedCol = handleBlockedColumnDrop(board, col, currentPlayer, isUpsideDown);
-      if (redirectedCol === -1) return false; // No available columns
+      if (redirectedCol === -1) return false;
       col = redirectedCol;
     }
 
     const success = makeMove(col);
     if (!success) return false;
 
-    // Check for Chaos Chicken trigger after successful move
     if (chaosChickenEnabled && !winner && !isDraw) {
-      // Update turn-based blocks
       updateTurnBasedBlocks();
     }
-
     return true;
   };
 
-  // Enhanced reset function
   const enhancedReset = () => {
     reset();
     if (chaosChickenEnabled) {
@@ -122,164 +121,148 @@ const FunMode = () => {
     }
   };
 
+  // Scoreboard Data
+  const p1Data = useMemo(() => ({
+    name: playerNames[PLAYER1] || "Player 1",
+    score: gameState.scores?.[PLAYER1] || 0,
+    active: currentPlayer === PLAYER1 && !winner && !isDraw,
+    emoji: PLAYER1
+  }), [gameState.scores, currentPlayer, winner, isDraw, playerNames]);
+
+  const p2Data = useMemo(() => ({
+    name: playerNames[PLAYER2] || "Player 2",
+    score: gameState.scores?.[PLAYER2] || 0,
+    active: currentPlayer === PLAYER2 && !winner && !isDraw,
+    emoji: PLAYER2
+  }), [gameState.scores, currentPlayer, winner, isDraw, playerNames]);
+
   return (
-    <PageContainer>
-      <HeaderContainer>Connect 4 - Fun Mode</HeaderContainer>
-    
-      {/* Feature status */}
-      <BodyContainer style={{ fontSize: "14px" }}>
-        Features:{" "}
-        <span style={{ color: monkeyModeEnabled ? "#4caf50" : "#ff6b6b", fontWeight: 700 }}>
-          Monkey Mode: {monkeyModeEnabled ? "On" : "Off"}
-        </span>
-        {" | "}
-        <span style={{ color: chaosChickenEnabled ? "#4caf50" : "#ff6b6b", fontWeight: 700 }}>
-          Chaos Chicken: {chaosChickenEnabled ? "On" : "Off"}
-        </span>
-      </BodyContainer>
+    <PageWrapper>
+      <Header>
+        <HeaderContent>
+          <AppLogo onClick={() => navigate("/v2")}>
+            Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>Fun Mode</span>
+          </AppLogo>
+          <Button variant="outline" size="sm" onClick={() => navigate("/v2/play-offline")} soundManager={soundManager}>
+            Exit
+          </Button>
+        </HeaderContent>
+      </Header>
 
-      {/* Chaos Chicken Indicators - Show when enabled */}
-      {chaosChickenEnabled && (
-        <ChickenIndicators 
-          chaosChickenState={chaosChickenState}
-          currentPlayer={currentPlayer}
-        />
-      )}
+      <MainContent>
+        <GameLayout>
+          <FeatureRow>
+            <FeatureBadge enabled={monkeyModeEnabled}>
+              Monkey {monkeyModeEnabled ? "Active" : "Off"}
+            </FeatureBadge>
+            <FeatureBadge enabled={chaosChickenEnabled}>
+              Chicken {chaosChickenEnabled ? "Active" : "Off"}
+            </FeatureBadge>
+          </FeatureRow>
 
-      {/* Unified Removal Overlay for Monkey and Rooster Discs */}
-      <RemovalOverlay 
-        data={removalOverlay} 
-        onComplete={() => setRemovalOverlay(null)} 
-      />
+          <Scoreboard p1={p1Data} p2={p2Data} />
 
-      {/* Monkey Mode Components - Conditionally rendered based on settings */}
-      <MonkeyModeContainer
-        monkeyModeEnabled={monkeyModeEnabled}
-        showMonkeyButton={showMonkeyButton}
-        monkeyButtonPlayer={monkeyButtonPlayer}
-        currentPlayer={currentPlayer}
-        monkeyButtonTimer={monkeyButtonTimer}
-        handleMonkeyButtonClick={handleMonkeyButtonClick}
-        isMonkeyAnimating={isMonkeyAnimating}
-        monkeyVoiceLine={monkeyVoiceLine}
-        isGravityFalling={isGravityFalling}
-        isUpsideDown={isUpsideDown}
-        upsideDownTurnsLeft={upsideDownTurnsLeft}
-      />
+          <RemovalOverlay 
+            data={removalOverlay} 
+            onComplete={() => setRemovalOverlay(null)} 
+          />
 
-      {/* Chaos Chicken Animation - Show when enabled and animating */}
-      {chaosChickenEnabled && (
-        <ChickenAnimation
-          isAnimating={isChickenAnimating}
-          voiceLine={chickenVoiceLine}
-          isRooster={isRoosterMode}
-          targetColumn={targetColumn}
-          onAnimationComplete={() => {
-            // Animation completion is handled by the hook
-          }}
-        />
-      )}
+          <MonkeyModeContainer
+            monkeyModeEnabled={monkeyModeEnabled}
+            showMonkeyButton={showMonkeyButton}
+            monkeyButtonPlayer={monkeyButtonPlayer}
+            currentPlayer={currentPlayer}
+            monkeyButtonTimer={monkeyButtonTimer}
+            handleMonkeyButtonClick={handleMonkeyButtonClick}
+            isMonkeyAnimating={isMonkeyAnimating}
+            monkeyVoiceLine={monkeyVoiceLine}
+            isGravityFalling={isGravityFalling}
+            isUpsideDown={isUpsideDown}
+            upsideDownTurnsLeft={upsideDownTurnsLeft}
+          />
 
-      <Status
-        winner={winner}
-        isDraw={isDraw}
-        currentPlayer={currentPlayer}
-        playerNames={playerNames}
-      />
+          {chaosChickenEnabled && (
+            <>
+              <ChickenIndicators chaosChickenState={chaosChickenState} currentPlayer={currentPlayer} />
+              <ChickenAnimation
+                isAnimating={isChickenAnimating}
+                voiceLine={chickenVoiceLine}
+                isRooster={isRoosterMode}
+                targetColumn={targetColumn}
+              />
+            </>
+          )}
 
-      <FunModeBoard isUpsideDown={isUpsideDown}>
-        <Board
-          board={board}
-          currentPlayer={currentPlayer}
-          winner={winner}
-          isDraw={isDraw}
-          onDrop={enhancedMakeMove}
-          canInteract={canInteract && !isChickenAnimating}
-          soundManager={soundManager}
-          isUpsideDown={isUpsideDown}
-          blockedColumns={chaosChickenEnabled ? blockedColumns : []}
-          onBlockedColumnAttempt={chaosChickenEnabled ? handleBlockedColumnDrop : undefined}
-          winningLine={gameState.winningLine}
-        />
-      </FunModeBoard>
+          <FunModeBoardWrapper isUpsideDown={isUpsideDown}>
+            <Board
+              board={board}
+              currentPlayer={currentPlayer}
+              winner={winner}
+              isDraw={isDraw}
+              onDrop={enhancedMakeMove}
+              canInteract={canInteract && !isChickenAnimating}
+              soundManager={soundManager}
+              isUpsideDown={isUpsideDown}
+              blockedColumns={chaosChickenEnabled ? blockedColumns : []}
+              onBlockedColumnAttempt={chaosChickenEnabled ? handleBlockedColumnDrop : undefined}
+              winningLine={gameState.winningLine}
+            />
+          </FunModeBoardWrapper>
 
-      <ButtonContainer>
-        <CustomButton onClick={enhancedReset} soundManager={soundManager}>
-          New Game
-        </CustomButton>
-        <CustomButton
-          onClick={() => navigate("/play-offline")}
-          soundManager={soundManager}
-        >
-          Back to Menu
-        </CustomButton>
-      </ButtonContainer>
+          <GameStatus 
+            message={
+              winner 
+                ? `${playerNames[winner]} Wins!` 
+                : isDraw 
+                ? "It's a Draw!" 
+                : isUpsideDown 
+                ? `Gravity Inverted! (${upsideDownTurnsLeft} turns)` 
+                : `${playerNames[currentPlayer]}'s Turn`
+            }
+            currentPlayerColor={currentPlayer === PLAYER1 ? "red" : "yellow"}
+          />
 
-      <BodyContainer
-        style={{ fontSize: "16px", marginTop: "20px", textAlign: "center" }}
-      >
-        {/* Monkey Mode Instructions */}
-        {monkeyModeEnabled ? (
-          <>
-            Get 2 separate 3-in-a-row to trigger Monkey Mayhem! 🐒
-            <br />
-            {monkeyMayhemState.wasUsed ? (
-              <span style={{ color: "#ff6b6b" }}>
-                Monkey Mayhem was used by{" "}
-                {monkeyMayhemState.usedBy === "🔴" ? "Player 1" : "Player 2"}!
-              </span>
-            ) : monkeyMayhemState.wasOffered ? (
-              <span style={{ color: "#ffa500" }}>
-                Monkey Mayhem opportunity expired!
-              </span>
-            ) : (
-              <span style={{ color: "#4caf50" }}>
-                First player to get 2 separate 3-in-a-row can trigger it once!
-              </span>
+          <ControlGroup>
+            <Button variant="secondary" fullWidth onClick={enhancedReset} soundManager={soundManager}>
+              New Game
+            </Button>
+          </ControlGroup>
+
+          <InstructionCard>
+            {monkeyModeEnabled && (
+              <InstructionSection>
+                <div style={{ fontWeight: 800, color: '#fff', fontSize: '14px' }}>🐒 MONKEY MAYHEM</div>
+                <div style={{ fontSize: '13px', color: '#94a3b8' }}>
+                  Form 2 separate 3-in-a-row to unleash chaos. Flip the board, shuffle gravity, and scramble the game!
+                </div>
+              </InstructionSection>
             )}
-          </>
-        ) : (
-          <span style={{ color: "#666" }}>
-            Monkey Mode is disabled in Settings.
-          </span>
-        )}
+            {chaosChickenEnabled && (
+              <InstructionSection>
+                <div style={{ fontWeight: 800, color: '#fff', fontSize: '14px' }}>🐔 CHAOS CHICKEN</div>
+                <div style={{ fontSize: '13px', color: '#94a3b8' }}>
+                  Form a 2x2 square. 1st time blocks a column with poop. 2nd time triggers the 
+                  <span style={{ color: '#ef4444' }}> Rooster of Rage</span> to clear an entire row!
+                </div>
+              </InstructionSection>
+            )}
+          </InstructionCard>
+        </GameLayout>
+      </MainContent>
 
-        <br /><br />
-
-        {/* Chaos Chicken Instructions */}
-        {chaosChickenEnabled ? (
-          <>
-            Form a 2x2 square to trigger Chaos Chicken! 🐔
-            <br />
-            <span style={{ color: "#4caf50" }}>
-              • 1st activation: Chicken blocks a column with poop for 2 turns
-            </span>
-            <br />
-            <span style={{ color: "#ff6b6b" }}>
-              • 2nd activation: Rooster of Rage clears opponent's row!
-            </span>
-            <br />
-            <span style={{ color: "#ffa500" }}>
-              Each player can only use their Rooster once per game.
-            </span>
-          </>
-        ) : (
-          <span style={{ color: "#666" }}>
-            Chaos Chicken is disabled in Settings.
-          </span>
-        )}
-
-        {!monkeyModeEnabled && !chaosChickenEnabled && (
-          <>
-            <br />
-            <span style={{ color: "#888", fontSize: "14px" }}>
-              Enable features in Fun Mode Settings to unlock special abilities!
-            </span>
-          </>
-        )}
-      </BodyContainer>
-    </PageContainer>
+      {(winner || isDraw) && (
+        <MatchResultOverlay 
+          title={winner ? "VICTORY" : "DRAW"}
+          subtitle={winner ? `${playerNames[winner]} has conquered the chaos!` : "Even mayhem ends in a stalemate."}
+          variant={winner ? "win" : "draw"}
+          onPrimaryAction={enhancedReset}
+          primaryActionLabel="Rematch"
+          onSecondaryAction={() => navigate("/v2")}
+          soundManager={soundManager}
+        />
+      )}
+    </PageWrapper>
   );
 };
 
-export default FunMode;
+export default FunModeV2;

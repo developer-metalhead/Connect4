@@ -1,106 +1,72 @@
-import { styled, keyframes } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
+import { tokens } from "../../components/designSystem/tokens";
 
-const glow = keyframes`
-  0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 53, 0.5); }
-  50% { box-shadow: 0 0 40px rgba(255, 107, 53, 0.8); }
-`;
-
-const flip = keyframes`
-  0% { transform: rotateX(0deg); }
-  100% { transform: rotateX(180deg); }
-`;
-
-const vine = keyframes`
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-`;
-
-export const ButtonContainer = styled("div")({
-  display: "flex",
-  flexDirection: "column",
-  padding: "16px",
-  gap: "24px",
-});
-
-export const HeaderContainer = styled("div")({
-  display: "flex",
-  flexDirection: "column",
-  fontSize: "64px",
-  padding: "16px",
-  gap: "24px",
-  textAlign: "center",
-});
-
-export const BodyContainer = styled("div")({
-  display: "flex",
-  flexDirection: "column",
-  color: "#FFFFFF73",
-  fontSize: "24px",
-  padding: "16px",
-  gap: "24px",
-  textAlign: "center",
-});
-
-export const PageContainer = styled("div")({
-  background: "#0f0f0f",
-  gap: "clamp(12px, 3vw, 24px)",
+export const GameLayout = styled("div")({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  justifyContent: "center",
-  color: "#fff",
-  minHeight: "100dvh",
+  gap: "32px",
   width: "100%",
-  padding: "clamp(12px, 3vw, 24px)",
-  margin: 0,
-  overflowX: "hidden",
-  boxSizing: "border-box",
-  position: "relative",
+  maxWidth: "800px",
+  margin: "0 auto",
 });
 
+export const FeatureRow = styled("div")({
+  display: "flex",
+  gap: "12px",
+  marginBottom: "16px",
+});
 
-// CHANGE: Removed CSS transform that was blocking pointer events
-export const FunModeBoard = styled("div")(({ isUpsideDown }) => ({
-  position: "relative",
-
-  // CHANGE: Use visual indicators instead of transform to maintain interactivity
-  ...(isUpsideDown && {
-    "&::before": {
-      content: '"🙃 GRAVITY REVERSED 🙃"',
-      position: "absolute",
-      top: "-50px",
-      left: "50%",
-      transform: "translateX(-50%)",
-      fontSize: "16px",
-      color: "#ffa500",
-      fontWeight: "bold",
-      zIndex: 1,
-      background: "rgba(0,0,0,0.8)",
-      padding: "5px 15px",
-      borderRadius: "15px",
-      border: "2px solid #ffa500",
-      animation: `${glow} 2s infinite`,
-    },
-    "&::after": {
-      content: '"🌿"',
-      position: "absolute",
-      top: "-30px",
-      right: "-20px",
-      fontSize: "30px",
-      animation: `${vine} 2s infinite 0.5s`,
-      zIndex: 1,
-    },
-  }),
+export const FeatureBadge = styled("div", {
+  shouldForwardProp: (prop) => prop !== "enabled",
+})(({ enabled }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: "6px",
+  padding: "6px 14px",
+  backgroundColor: enabled ? "rgba(34, 197, 94, 0.1)" : "rgba(239, 68, 68, 0.1)",
+  border: `1px solid ${enabled ? "rgba(34, 197, 94, 0.2)" : "rgba(239, 68, 68, 0.2)"}`,
+  borderRadius: tokens.radius.full,
+  fontSize: "12px",
+  fontWeight: 700,
+  color: enabled ? tokens.colors.success : tokens.colors.danger,
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
 }));
 
-// CHANGE: Add overlay component for monkey mode background dimming
-export const MonkeyModeOverlay = styled("div")({
-  position: "fixed",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: "rgba(0, 0, 0, 0.6)",
-  zIndex: 500,
-  pointerEvents: "none", // Allow clicks to pass through to monkey button
+export const InstructionCard = styled("div")({
+  backgroundColor: tokens.glass.background,
+  backdropFilter: tokens.glass.blur,
+  border: tokens.glass.border,
+  borderRadius: tokens.radius.lg,
+  padding: "24px",
+  width: "100%",
+  maxWidth: "600px",
+  marginTop: "40px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "20px",
+  boxShadow: tokens.shadows.lg,
+});
+
+export const InstructionSection = styled("div")({
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px",
+});
+
+export const FunModeBoardWrapper = styled("div", {
+  shouldForwardProp: (prop) => prop !== "isUpsideDown",
+})(({ isUpsideDown }) => ({
+  transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+  transform: isUpsideDown ? "rotate(180deg)" : "rotate(0deg)",
+}));
+
+export const ControlGroup = styled("div")({
+  display: "flex",
+  gap: "12px",
+  marginTop: "16px",
+  width: "100%",
+  maxWidth: "320px",
+  justifyContent: "center",
 });

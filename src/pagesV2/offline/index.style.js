@@ -1,46 +1,26 @@
 import { styled } from "@mui/material/styles";
+import { tokens } from "../../components/designSystem/tokens";
 
-export const ButtonContainer = styled("div")({
-  display: "flex",
-  flexDirection: "column",
-
-  padding: "16px",
-  gap: "24px",
-});
-
-export const HeaderContainer = styled("div")({
-  display: "flex",
-  flexDirection: "column",
-  fontSize: "64px",
-  padding: "16px",
-  gap: "24px",
-});
-
-export const BodyContainer = styled("div")({
-  display: "flex",
-  flexDirection: "column",
-  color: "#FFFFFF73",
-  fontSize: "24px",
-  padding: "16px",
-  gap: "24px",
-});
-
-export const PageContainer = styled("div")({
-  background: "#0f0f0f",
-  gap: "clamp(12px, 3vw, 24px)",
-
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-
-  color: "#fff",
-
-  minHeight: "100dvh",
-  width: "100%",
-  padding: "clamp(12px, 3vw, 24px)",
-
+export const OfflineHeader = styled("h1")({
+  fontSize: "clamp(32px, 8vw, 48px)",
+  fontWeight: 800,
+  letterSpacing: "-1px",
   margin: 0,
-  overflowX: "hidden",
-  boxSizing: "border-box",
+  color: tokens.colors.text,
+  textAlign: "center",
+});
+
+export const OfflineSubtitle = styled("p")({
+  fontSize: "16px",
+  color: tokens.colors.textMuted,
+  margin: "8px 0 32px 0",
+  textAlign: "center",
+});
+
+export const SelectionGrid = styled("div")({
+  display: "grid",
+  gridTemplateColumns: "1fr",
+  gap: "16px",
+  width: "100%",
+  maxWidth: "320px",
 });
