@@ -22,7 +22,7 @@ const glow = keyframes`
 const PoopContainer = styled("div")(({ columnIndex }) => ({
   position: "absolute",
   top: "-70px",
-  left: `calc(${columnIndex} * (var(--cell) + var(--gap)) + var(--gap))`,
+  left: `calc(var(--board-padding) + ${columnIndex} * (var(--cell) + var(--gap)))`,
   width: "var(--cell)",
   height: "var(--cell)",
   display: "flex",
@@ -31,6 +31,10 @@ const PoopContainer = styled("div")(({ columnIndex }) => ({
   justifyContent: "center",
   zIndex: 100,
   pointerEvents: "none",
+
+  "@media (max-width: 768px)": {
+    top: "-40px", // Closer to board on mobile
+  },
 }));
 
 const PoopEmoji = styled("div")({

@@ -345,7 +345,7 @@ const Board = ({
         {fallingDisc && (
           <FallingDisc
             style={{
-              left: `calc(${fallingDisc.col} * (var(--cell) + var(--gap)) + var(--gap))`,
+              left: `calc(var(--board-padding) + ${fallingDisc.col} * (var(--cell) + var(--gap)))`,
               animationDuration: `${400 + Math.abs(fallingDisc.targetRow - fallingDisc.currentRow) * 50}ms`,
               "--target-row": fallingDisc.targetRow,
               "--start-row": fallingDisc.currentRow,
@@ -360,7 +360,7 @@ const Board = ({
         {cpuFallingDisc && (
           <FallingDisc
             style={{
-              left: `calc(${cpuFallingDisc.col} * (var(--cell) + var(--gap)) + var(--gap))`,
+              left: `calc(var(--board-padding) + ${cpuFallingDisc.col} * (var(--cell) + var(--gap)))`,
               // CHANGE: Use calculated duration from cpuFallingDisc object
               animationDuration: `${cpuFallingDisc.animationDuration}ms`,
               "--target-row": cpuFallingDisc.targetRow,
@@ -382,7 +382,7 @@ const Board = ({
               <FallingDisc
                 key={`grav-${i}`}
                 style={{
-                  left: `calc(${d.col} * (var(--cell) + var(--gap)) + var(--gap))`,
+                  left: `calc(var(--board-padding) + ${d.col} * (var(--cell) + var(--gap)))`,
                   animationDuration: `${duration}ms`,
                   animationName: "gravityDrop",
                   "--target-row": d.toRow,
