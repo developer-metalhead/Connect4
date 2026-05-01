@@ -18,11 +18,13 @@ import PostVideoOverlay from "../../../components/designSystem/PostVideoOverlay"
 import PoopBlockIndicator from "../../../components/designSystem/Features/chaosChicken/PoopBlockIndicator";
 import BackButton from "../../../components/designSystem/BackButton";
 import GiveUpButton from "../../../components/designSystem/GiveUpButton";
+import useFunModeSettings from "../../../hooks/funMode/useFunModeSettings";
 import Modal from "../../../components/designSystem/Modal";
 
 const PlayCPUV2 = () => {
   const navigate = useNavigate();
   const soundManager = useSoundManager();
+  const { monkeyAnimationEnabled } = useFunModeSettings();
   const [activePanel, setActivePanel] = useState(null); // 'cpu', 'fun', 'sound' or null
 
   const { 
@@ -33,6 +35,7 @@ const PlayCPUV2 = () => {
     isCpuDropping, 
     cpuDroppingCol,
     shouldShowPostVideoOverlay,
+    setShouldShowPostVideoOverlay,
     closePostVideoOverlay
   } = useConnect4CPU();
 
@@ -42,6 +45,8 @@ const PlayCPUV2 = () => {
     if (winner) {
       if (winner === PLAYER1) {
         soundManager.playWinSound();
+      } else {
+        soundManager.playLoseSound();
       }
     } else if (isDraw) {
       soundManager.playDrawSound();
@@ -79,7 +84,16 @@ const PlayCPUV2 = () => {
   return (
     <PageWrapper>
       <BackButton soundManager={soundManager} />
-      <GiveUpButton onGiveUp={() => navigate("/play-offline")} soundManager={soundManager} />
+      <GiveUpButton 
+        onGiveUp={() => {
+          if (monkeyAnimationEnabled) {
+            navigate("/play-offline");
+          } else {
+            setShouldShowPostVideoOverlay(true);
+          }
+        }} 
+        soundManager={soundManager} 
+      />
       <Header>
         <HeaderContent>
           <AppLogo onClick={() => navigate("/home")}>
@@ -127,15 +141,27 @@ const PlayCPUV2 = () => {
         </GameLayout>
       </MainContent>
 
-      {/* Human Win/Draw Overlay */}
-      {(winner === PLAYER1 || isDraw) && (
+      {/* Human Win/Draw/CPU Win Overlay */}
+      {(winner || isDraw) && (
         <MatchResultOverlay 
-          title={winner === PLAYER1 ? "VICTORY" : "DRAW"}
-          subtitle={winner === PLAYER1 ? "You outsmarted the machine!" : "A tactical stalemate."}
-          variant={winner === PLAYER1 ? "win" : "draw"}
+          title={
+            winner === PLAYER1 ? "VICTORY" : 
+            winner === PLAYER2 ? "DEFEAT" :
+            "DRAW"
+          }
+          subtitle={
+            winner === PLAYER1 ? "You outsmarted the machine!" : 
+            winner === PLAYER2 ? "The CPU has claimed this victory." :
+            "A tactical stalemate."
+          }
+          variant={
+            winner === PLAYER1 ? "win" : 
+            winner === PLAYER2 ? "loss" :
+            "draw"
+          }
           onPrimaryAction={reset}
           primaryActionLabel="Rematch"
-          onSecondaryAction={() => navigate("/home")}
+          onSecondaryAction={() => navigate("/play-offline")}
           soundManager={soundManager}
         />
       )}

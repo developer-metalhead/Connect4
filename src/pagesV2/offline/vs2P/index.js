@@ -23,8 +23,19 @@ const Game2PV2 = () => {
   const navigate = useNavigate();
   const soundManager = useSoundManager();
   const [activePanel, setActivePanel] = useState(null); // 'fun', 'sound' or null
-  const { gameState, makeMove, reset } = useConnect4();
+  const [surrendered, setSurrendered] = useState(null); // PLAYER1 or PLAYER2
+  const { gameState, makeMove, reset: baseReset } = useConnect4();
   const { board, currentPlayer, winner, isDraw } = gameState;
+
+  const reset = () => {
+    setSurrendered(null);
+    baseReset();
+  };
+
+  const handleSurrender = () => {
+    // Current player surrenders, other player wins
+    setSurrendered(currentPlayer);
+  };
 
   useEffect(() => {
     if (winner) {
@@ -51,8 +62,8 @@ const Game2PV2 = () => {
 
   return (
     <PageWrapper>
-
-      <GiveUpButton onGiveUp={() => navigate("/play-offline")} soundManager={soundManager} />
+      <BackButton soundManager={soundManager} />
+      <GiveUpButton onGiveUp={handleSurrender} soundManager={soundManager} />
       <Header>
         <HeaderContent>
           <AppLogo onClick={() => navigate("/home")}>
@@ -95,14 +106,23 @@ const Game2PV2 = () => {
         </GameLayout>
       </MainContent>
 
-      {(winner || isDraw) && (
+      {(winner || isDraw || surrendered) && (
         <MatchResultOverlay 
-          title={winner ? "VICTORY" : "DRAW"}
-          subtitle={winner ? `${winner === PLAYER1 ? "Player 1" : "Player 2"} has claimed the board!` : "No winner this time."}
-          variant={winner ? "win" : "draw"}
+          title={
+            surrendered ? "SURRENDER" :
+            winner ? "VICTORY" : 
+            "DRAW"
+          }
+          subtitle={
+            surrendered ? `${surrendered === PLAYER1 ? "Player 1" : "Player 2"} has conceded.` :
+            winner ? `${winner === PLAYER1 ? "Player 1" : "Player 2"} has claimed the board!` : 
+            "No winner this time."
+          }
+          variant={isDraw ? "draw" : "win"}
+          icon={surrendered ? "🏳️" : winner ? "🏆" : "🤝"}
           onPrimaryAction={reset}
           primaryActionLabel="Rematch"
-          onSecondaryAction={() => navigate("/home")}
+          onSecondaryAction={() => navigate("/play-offline")}
           soundManager={soundManager}
         />
       )}

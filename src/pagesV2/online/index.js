@@ -267,8 +267,8 @@ const OnlineV2 = () => {
       {(gameState.winner || gameState.isDraw) && (
         <MatchResultOverlay 
           title={gameState.winner ? (gameState.winner === myDisc ? "VICTORY" : "DEFEAT") : "DRAW"}
-          subtitle={gameState.winner ? `${nameByDisc[gameState.winner]} dominated the board!` : "A perfect stalemate."}
-          variant={gameState.winner ? (gameState.winner === myDisc ? "win" : "default") : "draw"}
+          subtitle={gameState.winner ? (gameState.winner === myDisc ? "You dominated the board!" : "Better luck next time.") : "A perfect stalemate."}
+          variant={gameState.winner ? (gameState.winner === myDisc ? "win" : "loss") : "draw"}
           onPrimaryAction={resetRoom}
           primaryActionLabel="Rematch"
           onSecondaryAction={() => navigate("/home")}

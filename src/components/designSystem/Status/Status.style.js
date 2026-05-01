@@ -37,47 +37,88 @@ export const OverlayBackdrop = styled("div")({
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: "rgba(2, 6, 23, 0.9)",
-  backdropFilter: "blur(8px)",
-  zIndex: 2000,
+  backgroundColor: "rgba(2, 6, 23, 0.85)",
+  backdropFilter: "blur(12px)",
+  zIndex: 3000,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  animation: "overlayFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+  
+  "@keyframes overlayFadeIn": {
+    from: { opacity: 0 },
+    to: { opacity: 1 },
+  }
+});
+
+export const ResultCard = styled("div")({
+  backgroundColor: tokens.glass.background,
+  backdropFilter: tokens.glass.blur,
+  border: tokens.glass.border,
+  borderRadius: tokens.radius.xl,
+  padding: "48px",
+  width: "90%",
+  maxWidth: "480px",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  justifyContent: "center",
   gap: "32px",
-  animation: "overlayFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-  
-  "@keyframes overlayFadeIn": {
-    from: { opacity: 0, backdropFilter: "blur(0px)" },
-    to: { opacity: 1, backdropFilter: "blur(8px)" },
+  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+  animation: "cardSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+
+  "@keyframes cardSlideUp": {
+    from: { opacity: 0, transform: "translateY(40px) scale(0.9)" },
+    to: { opacity: 1, transform: "translateY(0) scale(1)" },
   }
 });
+
+export const ResultIcon = styled("div", {
+  shouldForwardProp: (prop) => prop !== "variant",
+})(({ variant }) => ({
+  width: "80px",
+  height: "80px",
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "40px",
+  background: variant === "win" ? "rgba(34, 197, 94, 0.15)" : variant === "loss" ? "rgba(239, 68, 68, 0.15)" : "rgba(255, 255, 255, 0.1)",
+  color: variant === "win" ? "#22c55e" : variant === "loss" ? "#ef4444" : "#94a3b8",
+  border: `2px solid ${variant === "win" ? "rgba(34, 197, 94, 0.3)" : variant === "loss" ? "rgba(239, 68, 68, 0.3)" : "rgba(255, 255, 255, 0.2)"}`,
+  boxShadow: `0 0 20px ${variant === "win" ? "rgba(34, 197, 94, 0.2)" : variant === "loss" ? "rgba(239, 68, 68, 0.2)" : "transparent"}`,
+}));
 
 export const OverlayTitle = styled("h2", {
   shouldForwardProp: (prop) => prop !== "variant",
 })(({ variant }) => ({
-  fontSize: "64px",
-  fontWeight: 900,
+  fontSize: "48px",
+  fontWeight: 800,
   margin: 0,
   textAlign: "center",
-  letterSpacing: "-2px",
-  color: variant === "win" ? tokens.colors.primary : variant === "draw" ? tokens.colors.textMuted : tokens.colors.text,
-  textShadow: variant === "win" ? "0 0 40px rgba(59, 130, 246, 0.5)" : "none",
+  letterSpacing: "-1px",
+  background: variant === "win" ? "linear-gradient(to bottom, #fff, #22c55e)" : variant === "loss" ? "linear-gradient(to bottom, #fff, #ef4444)" : "linear-gradient(to bottom, #fff, #94a3b8)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
   
   "@media (max-width: 600px)": {
-    fontSize: "40px",
+    fontSize: "36px",
   }
 }));
 
 export const OverlaySubtitle = styled("p")({
-  fontSize: "18px",
-  color: tokens.colors.textMuted,
-  margin: "-16px 0 0 0",
+  fontSize: "16px",
+  color: "rgba(255, 255, 255, 0.6)",
+  margin: "-20px 0 0 0",
   textAlign: "center",
+  maxWidth: "300px",
+  lineHeight: 1.6,
 });
 
 export const ActionGroup = styled("div")({
   display: "flex",
-  gap: "16px",
-  marginTop: "16px",
+  flexDirection: "column",
+  width: "100%",
+  gap: "12px",
+  marginTop: "8px",
 });
+

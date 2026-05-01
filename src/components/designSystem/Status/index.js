@@ -2,6 +2,8 @@ import React from "react";
 import { 
   StatusPill, 
   OverlayBackdrop, 
+  ResultCard,
+  ResultIcon,
   OverlayTitle, 
   OverlaySubtitle, 
   ActionGroup 
@@ -26,37 +28,46 @@ export const MatchResultOverlay = ({
   onPrimaryAction, 
   primaryActionLabel = "Play Again",
   onSecondaryAction,
-  secondaryActionLabel = "Back to Menu",
-  variant = "win", // win, draw, default
+  secondaryActionLabel = "Main Menu",
+  variant = "win", // win, loss, draw, default
+  icon,
   soundManager
 }) => {
   return (
     <OverlayBackdrop>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
-        <OverlayTitle variant={variant}>{title}</OverlayTitle>
-        {subtitle && <OverlaySubtitle>{subtitle}</OverlaySubtitle>}
-      </div>
-      
-      <ActionGroup>
-        <Button 
-          variant="primary" 
-          size="lg" 
-          onClick={onPrimaryAction}
-          soundManager={soundManager}
-        >
-          {primaryActionLabel}
-        </Button>
-        {onSecondaryAction && (
+      <ResultCard>
+        <ResultIcon variant={variant}>
+          {icon || (variant === "win" ? "🏆" : variant === "loss" ? "😔" : "🤝")}
+        </ResultIcon>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          <OverlayTitle variant={variant}>{title}</OverlayTitle>
+          {subtitle && <OverlaySubtitle>{subtitle}</OverlaySubtitle>}
+        </div>
+        
+        <ActionGroup>
           <Button 
-            variant="outline" 
+            variant="primary" 
             size="lg" 
-            onClick={onSecondaryAction}
+            fullWidth
+            onClick={onPrimaryAction}
             soundManager={soundManager}
           >
-            {secondaryActionLabel}
+            {primaryActionLabel}
           </Button>
-        )}
-      </ActionGroup>
+          {onSecondaryAction && (
+            <Button 
+              variant="outline" 
+              size="lg" 
+              fullWidth
+              onClick={onSecondaryAction}
+              soundManager={soundManager}
+            >
+              {secondaryActionLabel}
+            </Button>
+          )}
+        </ActionGroup>
+      </ResultCard>
     </OverlayBackdrop>
   );
 };
