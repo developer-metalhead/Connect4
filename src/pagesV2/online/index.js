@@ -69,7 +69,7 @@ const OnlineV2 = () => {
     if (!roomId) return "";
     const url = new URL(window.location.href);
     url.searchParams.set("room", roomId);
-    url.pathname = "/v2/play-online"; // Update path for V2
+    url.pathname = "/play-online"; // Update path for primary routes
     return url.toString();
   }, [roomId]);
 
@@ -114,14 +114,14 @@ const OnlineV2 = () => {
     <PageWrapper>
       <Header>
         <HeaderContent>
-          <AppLogo onClick={() => navigate("/v2")}>
+          <AppLogo onClick={() => navigate("/home")}>
             Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>Online</span>
           </AppLogo>
           <div style={{ display: 'flex', gap: '12px' }}>
             <Button variant="ghost" size="sm" onClick={() => setShowSoundSettings(true)} soundManager={soundManager}>
               🔊 Sound
             </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/v2")} soundManager={soundManager}>
+            <Button variant="outline" size="sm" onClick={() => navigate("/home")} soundManager={soundManager}>
               Exit
             </Button>
           </div>
@@ -255,7 +255,7 @@ const OnlineV2 = () => {
           variant={gameState.winner ? (gameState.winner === myDisc ? "win" : "default") : "draw"}
           onPrimaryAction={resetRoom}
           primaryActionLabel="Rematch"
-          onSecondaryAction={() => navigate("/v2")}
+          onSecondaryAction={() => navigate("/home")}
           soundManager={soundManager}
         />
       )}

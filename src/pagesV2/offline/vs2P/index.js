@@ -52,14 +52,14 @@ const Game2PV2 = () => {
     <PageWrapper>
       <Header>
         <HeaderContent>
-          <AppLogo onClick={() => navigate("/v2")}>
+          <AppLogo onClick={() => navigate("/home")}>
             Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>2 Players</span>
           </AppLogo>
           <div style={{ display: 'flex', gap: '12px' }}>
             <Button variant="ghost" size="sm" onClick={() => setShowSoundSettings(true)} soundManager={soundManager}>
               🔊 Sound
             </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/v2/play-offline")} soundManager={soundManager}>
+            <Button variant="outline" size="sm" onClick={() => navigate("/play-offline")} soundManager={soundManager}>
               Exit
             </Button>
           </div>
@@ -110,7 +110,7 @@ const Game2PV2 = () => {
           variant={winner ? "win" : "draw"}
           onPrimaryAction={reset}
           primaryActionLabel="Rematch"
-          onSecondaryAction={() => navigate("/v2")}
+          onSecondaryAction={() => navigate("/home")}
           soundManager={soundManager}
         />
       )}

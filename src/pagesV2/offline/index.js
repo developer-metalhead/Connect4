@@ -27,7 +27,7 @@ const OfflineV2 = () => {
               variant="primary" 
               size="lg" 
               fullWidth 
-              onClick={() => navigate("/v2/play-offline/2p")}
+              onClick={() => navigate("/play-offline/2p")}
               soundManager={soundManager}
             >
               VS 2nd Player
@@ -37,7 +37,7 @@ const OfflineV2 = () => {
               variant="secondary" 
               size="lg" 
               fullWidth 
-              onClick={() => navigate("/v2/play-offline/cpu")}
+              onClick={() => navigate("/play-offline/cpu")}
               soundManager={soundManager}
             >
               VS CPU (AI)
@@ -47,7 +47,7 @@ const OfflineV2 = () => {
               variant="outline" 
               size="lg" 
               fullWidth 
-              onClick={() => navigate("/v2/play-fun")}
+              onClick={() => navigate("/play-fun")}
               soundManager={soundManager}
             >
               Fun Mode (Chaos)
@@ -59,7 +59,7 @@ const OfflineV2 = () => {
               variant="ghost" 
               size="md" 
               fullWidth 
-              onClick={() => navigate("/v2")}
+              onClick={() => navigate("/home")}
               soundManager={soundManager}
             >
               Back to Main Menu

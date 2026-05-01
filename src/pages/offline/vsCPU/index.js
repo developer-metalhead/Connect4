@@ -92,7 +92,7 @@ const PlayCPU = () => {
         </BoredVideoButton>
       
         <CustomButton
-          onClick={() => navigate("/play-offline")}
+          onClick={() => navigate("/legacy/play-offline")}
           soundManager={soundManager}
         >
           Main Menu

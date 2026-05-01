@@ -208,7 +208,7 @@ const FunMode = () => {
           New Game
         </CustomButton>
         <CustomButton
-          onClick={() => navigate("/play-offline")}
+          onClick={() => navigate("/legacy/play-offline")}
           soundManager={soundManager}
         >
           Back to Menu

@@ -39,7 +39,7 @@ const HomeV2 = () => {
               variant="primary" 
               size="lg" 
               fullWidth 
-              onClick={() => navigate("/v2/play-offline")}
+              onClick={() => navigate("/play-offline")}
               soundManager={soundManager}
             >
               Play Offline
@@ -49,7 +49,7 @@ const HomeV2 = () => {
               variant="secondary" 
               size="lg" 
               fullWidth 
-              onClick={() => navigate("/v2/play-online")}
+              onClick={() => navigate("/play-online")}
               soundManager={soundManager}
             >
               Play Online

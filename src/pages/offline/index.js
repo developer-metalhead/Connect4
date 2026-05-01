@@ -17,16 +17,16 @@ const Offline = () => {
       <BodyContainer>Choose Game Mode</BodyContainer>
 
       <ButtonContainer>
-        <CustomButton onClick={() => navigate("/play-offline/2p")}>
+        <CustomButton onClick={() => navigate("/legacy/play-offline/2p")}>
           Play VS 2nd Player
         </CustomButton>
-        <CustomButton onClick={() => navigate("/play-offline/cpu")}>
+        <CustomButton onClick={() => navigate("/legacy/play-offline/cpu")}>
           Play VS CPU
         </CustomButton>
-        <CustomButton onClick={() => navigate("/play-fun")}>
+        <CustomButton onClick={() => navigate("/legacy/play-fun")}>
           Fun Mode
         </CustomButton>
-        <CustomButton onClick={() => navigate("/")}>Main Menu</CustomButton>
+        <CustomButton onClick={() => navigate("/legacy")}>Back to Home</CustomButton>
       </ButtonContainer>
     </PageContainer>
   );

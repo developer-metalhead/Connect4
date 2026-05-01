@@ -144,10 +144,10 @@ const FunModeV2 = () => {
     <PageWrapper>
       <Header>
         <HeaderContent>
-          <AppLogo onClick={() => navigate("/v2")}>
+          <AppLogo onClick={() => navigate("/home")}>
             Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>Fun Mode</span>
           </AppLogo>
-          <Button variant="outline" size="sm" onClick={() => navigate("/v2/play-offline")} soundManager={soundManager}>
+          <Button variant="outline" size="sm" onClick={() => navigate("/play-offline")} soundManager={soundManager}>
             Exit
           </Button>
         </HeaderContent>
@@ -264,7 +264,7 @@ const FunModeV2 = () => {
           variant={winner ? "win" : "draw"}
           onPrimaryAction={enhancedReset}
           primaryActionLabel="Rematch"
-          onSecondaryAction={() => navigate("/v2")}
+          onSecondaryAction={() => navigate("/home")}
           soundManager={soundManager}
         />
       )}

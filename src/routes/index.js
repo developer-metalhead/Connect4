@@ -16,24 +16,30 @@ import PlayerV2 from "../pagesV2/offline/vs2P/index";
 import PlayCPUV2 from "../pagesV2/offline/vsCPU";
 import FunModeV2 from "../pagesV2/funMode";
 
+// Common Components
+import LandingPage from "../pages/LandingPage";
+
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* V1 Routes (Legacy) */}
-      <Route path="/" element={<Home />} />
-      <Route path="/play-offline" element={<Offline />} />
-      <Route path="/play-online" element={<Online />} />
-      <Route path="/play-offline/2p" element={<Player />} />
-      <Route path="/play-offline/cpu" element={<PlayCPU />} />
-      <Route path="/play-fun" element={<FunMode />} />
+      {/* Selection Screen */}
+      <Route path="/" element={<LandingPage />} />
 
-      {/* V2 Routes (New UI) */}
-      <Route path="/v2" element={<HomeV2 />} />
-      <Route path="/v2/play-offline" element={<OfflineV2 />} />
-      <Route path="/v2/play-online" element={<OnlineV2 />} />
-      <Route path="/v2/play-offline/2p" element={<PlayerV2 />} />
-      <Route path="/v2/play-offline/cpu" element={<PlayCPUV2 />} />
-      <Route path="/v2/play-fun" element={<FunModeV2 />} />
+      {/* V2 Routes (New Primary UI - No prefix) */}
+      <Route path="/home" element={<HomeV2 />} />
+      <Route path="/play-offline" element={<OfflineV2 />} />
+      <Route path="/play-online" element={<OnlineV2 />} />
+      <Route path="/play-offline/2p" element={<PlayerV2 />} />
+      <Route path="/play-offline/cpu" element={<PlayCPUV2 />} />
+      <Route path="/play-fun" element={<FunModeV2 />} />
+
+      {/* V1 Routes (Legacy - /legacy prefix) */}
+      <Route path="/legacy" element={<Home />} />
+      <Route path="/legacy/play-offline" element={<Offline />} />
+      <Route path="/legacy/play-online" element={<Online />} />
+      <Route path="/legacy/play-offline/2p" element={<Player />} />
+      <Route path="/legacy/play-offline/cpu" element={<PlayCPU />} />
+      <Route path="/legacy/play-fun" element={<FunMode />} />
     </Routes>
   );
 };
