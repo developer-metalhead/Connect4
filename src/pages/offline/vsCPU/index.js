@@ -1,11 +1,13 @@
 /* eslint-disable no-unused-vars */
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import CustomButton from "../../../components/organisms/buttonComponent";
 import Status from "../../../components/organisms/status";
 import Board from "../../../components/organisms/boardStyles";
 import { PLAYER1 } from "../../../helperFunction/helperFunction";
 import useSoundManager from "../../../hooks/core/useSoundManager";
+// CHANGE: Import PostVideoOverlay component
+import PostVideoOverlay from "../../../components/organisms/postVideoOverlay";
 
 import useConnect4CPU from "../../../hooks/core/useConnect4CPU";
 
@@ -23,6 +25,9 @@ const PlayCPU = () => {
   const { gameState, makeHumanMove, reset, isCpuTurn, isCpuDropping, cpuDroppingCol } = useConnect4CPU();
   const { board, currentPlayer, winner, isDraw } = gameState;
   const soundManager = useSoundManager();
+  
+  // CHANGE: Add state to control PostVideoOverlay visibility
+  const [showPostVideoOverlay, setShowPostVideoOverlay] = useState(false);
 
   // Play appropriate sounds when game ends
   useEffect(() => {
@@ -30,7 +35,7 @@ const PlayCPU = () => {
       if (winner === PLAYER1) {
         soundManager.playWinSound(); // Human wins
       } else {
-        soundManager.playLoseSound(); // CPU wins
+        handleGiveUp() // CPU wins
       }
     } else if (isDraw) {
       soundManager.playDrawSound();
@@ -46,6 +51,17 @@ const PlayCPU = () => {
       }, 100);
     }
   }, [isCpuDropping, soundManager]);
+
+  // CHANGE: Handle Give Up button click to show PostVideoOverlay
+  const handleGiveUp = () => {
+    setShowPostVideoOverlay(true);
+  };
+
+  // CHANGE: Handle PostVideoOverlay close and reset game
+  const handleClosePostVideoOverlay = () => {
+    setShowPostVideoOverlay(false);
+    reset(); // Reset the game after overlay closes
+  };
 
   return (
     <PageContainer>
@@ -71,19 +87,26 @@ const PlayCPU = () => {
       />
 
       <ButtonContainer>
-        <CustomButton onClick={reset} soundManager={soundManager}>
-          New Game
-        </CustomButton>
+        {/* CHANGE: Update Give Up button to show PostVideoOverlay instead of direct reset */}
+        <BoredVideoButton onGameReset={reset}>
+        Give Up!
+        </BoredVideoButton>
+      
         <CustomButton
           onClick={() => navigate("/play-offline")}
           soundManager={soundManager}
         >
           Main Menu
         </CustomButton>
-        <BoredVideoButton onGameReset={reset}>
-          Extremely Fun Button!
-        </BoredVideoButton>
+        
       </ButtonContainer>
+
+      {/* CHANGE: Add PostVideoOverlay component */}
+      <PostVideoOverlay
+        isVisible={showPostVideoOverlay}
+        onClose={handleClosePostVideoOverlay}
+        soundManager={soundManager}
+      />
     </PageContainer>
   );
 };

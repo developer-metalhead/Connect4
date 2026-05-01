@@ -160,7 +160,7 @@ const PostVideoOverlay = ({ isVisible, onClose, soundManager }) => {
       // CHANGE: Auto-dismiss after 4.5 seconds with sound cleanup
       const timer = setTimeout(() => {
         handleClose();
-      }, 4500);
+      }, 2500);
       
       return () => {
         clearTimeout(timer);
