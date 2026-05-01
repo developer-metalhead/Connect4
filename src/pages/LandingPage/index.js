@@ -21,7 +21,8 @@ const SelectorContainer = styled("div")({
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  minHeight: "100vh",
+  width: "100%", // Fill width
+  height: "100%", // Fill height
   gap: "40px",
   padding: "20px",
   background: "radial-gradient(circle at center, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%)",
@@ -104,7 +105,7 @@ const LandingPage = () => {
               onClick={() => navigate("/home")}
               soundManager={soundManager}
             >
-              Play Overhauled <VersionTag>V2</VersionTag>
+              Play Overhauled <VersionTag>Rec</VersionTag>
             </Button>
             
             <Button 
