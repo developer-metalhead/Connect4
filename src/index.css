@@ -1,3 +1,4 @@
+/* Main styles */
 body {
   margin: 0;
   font-family:
@@ -5,9 +6,32 @@ body {
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  
+  overflow-x: hidden;        /* Already had this */
+  overflow-y: hidden;        /* Ensures scrolling still works */
+  
+  /* Hide scrollbar - Works on all major browsers */
+  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
 }
 
+/* Chrome, Safari, Edge, Opera */
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Also apply to html for better compatibility */
+html {
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
+/* Code styles */
 code {
   font-family:
     source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;

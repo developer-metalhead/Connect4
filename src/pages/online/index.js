@@ -148,7 +148,7 @@ const Online = () => {
                 onClick={createRoom}
                 soundManager={soundManager}
               >
-                Create Room (code/link)
+                Create Room
               </CustomButton>
 
               <div

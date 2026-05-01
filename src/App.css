@@ -36,3 +36,22 @@
     transform: rotate(360deg);
   }
 }
+
+/* CHANGE: Add global styles to disable text selection and touch callouts */
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* CHANGE: Allow text selection only for input fields and editable content */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}

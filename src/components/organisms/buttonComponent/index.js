@@ -5,11 +5,11 @@ import Button from "@mui/material/Button";
 
 const CustomButton = styled(Button)(({ theme }) => ({
   display: "flex",
-  padding: "12px 24px",
+  padding: "clamp(8px, 2vh, 12px) clamp(16px, 4vw, 24px)",
   justifyContent: "center",
   alignItems: "center",
   gap: "8px",
-  fontSize: "18px",
+  fontSize: "clamp(14px, 3.5vw, 18px)",
   alignSelf: "stretch",
   borderRadius: "9999px",
   backgroundColor: "#fff",
@@ -17,6 +17,15 @@ const CustomButton = styled(Button)(({ theme }) => ({
   fontWeight: 600,
   textTransform: "none",
   boxShadow: "none",
+  minHeight: "44px",
+  width: "100%",
+  // CHANGE: Disable text selection and touch callouts for buttons
+  userSelect: "none",
+  WebkitUserSelect: "none",
+  MozUserSelect: "none",
+  msUserSelect: "none",
+  WebkitTouchCallout: "none",
+  WebkitTapHighlightColor: "transparent",
 
   "&:hover": {
     backgroundColor: "#d4d7db",
@@ -35,6 +44,13 @@ const CustomButton = styled(Button)(({ theme }) => ({
     "&:hover": {
       backgroundColor: "#f3f4f6",
     },
+  },
+
+  // Mobile optimization for 1080x2400
+  "@media (max-width: 480px) and (max-height: 2400px)": {
+    padding: "clamp(6px, 1.5vh, 10px) clamp(12px, 3vw, 20px)",
+    fontSize: "clamp(12px, 3vw, 16px)",
+    minHeight: "40px",
   },
 }));
 
