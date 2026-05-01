@@ -25,20 +25,7 @@ import {
 const FunMode = () => {
   const navigate = useNavigate();
   const { monkeyModeEnabled, chaosChickenEnabled } = useFunModeSettings();
-  const {
-    gameState,
-    makeMove,
-    reset,
-    showMonkeyButton,
-    monkeyButtonPlayer,
-    triggerMonkeyMayhem, // CHANGE: This is now triggerMonkeyMode internally but kept for compatibility
-    isUpsideDown,
-    upsideDownTurnsLeft,
-    isMonkeyAnimating,
-    monkeyVoiceLine,
-    monkeyMayhemState, // CHANGE: This is now monkeyState internally but kept for compatibility
-    isGravityFalling,
-  } = useMonkeyMode({ monkeyModeEnabled });
+  const soundManager = useSoundManager();
 
   const {
     chaosChickenState,
@@ -55,8 +42,33 @@ const FunMode = () => {
     reset: resetChaosChicken,
   } = useChaosChicken({ chaosChickenEnabled });
 
+  const {
+    gameState,
+    makeMove,
+    reset,
+    showMonkeyButton,
+    monkeyButtonPlayer,
+    triggerMonkeyMayhem, // CHANGE: This is now triggerMonkeyMode internally but kept for compatibility
+    isUpsideDown,
+    upsideDownTurnsLeft,
+    isMonkeyAnimating,
+    monkeyVoiceLine,
+    monkeyMayhemState, // CHANGE: This is now monkeyState internally but kept for compatibility
+    isGravityFalling,
+    updateBoard,
+  } = useMonkeyMode({ 
+    monkeyModeEnabled,
+    onPiecePlaced: (newBoard, row, col, player) => {
+      // Execute immediately synchronously on piece drop
+      if (chaosChickenEnabled && checkChaosChickenTrigger(newBoard, row, col, player)) {
+        triggerChaosChicken(newBoard, player, soundManager, (updatedBoard) => {
+          updateBoard(updatedBoard);
+        });
+      }
+    }
+  });
+
   const { board, currentPlayer, winner, isDraw, isMonkeyWinner } = gameState;
-  const soundManager = useSoundManager();
 
   // CHANGE: Moved all effects to custom hook
   const { monkeyButtonTimer } = useFunModeEffects({
@@ -88,31 +100,6 @@ const FunMode = () => {
 
     // Check for Chaos Chicken trigger after successful move
     if (chaosChickenEnabled && !winner && !isDraw) {
-      // Find the row where the piece was placed
-      let placedRow = -1;
-      if (isUpsideDown) {
-        for (let row = 0; row < board.length; row++) {
-          if (board[row][col] !== "⚪") {
-            placedRow = row;
-            break;
-          }
-        }
-      } else {
-        for (let row = board.length - 1; row >= 0; row--) {
-          if (board[row][col] !== "⚪") {
-            placedRow = row;
-            break;
-          }
-        }
-      }
-
-      if (placedRow !== -1 && checkChaosChickenTrigger(board, placedRow, col, currentPlayer)) {
-        triggerChaosChicken(board, currentPlayer, soundManager, (newBoard) => {
-          // Update board after Rooster of Rage
-          // This would need to be integrated with the monkey mode state management
-        });
-      }
-
       // Update turn-based blocks
       updateTurnBasedBlocks();
     }

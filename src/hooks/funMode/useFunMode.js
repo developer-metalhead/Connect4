@@ -68,6 +68,12 @@ export const useFunMode = (options = {}) => {
 
       console.log("📋 BOARD AFTER MOVE:", newBoard.map((row) => row.join("")));
 
+      // Evaluate immediate piece placement extensions synchronously
+      if (options.onPiecePlaced) {
+        // Run any immediate triggers (like Chaos Chicken 2x2 detection) before turn switch
+        options.onPiecePlaced(newBoard, row, col, currentPlayer);
+      }
+
       let newState = { ...gameState, board: newBoard };
 
       // CHANGE: Check win condition with extension data

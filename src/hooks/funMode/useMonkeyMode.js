@@ -16,7 +16,7 @@ import { isValidMove,dropPiece } from "../../helperFunction/helperFunction";
 
 // CHANGE: Unified monkey mode hook (no more separate "mayhem" terminology)
 export const useMonkeyMode = (options = {}) => {
-  const { monkeyModeEnabled = true } = options;
+  const { monkeyModeEnabled = true, onPiecePlaced } = options;
 
   // CHANGE: Monkey-specific state (consolidated from previous separate hooks)
   const [showMonkeyButton, setShowMonkeyButton] = useState(false);
@@ -147,6 +147,7 @@ export const useMonkeyMode = (options = {}) => {
     customDropLogic,
     onMoveComplete: handleMoveComplete,
     onGameEnd: handleGameEnd,
+    onPiecePlaced,
   });
 
   // CHANGE: Trigger monkey mode (unified from previous "mayhem" function)
@@ -240,5 +241,6 @@ export const useMonkeyMode = (options = {}) => {
 
     // Monkey actions
     triggerMonkeyMayhem: triggerMonkeyMode, // CHANGE: Keep this name for backward compatibility
+    updateBoard: funModeHook.updateBoard,
   };
 };

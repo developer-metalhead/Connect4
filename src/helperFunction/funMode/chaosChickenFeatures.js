@@ -17,38 +17,48 @@ const ROOSTER_VOICE_LINES = [
   "Rage mode activated!",
 ];
 
-// Check if a 2x2 square was newly formed by the last move
-export const checkNew2x2Squares = (board, lastRow, lastCol, player) => {
-  console.log("🐔 CHECKING NEW 2x2 SQUARES:", { lastRow, lastCol, player });
+// Improved 2x2 Detection Function (Strict)
+export const detectNew2x2Squares = (board, player, lastRow, lastCol) => {
+  console.log(`🔍 Checking 2x2 immediately after placement at [${lastRow}][${lastCol}]`);
   
-  if (lastRow === -1 || lastCol === -1) return false;
+  if (lastRow === -1 || lastCol === -1) return { count: 0, squares: [] };
   
   const squares = [];
+  const ROWS = board.length;
+  const COLS = board[0].length;
   
-  // Check all possible 2x2 squares that could include the last placed disc
-  for (let startRow = Math.max(0, lastRow - 1); startRow <= Math.min(ROWS - 2, lastRow); startRow++) {
-    for (let startCol = Math.max(0, lastCol - 1); startCol <= Math.min(COLS - 2, lastCol); startCol++) {
-      // Check if this 2x2 square is complete with the player's discs
-      let isComplete = true;
-      for (let r = startRow; r < startRow + 2; r++) {
-        for (let c = startCol; c < startCol + 2; c++) {
-          if (board[r][c] !== player) {
-            isComplete = false;
-            break;
-          }
-        }
-        if (!isComplete) break;
-      }
-      
-      if (isComplete) {
-        squares.push({ startRow, startCol });
-        console.log("✅ FOUND 2x2 SQUARE:", { startRow, startCol, player });
+  // Check the maximum 4 possible 2x2 positions that can contain the newly placed disc:
+  // Top-left, Top-right, Bottom-left, Bottom-right
+  const possibleCorners = [
+    { r: lastRow, c: lastCol },         // Square is to the bottom-right
+    { r: lastRow, c: lastCol - 1 },     // Square is to the bottom-left
+    { r: lastRow - 1, c: lastCol },     // Square is to the top-right
+    { r: lastRow - 1, c: lastCol - 1 }  // Square is to the top-left
+  ];
+  
+  for (const corner of possibleCorners) {
+    const { r, c } = corner;
+    
+    // Bounds check
+    if (r >= 0 && r < ROWS - 1 && c >= 0 && c < COLS - 1) {
+      if (
+        board[r][c] === player &&
+        board[r][c + 1] === player &&
+        board[r + 1][c] === player &&
+        board[r + 1][c + 1] === player
+      ) {
+        squares.push({ startRow: r, startCol: c });
+        console.log(`✅ Found new 2x2 at [${r}][${c}] including placed cell`);
       }
     }
   }
   
-  console.log("📊 TOTAL NEW 2x2 SQUARES:", squares.length);
-  return squares.length > 0;
+  console.log(`📊 TOTAL NEW 2x2 SQUARES: ${squares.length}`);
+  if (squares.length > 0) {
+    console.log(`🚀 Triggering Chaos Chicken instantly for player ${player}`);
+  }
+  
+  return { count: squares.length, squares };
 };
 
 // Get random unblocked column
@@ -206,7 +216,8 @@ export const shouldTriggerChaosChicken = (board, lastRow, lastCol, player, chaos
   }
   
   // Check if new 2x2 square was formed
-  const hasNew2x2 = checkNew2x2Squares(board, lastRow, lastCol, player);
+  const { count } = detectNew2x2Squares(board, player, lastRow, lastCol);
+  const hasNew2x2 = count > 0;
   
   console.log("🎯 CHAOS CHICKEN DECISION:", {
     player,
