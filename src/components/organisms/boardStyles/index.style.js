@@ -2,7 +2,7 @@ import { styled } from "@mui/material/styles";
 
 export const BoardContainer = styled("div")({
   // Fluid sizing across devices
-  "--cell": "clamp(34px, 9vmin, 64px)",
+  "--cell": "clamp(34px, 9vmin, 50px)",
   "--gap": "clamp(6px, 2vmin, 12px)",
 
   background: "#0a1f45",
@@ -56,20 +56,22 @@ export const Cell = styled("div")({
   },
 });
 
+// CHANGE: Use same CSS variables as BoardContainer for perfect alignment and proper sizing
 export const PreviewRow = styled("div")({
   display: "grid",
-  gridTemplateColumns: "repeat(7, 75px)",
+  gridTemplateColumns: "repeat(7, 50px)",
   gap: "10px",
   height: "55px",
   marginBottom: "0px",
   justifyContent: "center",
+
   // CHANGE: Disable text selection for preview row
   userSelect: "none",
   WebkitUserSelect: "none",
 
   "& .preview-cell": {
-    width: "75px",
-    height: "75px",
+    width: "var(--cell)",
+    height: "var(--cell)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -82,12 +84,19 @@ export const PreviewRow = styled("div")({
   },
 
   "& .preview-piece": {
-    fontSize: "40px",
+    fontSize: "clamp(34px, 9vmin, 40px)",
     opacity: 0.6,
     transition: "all 0.2s",
     // CHANGE: Disable text selection for preview pieces
     userSelect: "none",
     WebkitUserSelect: "none",
+  },
+
+  // CHANGE: Mobile optimization for 1080x2400 screens
+  "@media (max-width: 480px) and (max-height: 2400px)": {
+    height: "clamp(35px, 8vmin, 55px)",
+    marginBottom: "clamp(2px, 0.5vmin, 4px)",
+    padding: "0 clamp(4px, 1.5vmin, 8px)",
   },
 });
 
