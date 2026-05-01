@@ -63,9 +63,9 @@ const FunConfirmationModal = ({ isOpen, onAccept, onDecline, onClose }) => {
   return (
     <ModalOverlay onClick={handleBackdropClick}>
       <ModalContainer>
-        <ModalTitle>🎉 Ready for More Fun? 🎉</ModalTitle>
+        <ModalTitle>I suck and want to give up</ModalTitle>
         <ModalMessage>
-          Do you want to have even MORE fun than this? 
+          Do you want to be such a sore loser? 
       
         </ModalMessage>
         <ButtonContainer>
@@ -76,7 +76,7 @@ const FunConfirmationModal = ({ isOpen, onAccept, onDecline, onClose }) => {
               minWidth: '120px',
             }}
           >
-            Yes, More Fun! 🚀
+            Yes, I am retarded !
           </CustomButton>
           <CustomButton 
             onClick={onDecline}
@@ -85,7 +85,7 @@ const FunConfirmationModal = ({ isOpen, onAccept, onDecline, onClose }) => {
               minWidth: '120px',
             }}
           >
-            No, I'm Good 😊
+            No, bring the pain !
           </CustomButton>
         </ButtonContainer>
       </ModalContainer>

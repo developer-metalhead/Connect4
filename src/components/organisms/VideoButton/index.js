@@ -143,7 +143,7 @@ const BoredVideoButton = ({ children = "Extremely Fun Button!", onGameReset, ...
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
-  }, [showVideoModal.bored, showPostVideoOverlay, handleCloseVideoModal, handleClosePostVideoOverlay]);
+  }, [showVideoModal.bored]);
 
   const isBoredPlaying = isPlaying.bored;
   const isBoredLoaded = isLoaded.bored;
@@ -192,12 +192,7 @@ const BoredVideoButton = ({ children = "Extremely Fun Button!", onGameReset, ...
         </VideoModal>
       )}
 
-      {/* CHANGE: Post-Video Overlay */}
-      <PostVideoOverlay
-        isVisible={showPostVideoOverlay}
-        onClose={handleClosePostVideoOverlay}
-        soundManager={soundManager}
-      />
+   
     </>
   );
 };
