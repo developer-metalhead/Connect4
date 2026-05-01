@@ -6,6 +6,11 @@ import useSoundManager from "../../hooks/core/useSoundManager.js";
 import { PageWrapper, MainContent } from "../../components/designSystem/Layout.style";
 import Button from "../../components/designSystem/Button";
 import BackButton from "../../components/designSystem/BackButton";
+import SettingsMenu from "../../components/designSystem/SettingsMenu";
+import SidePanel from "../../components/designSystem/SidePanel";
+import CPUSettings from "../../components/designSystem/CPUSettings";
+import FunModeSettings from "../../components/designSystem/FunModeSettings";
+import SoundSettings from "../../components/designSystem/SoundSettings";
 import Modal from "../../components/designSystem/Modal";
 import { 
   HomeHeader, 
@@ -14,18 +19,45 @@ import {
   Decoration 
 } from "./index.style";
 
-import FunModeSettings from "../../components/designSystem/FunModeSettings";
-import SoundSettings from "../../components/designSystem/SoundSettings";
+
 
 const HomeV2 = () => {
   const navigate = useNavigate();
   const [showFunModeSettings, setShowFunModeSettings] = useState(false);
   const [showSoundSettings, setShowSoundSettings] = useState(false);
   const soundManager = useSoundManager();
+  const [activePanel, setActivePanel] = useState(null); // 'fun', 'sound' or null
+
 
   return (
     <PageWrapper>
       <BackButton onClick={() => navigate("/")} soundManager={soundManager} />
+      
+      <SettingsMenu
+        soundManager={soundManager}
+        activeOption={activePanel}
+        onOptionClick={(id) => setActivePanel(activePanel === id ? null : id)}
+        options={[
+          { id: 'cpu', label: 'CPU Settings', icon: <span>🤖</span> },
+          { id: 'fun', label: 'Fun Mode Settings', icon: <span>🔥</span> },
+          { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
+        ]}
+      />
+
+      <SidePanel 
+        isOpen={activePanel !== null} 
+        onClose={() => setActivePanel(null)}
+        title={
+          activePanel === 'cpu' ? 'CPU Settings' :
+          activePanel === 'fun' ? 'Fun Mode Settings' :
+          'Sound Settings'
+        }
+      >
+        {activePanel === 'cpu' && <CPUSettings soundManager={soundManager} />}
+        {activePanel === 'fun' && <FunModeSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'sound' && <SoundSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+      </SidePanel>
+
       <Decoration style={{ top: '20%', left: '10%' }} />
       <Decoration style={{ bottom: '20%', right: '10%', background: '#6366f1' }} />
       
@@ -57,25 +89,7 @@ const HomeV2 = () => {
               Play Online
             </Button>
             
-            <Button 
-              variant="outline" 
-              size="lg" 
-              fullWidth 
-              onClick={() => setShowFunModeSettings(true)}
-              soundManager={soundManager}
-            >
-              Fun Mode Settings
-            </Button>
-
-            <Button 
-              variant="ghost" 
-              size="md" 
-              fullWidth 
-              onClick={() => setShowSoundSettings(true)}
-              soundManager={soundManager}
-            >
-              🔊 Sound Settings
-            </Button>
+           
           </MenuGrid>
         </div>
       </MainContent>

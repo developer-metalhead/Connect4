@@ -81,7 +81,7 @@ const CloseButton = styled("button")({
   "&:hover": {
     background: "rgba(255, 255, 255, 0.2)",
     color: "#fff",
-    transform: "rotate(90deg)",
+
   },
 
   "& svg": {

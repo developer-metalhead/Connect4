@@ -34,7 +34,7 @@ const MenuButton = styled("button")(({ active }) => ({
 
   "&:hover": {
     background: "rgba(255, 255, 255, 0.2)",
-    transform: "rotate(90deg)",
+  
     boxShadow: tokens.shadows.lg,
   },
 
