@@ -14,6 +14,8 @@ export const useVideoManager = () => {
   const [isPlaying, setIsPlaying] = useState({});
   const [isLoaded, setIsLoaded] = useState({});
   const [showVideoModal, setShowVideoModal] = useState({});
+  // CHANGE: Add state for post-video overlay
+  const [showPostVideoOverlay, setShowPostVideoOverlay] = useState(false);
 
   // Create video instance
   const createVideoInstance = useCallback((videoKey, config) => {
@@ -23,6 +25,8 @@ export const useVideoManager = () => {
       video.preload = 'metadata';
       video.volume = config.volume || 1;
       video.loop = config.loop || false;
+      // CHANGE: Set faster playback rate for snappier feel
+      video.playbackRate = 1.55;
       
       // CHANGE: Remove controls and make it behave like an animation
       video.controls = false;
@@ -57,6 +61,8 @@ export const useVideoManager = () => {
       video.addEventListener('ended', () => {
         setIsPlaying(prev => ({ ...prev, [videoKey]: false }));
         setShowVideoModal(prev => ({ ...prev, [videoKey]: false }));
+        // CHANGE: Trigger post-video overlay when video ends
+        setShowPostVideoOverlay(true);
         console.log(`🏁 Video ended: ${videoKey}`);
       });
 
@@ -107,7 +113,9 @@ export const useVideoManager = () => {
     }
 
     try {
-      video.currentTime = 0; // Reset to beginning
+      video.currentTime = 0;
+      // CHANGE: Ensure playback rate is set when playing
+      video.playbackRate = 1.55;
       const playPromise = video.play();
       
       if (playPromise) {
@@ -152,18 +160,20 @@ export const useVideoManager = () => {
     }
   }, []);
 
-  // Close video modal
   const closeVideoModal = useCallback((videoKey) => {
     setShowVideoModal(prev => ({ ...prev, [videoKey]: false }));
     stopVideo(videoKey);
   }, [stopVideo]);
 
-  // Play bored video specifically
+  // CHANGE: Add function to close post-video overlay
+  const closePostVideoOverlay = useCallback(() => {
+    setShowPostVideoOverlay(false);
+  }, []);
+
   const playBoredVideo = useCallback(() => {
     playVideo('bored');
   }, [playVideo]);
 
-  // Get video element for rendering in modal
   const getVideoElement = useCallback((videoKey) => {
     return videoInstancesRef.current[videoKey];
   }, []);
@@ -180,6 +190,9 @@ export const useVideoManager = () => {
     isPlaying,
     isLoaded,
     showVideoModal,
+    // CHANGE: Export post-video overlay state and controls
+    showPostVideoOverlay,
+    closePostVideoOverlay,
     
     // Utility
     isVideoSupported: Object.keys(videoInstancesRef.current).length > 0,
