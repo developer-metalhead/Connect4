@@ -19,10 +19,14 @@ const Board = ({
   isDraw,
   onDrop,
   canInteract = true,
-  soundManager, // Add sound manager prop
-  isUpsideDown = false, // CHANGE: Add isUpsideDown prop
-  gravityAnimation = null, // NEW: batch animation plan for restoring gravity
-
+  soundManager,
+  isUpsideDown = false,
+  gravityAnimation = null,
+  isCpuDropping = false,
+  cpuDroppingCol = null,
+  winningLine = null,
+  blockedColumns = [],
+  onBlockedColumnAttempt = null,
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
@@ -57,7 +61,7 @@ const Board = ({
 
   // CHANGE: Check if column is blocked by poop
   const isColumnBlockedByPoop = (col) => {
-    return blockedColumns.some(block => block.columnIndex === col && block.turnsLeft > 0);
+    return (blockedColumns || []).some(block => block.columnIndex === col && block.turnsLeft > 0);
   };
 
   const handleClick = (col) => {
@@ -275,7 +279,7 @@ const Board = ({
   }, [activeCol, board, winner, isDraw, canInteract, isUpsideDown]);
 
   return (
-    <>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
       {/* CHANGE: Conditionally render preview row based on board orientation */}
       {!isUpsideDown && (
         <PreviewRow>
@@ -305,7 +309,7 @@ const Board = ({
 
       <BoardContainer data-board-container>
         {/* CHANGE: Add poop block indicators */}
-        {blockedColumns.map((block) => (
+        {(blockedColumns || []).map((block) => (
           <PoopBlockIndicator
             key={`poop-${block.columnIndex}`}
             columnIndex={block.columnIndex}
@@ -314,7 +318,7 @@ const Board = ({
         ))}
 
         {/* Column highlights */}
-        {activeCol !== null && droppingCol === null && (
+        {activeCol !== null && droppingCol === null && activeTargetRow !== -1 && (
           <ColumnHighlight
             style={{
               left: `calc(var(--board-padding) + ${activeCol} * (var(--cell) + var(--gap)) - 3px)`,
@@ -414,6 +418,10 @@ const Board = ({
                 {/* Hide original from-cells while overlay is animating */}
                 {maskedKeys && maskedKeys.has(`${r},${c}`) ? "⚪" : cell}
 
+                {/* Ghost Preview Disc */}
+                {previewRow === r && activeCol === c && (
+                  <GhostDisc>{currentPlayer}</GhostDisc>
+                )}
               </Cell>
             ))}
           </Row>
