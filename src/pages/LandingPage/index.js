@@ -90,38 +90,40 @@ const LandingPage = () => {
   const soundManager = useSoundManager();
 
   return (
-    <SelectorContainer>
-      <GlassCard>
-        <Logo>Connect 4</Logo>
-        <Subtitle>Select your experience</Subtitle>
-        
-        <ButtonGroup>
-          <Button 
-            variant="primary" 
-            fullWidth 
-            size="lg"
-            onClick={() => navigate("/home")}
-            soundManager={soundManager}
-          >
-            Play Overhauled <VersionTag>V2</VersionTag>
-          </Button>
+    <PageWrapper>
+      <SelectorContainer>
+        <GlassCard>
+          <Logo>Connect 4</Logo>
+          <Subtitle>Select your experience</Subtitle>
           
-          <Button 
-            variant="outline" 
-            fullWidth 
-            size="lg"
-            onClick={() => navigate("/legacy")}
-            soundManager={soundManager}
-            style={{ 
-              borderColor: "rgba(255, 255, 255, 0.2)",
-              color: "rgba(255, 255, 255, 0.8)"
-            }}
-          >
-            Play Legacy <VersionTag>Classic</VersionTag>
-          </Button>
-        </ButtonGroup>
-      </GlassCard>
-    </SelectorContainer>
+          <ButtonGroup>
+            <Button 
+              variant="primary" 
+              fullWidth 
+              size="lg"
+              onClick={() => navigate("/home")}
+              soundManager={soundManager}
+            >
+              Play Overhauled <VersionTag>V2</VersionTag>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              fullWidth 
+              size="lg"
+              onClick={() => navigate("/legacy")}
+              soundManager={soundManager}
+              style={{ 
+                borderColor: "rgba(255, 255, 255, 0.2)",
+                color: "rgba(255, 255, 255, 0.8)"
+              }}
+            >
+              Play Legacy <VersionTag>Classic</VersionTag>
+            </Button>
+          </ButtonGroup>
+        </GlassCard>
+      </SelectorContainer>
+    </PageWrapper>
   );
 };
 

@@ -10,10 +10,14 @@ export const GlobalLayoutStyles = (
         margin: 0,
         padding: 0,
       },
-      "body": {
-        overflow: "hidden",
+      "html, body": {
+        overflow: "hidden !important",
+        overscrollBehavior: "none !important",
+        height: "100%",
+        width: "100%",
+        position: "fixed",
       },
-      /* Custom Themed Scrollbar */
+      /* Custom Themed Scrollbar for internal panels */
       "*::-webkit-scrollbar": {
         width: "6px",
       },
@@ -34,21 +38,20 @@ export const GlobalLayoutStyles = (
   />
 );
 
-export const PageWrapper = styled("div", {
-  shouldForwardProp: (prop) => prop !== "disableScroll",
-})(({ disableScroll = true }) => ({
+export const PageWrapper = styled("div")({
   height: "100vh",
-  width: "100%",
+  width: "100vw",
   backgroundColor: tokens.colors.background,
   backgroundImage: `radial-gradient(circle at 50% 0%, #1e293b 0%, ${tokens.colors.background} 70%)`,
   color: tokens.colors.text,
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  overflow: "hidden", 
-  position: "relative",
-  touchAction: "none",
-}));
+  overflow: "hidden !important", 
+  position: "fixed", // Hard lock
+  inset: 0,
+  touchAction: "none !important",
+});
 
 export const Header = styled("header")({
   width: "100%",
@@ -101,9 +104,9 @@ export const MainContent = styled("main")({
   alignItems: "center",
   padding: "16px",
   gap: "16px",
-  overflowY: "auto", // Allow internal scrolling if content is too tall
+  overflowY: "auto", // Only internal scrolling allowed
   overflowX: "hidden",
-  justifyContent: "flex-start", // Start from top to avoid vertical clipping
+  justifyContent: "flex-start",
 
   "@media (min-width: 768px)": {
     padding: "24px", 

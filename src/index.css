@@ -1,34 +1,31 @@
-/* Main styles */
-body {
+html, body {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden !important;
+  overscroll-behavior: none !important; /* Disable pull-to-refresh and bounce */
+  position: fixed;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  
-  overflow-x: hidden;        /* Already had this */
-  overflow-y: hidden;        /* Ensures scrolling still works */
-  
-  /* Hide scrollbar - Works on all major browsers */
+}
+
+/* Hide scrollbar - Works on all major browsers */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+* {
   scrollbar-width: none;     /* Firefox */
   -ms-overflow-style: none;  /* IE and Edge */
-}
-
-/* Chrome, Safari, Edge, Opera */
-body::-webkit-scrollbar {
-  display: none;
-}
-
-/* Also apply to html for better compatibility */
-html {
-  overflow-x: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-html::-webkit-scrollbar {
-  display: none;
+  box-sizing: border-box;
 }
 
 /* Code styles */
