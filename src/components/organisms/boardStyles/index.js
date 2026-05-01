@@ -197,13 +197,18 @@ const Board = ({
     if (targetRow === -1) return null;
     
     const startRow = isUpsideDown ? board.length : -1;
+    const distance = isUpsideDown ? targetRow + 1 : board.length - targetRow;
+    
     return {
       col: cpuDroppingCol,
       targetRow,
       currentRow: startRow,
       player: "🟡", // CPU player emoji
+      // CHANGE: Calculate exact animation duration to match useConnect4CPU timing
+      animationDuration: 400 + Math.abs(distance) * 50,
     };
   })() : null;
+
 
   return (
     <>
@@ -262,12 +267,13 @@ const Board = ({
           </FallingDisc>
         )}
 
-        {/* CHANGE: Add CPU falling disc animation */}
+        {/* CHANGE: Add CPU falling disc animation with synchronized timing */}
         {cpuFallingDisc && (
           <FallingDisc
             style={{
               left: `calc(${cpuFallingDisc.col} * (var(--cell) + var(--gap)) + var(--gap))`,
-              animationDuration: `${400 + Math.abs(cpuFallingDisc.targetRow - cpuFallingDisc.currentRow) * 50}ms`,
+              // CHANGE: Use calculated duration from cpuFallingDisc object
+              animationDuration: `${cpuFallingDisc.animationDuration}ms`,
               "--target-row": cpuFallingDisc.targetRow,
               "--start-row": cpuFallingDisc.currentRow,
               "--is-upside-down": isUpsideDown ? 1 : 0,
@@ -276,6 +282,7 @@ const Board = ({
             {cpuFallingDisc.player}
           </FallingDisc>
         )}
+
 
         {/* NEW: Batch falling overlays when restoring normal gravity */}
         {Array.isArray(gravityAnimation) &&

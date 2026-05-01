@@ -348,7 +348,18 @@ export const useConnect4CPU = () => {
       setIsCpuDropping(true);
       setCpuDroppingCol(col);
 
-      // CHANGE: Delay the actual game state update to allow animation
+      // CHANGE: Calculate animation duration to match Board component timing
+      let targetRow = -1;
+      for (let row = board.length - 1; row >= 0; row--) {
+        if (board[row][col] === "⚪") {
+          targetRow = row;
+          break;
+        }
+      }
+      const distance = board.length - targetRow;
+      const animationDuration = 230 + Math.abs(distance) * 50;
+
+      // CHANGE: Delay the actual game state update to match exact animation duration
       setTimeout(() => {
         const { newBoard, row } = dropPiece(board, col, CPU);
         setGameState((prev) => {
@@ -366,13 +377,14 @@ export const useConnect4CPU = () => {
         // CHANGE: Clear CPU dropping state after move is complete
         setIsCpuDropping(false);
         setCpuDroppingCol(null);
-      }, 800); // Animation duration to match player animation
+      }, animationDuration); // CHANGE: Use calculated animation duration instead of fixed 800ms
     }, 350); // small delay for UX
 
     return () => {
       if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
     };
   }, [gameState]);
+
 
   // Learn at end of game (penalize losing CPU moves; forgive on win)
   useEffect(() => {
