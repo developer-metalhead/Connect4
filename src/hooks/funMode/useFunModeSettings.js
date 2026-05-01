@@ -4,8 +4,8 @@ const STORAGE_KEY = "c4_fun_mode_settings_v1";
 const DEFAULTS = {
   monkeyModeEnabled: true,
   // CHANGE: Ready for future features to be added here
-  chaosChickenEnabled: false,
   powerUpsEnabled: false,
+  chaosChickenEnabled: true,
 };
 
 const load = () => {
@@ -53,6 +53,14 @@ const useFunModeSettings = () => {
     toggleFeature('monkeyModeEnabled');
   }, [toggleFeature]);
 
+  const setChaosChickenEnabled = useCallback((v) => {
+    setSettings((s) => ({ ...s, chaosChickenEnabled: !!v }));
+  }, []);
+
+  const toggleChaosChicken = useCallback(() => {
+    setSettings((s) => ({ ...s, chaosChickenEnabled: !s.chaosChickenEnabled }));
+  }, []);
+
   return {
     settings,
     
@@ -62,8 +70,11 @@ const useFunModeSettings = () => {
     
     // Direct accessors for convenience
     monkeyModeEnabled: settings.monkeyModeEnabled,
+    chaosChickenEnabled: settings.chaosChickenEnabled,
     setMonkeyModeEnabled,
+    setChaosChickenEnabled,
     toggleMonkeyMode,
+    toggleChaosChicken,
     
     // CHANGE: Ready for future features
     chaosChickenEnabled: settings.chaosChickenEnabled,

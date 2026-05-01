@@ -145,13 +145,16 @@ export const flipBoardUpsideDown = (board) => {
   return newBoard;
 };
 
+// === MONKEY STEAL DISC LOGIC ===
+// Probability check and disc stealing function starts here
 export const maybeStealDisc = (board, triggeringPlayer, isUpsideDown = false) => {
-  if (Math.random() > 0.5) {
-    console.log("🍌 NO DISC STOLEN (50% chance)");
-    return board;
+// Probability of monkey stealing a disc = 75%
+  if (Math.random() > 0.25) {   // 75% chance to steal
+    console.log("🍌 NO DISC STOLEN (25% chance)");
+    return { newBoard: board, stolenCell: null };
   }
 
-  console.log("🍌 MONKEY STEALING A DISC! (50% chance)");
+  console.log("🍌 MONKEY STEALING A DISC! (75% chance)");
 
   const opponentPlayer = triggeringPlayer === "🔴" ? "🟡" : "🔴";
   
@@ -166,7 +169,7 @@ export const maybeStealDisc = (board, triggeringPlayer, isUpsideDown = false) =>
 
   if (opponentCells.length === 0) {
     console.log("❌ NO OPPONENT DISCS TO STEAL");
-    return board;
+    return { newBoard: board, stolenCell: null };
   }
 
   const randomCell =
@@ -210,7 +213,7 @@ export const maybeStealDisc = (board, triggeringPlayer, isUpsideDown = false) =>
     "📋 AFTER DISC THEFT:",
     newBoard.map((row) => row.join("")),
   );
-  return newBoard;
+  return { newBoard, stolenCell: randomCell, opponentPlayer };
 };
 
 export const getRandomMonkeyVoiceLine = () => {

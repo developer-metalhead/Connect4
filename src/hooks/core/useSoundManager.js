@@ -23,6 +23,11 @@ const SOUND_CONFIG = {
     volume: 0.6,
     pitchVariation: false,
   },
+  coinsfalling: {
+    files: ["coinsfalling.mp3", "coinsfalling.ogg"],
+    volume: 0.8,
+    pitchVariation: false,
+  },
   // CHANGE: Add monkey laugh sound for post-video overlay
   monkeylaugh: {
     files: ["monkeylaugh.mp3", "monkeylaugh.ogg"],

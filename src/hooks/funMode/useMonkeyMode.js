@@ -16,7 +16,7 @@ import { isValidMove,dropPiece } from "../../helperFunction/helperFunction";
 
 // CHANGE: Unified monkey mode hook (no more separate "mayhem" terminology)
 export const useMonkeyMode = (options = {}) => {
-  const { monkeyModeEnabled = true } = options;
+  const { monkeyModeEnabled = true, onPiecePlaced, soundManager, onOverlayShow } = options;
 
   // CHANGE: Monkey-specific state (consolidated from previous separate hooks)
   const [showMonkeyButton, setShowMonkeyButton] = useState(false);
@@ -147,6 +147,7 @@ export const useMonkeyMode = (options = {}) => {
     customDropLogic,
     onMoveComplete: handleMoveComplete,
     onGameEnd: handleGameEnd,
+    onPiecePlaced,
   });
 
   // CHANGE: Trigger monkey mode (unified from previous "mayhem" function)
@@ -175,7 +176,21 @@ export const useMonkeyMode = (options = {}) => {
 
     setTimeout(() => {
       let flippedBoard = flipBoardUpsideDown(funModeHook.gameState.board);
-      flippedBoard = maybeStealDisc(flippedBoard, monkeyButtonPlayer, true);
+      
+      const { newBoard: afterStealBoard, stolenCell, opponentPlayer } = maybeStealDisc(flippedBoard, monkeyButtonPlayer, true);
+      flippedBoard = afterStealBoard;
+
+      // === MONKEY MAYHEM OVERLAY ===
+      if (stolenCell && onOverlayShow) {
+        // === AUDIO: Play coinfalling.mp3 when discs are removed ===
+        soundManager?.playSound('coinsfalling');
+        onOverlayShow({
+          type: "monkey",
+          count: 1,
+          col: stolenCell.col,
+          player: opponentPlayer
+        });
+      }
 
       funModeHook.updateBoard(flippedBoard);
       setIsUpsideDown(true);
@@ -240,5 +255,6 @@ export const useMonkeyMode = (options = {}) => {
 
     // Monkey actions
     triggerMonkeyMayhem: triggerMonkeyMode, // CHANGE: Keep this name for backward compatibility
+    updateBoard: funModeHook.updateBoard,
   };
 };

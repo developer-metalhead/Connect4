@@ -10,6 +10,7 @@ import {
   WinningLine,
   GhostDisc,
 } from "./index.style";
+import PoopBlockIndicator from "../../features/ChaosChicken/PoopBlockIndicator";
 
 const Board = ({
   board,
@@ -18,18 +19,18 @@ const Board = ({
   isDraw,
   onDrop,
   canInteract = true,
-  soundManager, // Add sound manager prop
-  isUpsideDown = false, // CHANGE: Add isUpsideDown prop
-  gravityAnimation = null, // NEW: batch animation plan for restoring gravity
-  // CHANGE: Add CPU dropping props for animation
+  soundManager,
+  isUpsideDown = false,
+  gravityAnimation = null,
   isCpuDropping = false,
   cpuDroppingCol = null,
-  winningLine = null, // CHANGE: Add winningLine prop
+  winningLine = null,
+  blockedColumns = [],
+  onBlockedColumnAttempt = null,
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
   const [fallingDisc, setFallingDisc] = useState(null);
-  // CHANGE: Add touch state for mobile interactions
   const [touchCol, setTouchCol] = useState(null);
   const [touchTimeout, setTouchTimeout] = useState(null);
 
@@ -39,7 +40,6 @@ const Board = ({
       ? new Set(gravityAnimation.map((a) => `${a.fromRow},${a.col}`))
       : null;
 
-  // CHANGE: Clear touch timeout when component unmounts or state changes
   const clearTouchTimeout = () => {
     if (touchTimeout) {
       clearTimeout(touchTimeout);
@@ -47,33 +47,52 @@ const Board = ({
     }
   };
 
-  // CHANGE: Helper function to get column from touch coordinates
   const getColumnFromTouch = (touch) => {
     const boardElement = document.querySelector('[data-board-container]');
     if (!boardElement) return null;
     
     const rect = boardElement.getBoundingClientRect();
     const x = touch.clientX - rect.left;
-    const cellWidth = rect.width / 7; // 7 columns
+    const cellWidth = rect.width / 7;
     const col = Math.floor(x / cellWidth);
     
     return col >= 0 && col < 7 ? col : null;
   };
 
+  // CHANGE: Check if column is blocked by poop
+  const isColumnBlockedByPoop = (col) => {
+    return (blockedColumns || []).some(block => block.columnIndex === col && block.turnsLeft > 0);
+  };
+
   const handleClick = (col) => {
     if (winner || isDraw || !canInteract || droppingCol !== null) return;
 
+    // CHANGE: Handle blocked columns
+    if (isColumnBlockedByPoop(col)) {
+      console.log("💩 ATTEMPTED DROP ON BLOCKED COLUMN:", col);
+      if (onBlockedColumnAttempt) {
+        const redirectCol = onBlockedColumnAttempt(col);
+        if (redirectCol !== -1 && redirectCol !== col) {
+          console.log("🔄 REDIRECTING TO COLUMN:", redirectCol);
+          col = redirectCol;
+        } else {
+          console.log("❌ NO ALTERNATIVE COLUMN AVAILABLE");
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+
     // Clear hover state immediately when drop begins
     setHoverCol(null);
-    // CHANGE: Clear touch state when drop begins
     setTouchCol(null);
     clearTouchTimeout();
     setDroppingCol(col);
 
-    // CHANGE: Find target row based on board orientation
+    // Find target row based on board orientation
     let targetRow = -1;
     if (isUpsideDown) {
-      // In upside-down mode, find first empty row from top
       for (let row = 0; row < board.length; row++) {
         if (board[row][col] === "⚪") {
           targetRow = row;
@@ -81,7 +100,6 @@ const Board = ({
         }
       }
     } else {
-      // Normal mode, find first empty row from bottom
       for (let row = board.length - 1; row >= 0; row--) {
         if (board[row][col] === "⚪") {
           targetRow = row;
@@ -90,12 +108,10 @@ const Board = ({
       }
     }
 
-    if (targetRow === -1) return; // Column is full
+    if (targetRow === -1) return;
 
-    // CHANGE: Adjust falling animation for upside-down mode
     const startRow = isUpsideDown ? board.length : -1;
 
-    // Start falling animation
     setFallingDisc({
       col,
       targetRow,
@@ -103,16 +119,14 @@ const Board = ({
       player: currentPlayer,
     });
 
-    // Animation duration based on distance (more realistic)
     const distance = isUpsideDown ? targetRow + 1 : board.length - targetRow;
     const animationDuration = 300 + distance * 50;
 
-    // CHANGE: Play drop sound earlier - at 30% of animation duration instead of near the end
     setTimeout(() => {
       if (soundManager) {
         soundManager.playDropSound();
       }
-    }, animationDuration * 0.1); // Play sound at 30% of animation completion
+    }, animationDuration * 0.1);
 
     setTimeout(() => {
       setFallingDisc(null);
@@ -123,8 +137,13 @@ const Board = ({
 
   const handleMouseEnter = (col) => {
     if (canInteract && !winner && !isDraw && droppingCol === null) {
+      // CHANGE: Show different hover state for blocked columns
+      if (isColumnBlockedByPoop(col)) {
+        setHoverCol(null); // Don't highlight blocked columns
+        return;
+      }
+      
       setHoverCol(col);
-      // Play hover sound
       if (soundManager) {
         soundManager.playHoverSound();
       }
@@ -137,29 +156,39 @@ const Board = ({
     }
   };
 
-  // CHANGE: Add touch start handler for mobile preview
   const handleTouchStart = (col) => {
     if (canInteract && !winner && !isDraw && droppingCol === null) {
       clearTouchTimeout();
+      
+      // CHANGE: Don't highlight blocked columns on touch
+      if (isColumnBlockedByPoop(col)) {
+        setTouchCol(null);
+        return;
+      }
+      
       setTouchCol(col);
-      // Play hover sound on touch
       if (soundManager) {
         soundManager.playHoverSound();
       }
     }
   };
 
-  // CHANGE: Add touch move handler to track finger sliding across columns
   const handleTouchMove = (e) => {
     if (canInteract && !winner && !isDraw && droppingCol === null) {
-      e.preventDefault(); // Prevent scrolling
+      e.preventDefault();
       const touch = e.touches[0];
       const newCol = getColumnFromTouch(touch);
       
       if (newCol !== null && newCol !== touchCol) {
         clearTouchTimeout();
+        
+        // CHANGE: Don't highlight blocked columns
+        if (isColumnBlockedByPoop(newCol)) {
+          setTouchCol(null);
+          return;
+        }
+        
         setTouchCol(newCol);
-        // CHANGE: Reduced sound frequency to avoid audio spam during sliding
         if (soundManager && Math.abs(newCol - (touchCol || 0)) === 1) {
           soundManager.playHoverSound();
         }
@@ -167,15 +196,12 @@ const Board = ({
     }
   };
 
-  // CHANGE: Modified touch end handler to auto-drop piece in highlighted column
   const handleTouchEnd = (e) => {
     if (canInteract && droppingCol === null && touchCol !== null) {
-      // Auto-drop the piece in the currently highlighted column
       handleClick(touchCol);
     }
   };
 
-  // CHANGE: Determine which column should show preview/highlight
   const activeCol = hoverCol !== null ? hoverCol : touchCol;
 
   // Calculate target row for the active column highlight
@@ -272,7 +298,8 @@ const Board = ({
                 canInteract &&
                 !winner &&
                 !isDraw &&
-                droppingCol === null && (
+                droppingCol === null &&
+                !isColumnBlockedByPoop(col) && (
                   <span className="preview-piece">{currentPlayer}</span>
                 )}
             </div>
@@ -281,6 +308,15 @@ const Board = ({
       )}
 
       <BoardContainer data-board-container>
+        {/* CHANGE: Add poop block indicators */}
+        {(blockedColumns || []).map((block) => (
+          <PoopBlockIndicator
+            key={`poop-${block.columnIndex}`}
+            columnIndex={block.columnIndex}
+            turnsLeft={block.turnsLeft}
+          />
+        ))}
+
         {/* Column highlights */}
         {activeCol !== null && droppingCol === null && activeTargetRow !== -1 && (
           <ColumnHighlight
@@ -305,7 +341,6 @@ const Board = ({
           />
         )}
 
-        {/* CHANGE: Adjust falling disc animation for upside-down mode */}
         {fallingDisc && (
           <FallingDisc
             style={{
@@ -337,12 +372,11 @@ const Board = ({
         )}
 
 
-        {/* NEW: Batch falling overlays when restoring normal gravity */}
         {Array.isArray(gravityAnimation) &&
           gravityAnimation.length > 0 &&
           gravityAnimation.map((d, i) => {
             const distance = Math.max(0, d.toRow - d.fromRow);
-            const duration = 300 + distance * 70; // keep in sync with planner
+            const duration = 300 + distance * 70;
             return (
               <FallingDisc
                 key={`grav-${i}`}
@@ -359,7 +393,6 @@ const Board = ({
             );
           })}
 
-
         {board.map((row, r) => (
           <Row key={r}>
             {row.map((cell, c) => (
@@ -374,11 +407,12 @@ const Board = ({
                 className={droppingCol === c ? "dropping" : ""}
                 style={{
                   cursor:
-                    canInteract && !winner && !isDraw && droppingCol === null
+                    canInteract && !winner && !isDraw && droppingCol === null && !isColumnBlockedByPoop(c)
                       ? "pointer"
                       : "default",
-
                   opacity: droppingCol !== null && droppingCol !== c ? 0.7 : 1,
+                  // CHANGE: Visual indication for blocked columns
+                  filter: isColumnBlockedByPoop(c) ? "grayscale(0.5) brightness(0.8)" : "none",
                 }}
               >
                 {/* Hide original from-cells while overlay is animating */}
@@ -449,7 +483,8 @@ const Board = ({
                 canInteract &&
                 !winner &&
                 !isDraw &&
-                droppingCol === null && (
+                droppingCol === null &&
+                !isColumnBlockedByPoop(col) && (
                   <span className="preview-piece">{currentPlayer}</span>
                 )}
             </div>
