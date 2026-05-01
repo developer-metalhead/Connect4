@@ -26,6 +26,7 @@ import { MonkeyModeContainer } from "../../components/designSystem/Features/monk
 import MonkeyAnimation from "../../components/designSystem/Features/monkeyMayhem/MonkeyAnimation";
 import ChickenAnimation from "../../components/designSystem/Features/chaosChicken/ChickenAnimation";
 import ChickenIndicators from "../../components/designSystem/Features/chaosChicken/ChickenIndicators";
+import PoopBlockIndicator from "../../components/designSystem/Features/chaosChicken/PoopBlockIndicator";
 import RemovalOverlay from "../../components/designSystem/Features/core/RemovalOverlay";
 import useFunModeSettings from "../../hooks/funMode/useFunModeSettings";
 import { useFunModeEffects } from "../../hooks/funMode/useFunModeEffects";
@@ -209,6 +210,7 @@ const FunModeV2 = () => {
               blockedColumns={chaosChickenEnabled ? blockedColumns : []}
               onBlockedColumnAttempt={chaosChickenEnabled ? handleBlockedColumnDrop : undefined}
               winningLine={gameState.winningLine}
+              PoopBlockIndicatorComponent={PoopBlockIndicator}
             />
           </FunModeBoardWrapper>
 

@@ -17,6 +17,7 @@ import Board from "../../../components/organisms/boardStyles";
 import PostVideoOverlay from "../../../components/designSystem/PostVideoOverlay";
 import VideoButton from "../../../components/designSystem/VideoButton";
 import SoundSettings from "../../../components/designSystem/SoundSettings";
+import PoopBlockIndicator from "../../../components/designSystem/Features/chaosChicken/PoopBlockIndicator";
 import Modal from "../../../components/designSystem/Modal";
 
 const PlayCPUV2 = () => {
@@ -108,6 +109,7 @@ const PlayCPUV2 = () => {
             isCpuDropping={isCpuDropping}
             cpuDroppingCol={cpuDroppingCol}
             winningLine={gameState.winningLine}
+            PoopBlockIndicatorComponent={PoopBlockIndicator}
           />
 
           <GameStatus 
