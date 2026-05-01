@@ -291,9 +291,10 @@ const updateMemoryOnGameEnd = ({ winner }, historyRef) => {
 
 export const useConnect4CPU = () => {
   const [gameState, setGameState] = useState(resetGame);
-  // CHANGE: Add state to track when CPU is dropping a piece for animation
   const [isCpuDropping, setIsCpuDropping] = useState(false);
   const [cpuDroppingCol, setCpuDroppingCol] = useState(null);
+  // CHANGE: Add state to trigger PostVideoOverlay when CPU wins
+  const [shouldShowPostVideoOverlay, setShouldShowPostVideoOverlay] = useState(false);
   const aiTimerRef = useRef(null);
   const historyRef = useRef([]); // track states & CPU moves for mistake memory
 
@@ -344,11 +345,10 @@ export const useConnect4CPU = () => {
         player: CPU,
       });
 
-      // CHANGE: Set CPU dropping state before making the move
       setIsCpuDropping(true);
       setCpuDroppingCol(col);
 
-      // CHANGE: Calculate animation duration to match Board component timing
+      // Calculate animation duration to match Board component timing
       let targetRow = -1;
       for (let row = board.length - 1; row >= 0; row--) {
         if (board[row][col] === "⚪") {
@@ -359,7 +359,7 @@ export const useConnect4CPU = () => {
       const distance = board.length - targetRow;
       const animationDuration = 230 + Math.abs(distance) * 50;
 
-      // CHANGE: Delay the actual game state update to match exact animation duration
+      // Delay the actual game state update to match exact animation duration
       setTimeout(() => {
         const { newBoard, row } = dropPiece(board, col, CPU);
         setGameState((prev) => {
@@ -374,10 +374,17 @@ export const useConnect4CPU = () => {
           return next;
         });
 
-        // CHANGE: Clear CPU dropping state after move is complete
         setIsCpuDropping(false);
         setCpuDroppingCol(null);
-      }, animationDuration); // CHANGE: Use calculated animation duration instead of fixed 800ms
+
+        // CHANGE: Check if CPU won and trigger PostVideoOverlay after 0.5 seconds
+        const { newBoard: finalBoard, row: finalRow } = dropPiece(board, col, CPU);
+        if (checkWin(finalBoard, finalRow, col, CPU)) {
+          setTimeout(() => {
+            setShouldShowPostVideoOverlay(true);
+          }, 400);
+        }
+      }, animationDuration);
     }, 350); // small delay for UX
 
     return () => {
@@ -396,10 +403,16 @@ export const useConnect4CPU = () => {
   const reset = useCallback(() => {
     if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
     historyRef.current = [];
-    // CHANGE: Reset CPU dropping state on game reset
     setIsCpuDropping(false);
     setCpuDroppingCol(null);
+    // CHANGE: Reset PostVideoOverlay state on game reset
+    setShouldShowPostVideoOverlay(false);
     setGameState(resetGame());
+  }, []);
+
+  // CHANGE: Add function to close PostVideoOverlay
+  const closePostVideoOverlay = useCallback(() => {
+    setShouldShowPostVideoOverlay(false);
   }, []);
 
   const isCpuTurn = gameState.currentPlayer === CPU;
@@ -411,9 +424,11 @@ export const useConnect4CPU = () => {
     isCpuTurn, 
     HUMAN, 
     CPU,
-    // CHANGE: Export CPU dropping state for Board component
     isCpuDropping,
-    cpuDroppingCol
+    cpuDroppingCol,
+    // CHANGE: Export PostVideoOverlay state and controls
+    shouldShowPostVideoOverlay,
+    closePostVideoOverlay
   };
 };
 

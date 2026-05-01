@@ -51,18 +51,15 @@ const Game2P = () => {
       />
 
       <ButtonContainer>
-        <CustomButton onClick={reset} soundManager={soundManager}>
-          New Game
-        </CustomButton>
+      <BoredVideoButton onGameReset={reset}>
+        Give Up!
+        </BoredVideoButton>
         <CustomButton
           onClick={() => navigate("/play-offline")}
           soundManager={soundManager}
         >
           Back to Menu
         </CustomButton>
-        <BoredVideoButton onGameReset={reset}>
-          Extremely Fun Button!
-        </BoredVideoButton>
       </ButtonContainer>
     </PageContainer>
   );
