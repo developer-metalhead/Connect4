@@ -312,8 +312,10 @@ export const useConnect4CPU = () => {
       const { newBoard, row } = dropPiece(board, col, HUMAN);
       let next = { ...gameState, board: newBoard };
 
-      if (checkWin(newBoard, row, col, HUMAN)) {
+      const winResult = checkWin(newBoard, row, col, HUMAN);
+      if (winResult) {
         next.winner = HUMAN;
+        next.winningLine = winResult;
       } else if (isBoardFull(newBoard)) {
         next.isDraw = true;
       } else {
@@ -364,8 +366,10 @@ export const useConnect4CPU = () => {
         const { newBoard, row } = dropPiece(board, col, CPU);
         setGameState((prev) => {
           const next = { ...prev, board: newBoard };
-          if (checkWin(newBoard, row, col, CPU)) {
+          const winResult = checkWin(newBoard, row, col, CPU);
+          if (winResult) {
             next.winner = CPU;
+            next.winningLine = winResult;
           } else if (isBoardFull(newBoard)) {
             next.isDraw = true;
           } else {
@@ -382,7 +386,7 @@ export const useConnect4CPU = () => {
         if (checkWin(finalBoard, finalRow, col, CPU)) {
           setTimeout(() => {
             setShouldShowPostVideoOverlay(true);
-          }, 400);
+          }, 1000);
         }
       }, animationDuration);
     }, 350); // small delay for UX

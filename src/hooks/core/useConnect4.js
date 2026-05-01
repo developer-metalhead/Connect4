@@ -21,8 +21,10 @@ export const useConnect4 = () => {
 
       let newState = { ...gameState, board: newBoard };
 
-      if (checkWin(newBoard, row, col, currentPlayer)) {
+      const winResult = checkWin(newBoard, row, col, currentPlayer);
+      if (winResult) {
         newState.winner = currentPlayer;
+        newState.winningLine = winResult;
       } else if (isBoardFull(newBoard)) {
         newState.isDraw = true;
       } else {

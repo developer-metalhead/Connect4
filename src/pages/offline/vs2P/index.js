@@ -48,6 +48,7 @@ const Game2P = () => {
         isDraw={isDraw}
         onDrop={makeMove}
         soundManager={soundManager}
+        winningLine={gameState.winningLine}
       />
 
       <ButtonContainer>

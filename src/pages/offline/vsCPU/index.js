@@ -83,6 +83,7 @@ const PlayCPU = () => {
         soundManager={soundManager}
         isCpuDropping={isCpuDropping}
         cpuDroppingCol={cpuDroppingCol}
+        winningLine={gameState.winningLine}
       />
 
       <ButtonContainer>
