@@ -144,13 +144,13 @@ export const GravityStatusSection = ({
     );
   }
 
-  if (isUpsideDown && !isGravityFalling) {
-    return (
-      <StatusIndicator>
-        🙃 UPSIDE DOWN ({Math.ceil(upsideDownTurnsLeft / 2)} turns left)
-      </StatusIndicator>
-    );
-  }
+  // if (isUpsideDown && !isGravityFalling) {
+  //   return (
+  //     <StatusIndicator>
+  //       🙃 UPSIDE DOWN ({Math.ceil(upsideDownTurnsLeft / 2)} turns left)
+  //     </StatusIndicator>
+  //   );
+  // }
 
   return null;
 };

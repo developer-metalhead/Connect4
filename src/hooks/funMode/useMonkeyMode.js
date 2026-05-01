@@ -187,6 +187,7 @@ export const useMonkeyMode = (options = {}) => {
         onOverlayShow({
           type: "monkey",
           count: 1,
+          row: stolenCell.row,
           col: stolenCell.col,
           player: opponentPlayer
         });

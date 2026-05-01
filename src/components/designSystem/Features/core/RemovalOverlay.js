@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { styled, keyframes } from "@mui/material/styles";
 import { tokens } from "../../tokens";
-
+import { formatCoords,ROWS } from "../../../../helperFunction/helperFunction";
 
 const slideIn = keyframes`
   0% { transform: translate(-50%, -150%) scale(0.8); opacity: 0; }
@@ -107,8 +107,8 @@ const RemovalOverlay = ({ data, onComplete }) => {
       </Emojis>
       <Text>
         {data.type === "monkey"
-          ? `Monkey stole ${data.player} disc from row ${data.row + 1}!`
-          : `Rooster of Rage gnawed at ${data.count} ${data.player} discs!`}
+          ? `Monkey stole ${data.player} disc from ${formatCoords(data.row, data.col)}!`
+          : `Rooster of Rage cleared ${data.count} ${data.player} discs from Row ${ROWS - data.row}!`}
       </Text>
       
       {particles.map((p) => (
