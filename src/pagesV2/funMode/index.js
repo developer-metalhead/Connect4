@@ -75,6 +75,7 @@ const FunModeV2 = () => {
     monkeyModeEnabled,
     soundManager,
     onOverlayShow: setRemovalOverlay,
+    useRotation: true,
     onPiecePlaced: (newBoard, row, col, player, extensionData) => {
       if (chaosChickenEnabled && checkChaosChickenTrigger(newBoard, row, col, player)) {
         triggerChaosChicken(newBoard, player, soundManager, (updatedBoard) => {
@@ -102,7 +103,8 @@ const FunModeV2 = () => {
 
   const enhancedMakeMove = (col) => {
     if (chaosChickenEnabled) {
-      const redirectedCol = handleBlockedColumnDrop(board, col, currentPlayer, isUpsideDown);
+      // Logic uses normal gravity because the board rotation handles visual anti-gravity
+      const redirectedCol = handleBlockedColumnDrop(board, col, currentPlayer, false);
       if (redirectedCol === -1) return false;
       col = redirectedCol;
     }
@@ -206,7 +208,7 @@ const FunModeV2 = () => {
               onDrop={enhancedMakeMove}
               canInteract={canInteract && !isChickenAnimating}
               soundManager={soundManager}
-              isUpsideDown={isUpsideDown}
+              isUpsideDown={false}
               blockedColumns={chaosChickenEnabled ? blockedColumns : []}
               onBlockedColumnAttempt={chaosChickenEnabled ? handleBlockedColumnDrop : undefined}
               winningLine={gameState.winningLine}
