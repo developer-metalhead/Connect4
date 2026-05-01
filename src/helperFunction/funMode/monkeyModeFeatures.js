@@ -148,7 +148,7 @@ export const flipBoardUpsideDown = (board) => {
 export const maybeStealDisc = (board, triggeringPlayer, isUpsideDown = false) => {
   if (Math.random() > 0.5) {
     console.log("🍌 NO DISC STOLEN (50% chance)");
-    return board;
+    return { newBoard: board, stolenCell: null };
   }
 
   console.log("🍌 MONKEY STEALING A DISC! (50% chance)");
@@ -166,7 +166,7 @@ export const maybeStealDisc = (board, triggeringPlayer, isUpsideDown = false) =>
 
   if (opponentCells.length === 0) {
     console.log("❌ NO OPPONENT DISCS TO STEAL");
-    return board;
+    return { newBoard: board, stolenCell: null };
   }
 
   const randomCell =
@@ -210,7 +210,7 @@ export const maybeStealDisc = (board, triggeringPlayer, isUpsideDown = false) =>
     "📋 AFTER DISC THEFT:",
     newBoard.map((row) => row.join("")),
   );
-  return newBoard;
+  return { newBoard, stolenCell: randomCell, opponentPlayer };
 };
 
 export const getRandomMonkeyVoiceLine = () => {

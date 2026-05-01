@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useNavigate } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import CustomButton from "../../components/organisms/buttonComponent";
 import Status from "../../components/organisms/status";
 import Board from "../../components/organisms/boardStyles";
@@ -11,6 +11,7 @@ import useFunModeSettings from "../../hooks/funMode/useFunModeSettings";
 import { MonkeyModeContainer } from "../../components/features/MayhemMonkey/MonkeyModeComponent";
 import ChickenAnimation from "../../components/features/ChaosChicken/ChickenAnimation";
 import ChickenIndicators from "../../components/features/ChaosChicken/ChickenIndicators";
+import RemovalOverlay from "../../components/features/RemovalOverlay";
 import { useFunModeEffects } from "../../hooks/funMode/useFunModeEffects";
 import { getPlayerNames,createMonkeyButtonHandler,canInteractWithBoard } from "../../helperFunction/funMode/monkeyModeFeatures";
 
@@ -24,6 +25,7 @@ import {
 
 const FunMode = () => {
   const navigate = useNavigate();
+  const [removalOverlay, setRemovalOverlay] = useState(null);
   const { monkeyModeEnabled, chaosChickenEnabled } = useFunModeSettings();
   const soundManager = useSoundManager();
 
@@ -40,7 +42,10 @@ const FunMode = () => {
     handleBlockedColumnDrop,
     isColumnBlocked,
     reset: resetChaosChicken,
-  } = useChaosChicken({ chaosChickenEnabled });
+  } = useChaosChicken({ 
+    chaosChickenEnabled, 
+    onOverlayShow: setRemovalOverlay 
+  });
 
   const {
     gameState,
@@ -58,6 +63,8 @@ const FunMode = () => {
     updateBoard,
   } = useMonkeyMode({ 
     monkeyModeEnabled,
+    soundManager,
+    onOverlayShow: setRemovalOverlay,
     onPiecePlaced: (newBoard, row, col, player, extensionData) => {
       // Execute immediately synchronously on piece drop
       if (chaosChickenEnabled && checkChaosChickenTrigger(newBoard, row, col, player)) {
@@ -138,6 +145,12 @@ const FunMode = () => {
           currentPlayer={currentPlayer}
         />
       )}
+
+      {/* Unified Removal Overlay for Monkey and Rooster Discs */}
+      <RemovalOverlay 
+        data={removalOverlay} 
+        onComplete={() => setRemovalOverlay(null)} 
+      />
 
       {/* Monkey Mode Components - Conditionally rendered based on settings */}
       <MonkeyModeContainer

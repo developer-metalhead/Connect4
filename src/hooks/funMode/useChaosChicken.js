@@ -104,6 +104,21 @@ export const useChaosChicken = (options = {}) => {
           const selectedRow = selectNonEmptyRowForRooster(board);
           const { newBoard, clearedCount } = clearOpponentDiscsInRow(board, selectedRow, player);
 
+          if (clearedCount > 0) {
+            // === ROOSTER OF RAGE OVERLAY ===
+            if (options.onOverlayShow) {
+              const opponentPlayer = player === "🔴" ? "🟡" : "🔴";
+              // === AUDIO: Play coinfalling.mp3 when discs are removed ===
+              soundManager?.playSound('coinsfalling');
+              options.onOverlayShow({
+                type: "rooster",
+                count: clearedCount,
+                row: selectedRow,
+                player: opponentPlayer
+              });
+            }
+          }
+
           if (clearedCount > 0 || selectedRow !== -1) {
             // Apply gravity after clearing
             const finalBoard = applyGravityAfterClear(

@@ -23,6 +23,11 @@ const SOUND_CONFIG = {
     volume: 0.6,
     pitchVariation: false,
   },
+  coinsfalling: {
+    files: ["coinsfalling.mp3", "coinsfalling.ogg"],
+    volume: 0.8,
+    pitchVariation: false,
+  },
   bgMusic: {
     files: ["background.mp3", "background.ogg"],
     volume: 0.3,
