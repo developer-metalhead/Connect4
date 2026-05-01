@@ -93,12 +93,23 @@ export const PreviewRow = styled("div")({
   },
 
   // CHANGE: Mobile optimization for 1080x2400 screens
-  "@media (max-width: 480px) and (max-height: 2400px)": {
-    height: "clamp(35px, 8vmin, 55px)",
-    marginBottom: "clamp(2px, 0.5vmin, 4px)",
-    padding: "0 clamp(4px, 1.5vmin, 8px)",
+"@media (max-width: 480px) and (max-height: 2400px)": {
+  height: "clamp(35px, 8vmin, 55px)",
+  marginBottom: "0px",
+ 
+  gridTemplateColumns: "repeat(7, 32px)",
+
+  "& .preview-piece": {
+    fontSize: "clamp(20px, 6vmin, 28px)",
   },
+
+  "& .preview-cell": {
+    width: "clamp(20px, 6vmin, 28px)",
+    height: "clamp(20px, 6vmin, 28px)",
+  },
+},
 });
+
 
 export const ColumnHighlight = styled("div")({
   position: "absolute",
