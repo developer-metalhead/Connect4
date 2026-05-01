@@ -23,6 +23,9 @@ const Board = ({
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
   const [fallingDisc, setFallingDisc] = useState(null);
+  // CHANGE: Add touch state for mobile interactions
+  const [touchCol, setTouchCol] = useState(null);
+  const [touchTimeout, setTouchTimeout] = useState(null);
 
   // Build a quick mask to hide source cells during mass-fall overlays
   const maskedKeys =
@@ -30,12 +33,35 @@ const Board = ({
       ? new Set(gravityAnimation.map((a) => `${a.fromRow},${a.col}`))
       : null;
 
+  // CHANGE: Clear touch timeout when component unmounts or state changes
+  const clearTouchTimeout = () => {
+    if (touchTimeout) {
+      clearTimeout(touchTimeout);
+      setTouchTimeout(null);
+    }
+  };
+
+  // CHANGE: Helper function to get column from touch coordinates
+  const getColumnFromTouch = (touch) => {
+    const boardElement = document.querySelector('[data-board-container]');
+    if (!boardElement) return null;
+    
+    const rect = boardElement.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const cellWidth = rect.width / 7; // 7 columns
+    const col = Math.floor(x / cellWidth);
+    
+    return col >= 0 && col < 7 ? col : null;
+  };
 
   const handleClick = (col) => {
     if (winner || isDraw || !canInteract || droppingCol !== null) return;
 
     // Clear hover state immediately when drop begins
     setHoverCol(null);
+    // CHANGE: Clear touch state when drop begins
+    setTouchCol(null);
+    clearTouchTimeout();
     setDroppingCol(col);
 
     // CHANGE: Find target row based on board orientation
@@ -105,6 +131,47 @@ const Board = ({
     }
   };
 
+  // CHANGE: Add touch start handler for mobile preview
+  const handleTouchStart = (col) => {
+    if (canInteract && !winner && !isDraw && droppingCol === null) {
+      clearTouchTimeout();
+      setTouchCol(col);
+      // Play hover sound on touch
+      if (soundManager) {
+        soundManager.playHoverSound();
+      }
+    }
+  };
+
+  // CHANGE: Add touch move handler to track finger sliding across columns
+  const handleTouchMove = (e) => {
+    if (canInteract && !winner && !isDraw && droppingCol === null) {
+      e.preventDefault(); // Prevent scrolling
+      const touch = e.touches[0];
+      const newCol = getColumnFromTouch(touch);
+      
+      if (newCol !== null && newCol !== touchCol) {
+        clearTouchTimeout();
+        setTouchCol(newCol);
+        // CHANGE: Reduced sound frequency to avoid audio spam during sliding
+        if (soundManager && Math.abs(newCol - (touchCol || 0)) === 1) {
+          soundManager.playHoverSound();
+        }
+      }
+    }
+  };
+
+  // CHANGE: Modified touch end handler to auto-drop piece in highlighted column
+  const handleTouchEnd = (e) => {
+    if (canInteract && droppingCol === null && touchCol !== null) {
+      // Auto-drop the piece in the currently highlighted column
+      handleClick(touchCol);
+    }
+  };
+
+  // CHANGE: Determine which column should show preview/highlight
+  const activeCol = hoverCol !== null ? hoverCol : touchCol;
+
   return (
     <>
       {/* CHANGE: Conditionally render preview row based on board orientation */}
@@ -116,9 +183,12 @@ const Board = ({
               className="preview-cell"
               onMouseEnter={() => handleMouseEnter(col)}
               onMouseLeave={handleMouseLeave}
+              onTouchStart={() => handleTouchStart(col)}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
               onClick={() => canInteract && handleClick(col)}
             >
-              {hoverCol === col &&
+              {activeCol === col &&
                 canInteract &&
                 !winner &&
                 !isDraw &&
@@ -130,12 +200,12 @@ const Board = ({
         </PreviewRow>
       )}
 
-      <BoardContainer>
+      <BoardContainer data-board-container>
         {/* Column highlights */}
-        {hoverCol !== null && droppingCol === null && (
+        {activeCol !== null && droppingCol === null && (
           <ColumnHighlight
             style={{
-              left: `calc(${hoverCol} * (var(--cell) + var(--gap)) + var(--gap))`,
+              left: `calc(${activeCol} * (var(--cell) + var(--gap)) + var(--gap))`,
               backgroundColor:
                 currentPlayer === "🔴"
                   ? "rgba(255, 68, 68, 0.35)"
@@ -190,6 +260,9 @@ const Board = ({
                 onClick={() => canInteract && handleClick(c)}
                 onMouseEnter={() => handleMouseEnter(c)}
                 onMouseLeave={handleMouseLeave}
+                onTouchStart={() => handleTouchStart(c)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 className={droppingCol === c ? "dropping" : ""}
                 style={{
                   cursor:
@@ -218,9 +291,12 @@ const Board = ({
               className="preview-cell"
               onMouseEnter={() => handleMouseEnter(col)}
               onMouseLeave={handleMouseLeave}
+              onTouchStart={() => handleTouchStart(col)}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
               onClick={() => canInteract && handleClick(col)}
             >
-              {hoverCol === col &&
+              {activeCol === col &&
                 canInteract &&
                 !winner &&
                 !isDraw &&

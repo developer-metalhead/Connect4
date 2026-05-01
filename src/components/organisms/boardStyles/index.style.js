@@ -65,15 +65,17 @@ export const PreviewRow = styled("div")({
   },
 });
 
+
+// });
 export const ColumnHighlight = styled("div")({
   position: "absolute",
   top: "clamp(8px, 2.5vmin, 16px)",
   bottom: "clamp(8px, 2.5vmin, 10px)",
   width: "calc(var(--cell) + 6px)",
   borderRadius: "120px",
-
   pointerEvents: "none",
-  transition: "all 0.2s ease",
+  // CHANGE: Faster and smoother transition for column highlight sliding
+  transition: "left 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
   zIndex: 1,
 });
 
