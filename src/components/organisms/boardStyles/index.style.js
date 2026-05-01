@@ -10,7 +10,9 @@ export const BoardContainer = styled("div")({
   padding: "var(--board-padding)",
   borderRadius: "16px",
   boxShadow: "0 12px 28px rgba(0, 0, 0, 0.5)",
-  display: "inline-block",
+  display: "inline-flex",
+  flexDirection: "column",
+  gap: "var(--gap)",
   maxWidth: "100%",
   position: "relative", // For absolute positioning of highlights and falling discs
   // CHANGE: Disable text selection and touch callouts for game board
