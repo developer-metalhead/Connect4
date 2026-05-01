@@ -15,34 +15,35 @@ const MenuWrapper = styled("div")({
 });
 
 const MenuButton = styled("button")(({ active }) => ({
-  width: "48px",
-  height: "48px",
+  width: "44px",
+  height: "44px",
   borderRadius: "50%",
   background: active ? "rgba(255, 255, 255, 0.15)" : tokens.glass.background,
   backdropFilter: tokens.glass.blur,
-  border: tokens.glass.border,
+  border: "1px solid rgba(255, 255, 255, 0.1)",
   color: "#fff",
   display: "flex",
-  flexDirection: "column",
+  flexDirection: "column", // Keep column for rotation logic
   alignItems: "center",
   justifyContent: "center",
-  gap: "3px",
+  gap: "3.5px",
   cursor: "pointer",
-  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-  boxShadow: tokens.shadows.md,
+  transition: "all 0.5s cubic-bezier(0.16, 1, 0.3, 1)", // Slower, smoother easing
+  transform: active ? "rotate(90deg)" : "rotate(0deg)", // Rotate the whole group
   padding: 0,
+  outline: "none",
 
   "&:hover": {
     background: "rgba(255, 255, 255, 0.2)",
-  
-    boxShadow: tokens.shadows.lg,
+    transform: active ? "rotate(90deg) scale(1.1)" : "scale(1.1)",
   },
 
   "& span": {
     width: "4px",
     height: "4px",
-    background: "currentColor",
+    background: "#fff",
     borderRadius: "50%",
+    transition: "all 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
   },
 }));
 
