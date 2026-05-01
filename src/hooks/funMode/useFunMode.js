@@ -71,7 +71,7 @@ export const useFunMode = (options = {}) => {
       // Evaluate immediate piece placement extensions synchronously
       if (options.onPiecePlaced) {
         // Run any immediate triggers (like Chaos Chicken 2x2 detection) before turn switch
-        options.onPiecePlaced(newBoard, row, col, currentPlayer);
+        options.onPiecePlaced(newBoard, row, col, currentPlayer, extensionData);
       }
 
       let newState = { ...gameState, board: newBoard };
@@ -106,7 +106,7 @@ export const useFunMode = (options = {}) => {
       console.log("✅ CORE FUN MODE MOVE COMPLETED");
       return true;
     },
-    [gameState, isAnimating, enableExtensions, customValidation, customDropLogic, onMoveComplete, onGameEnd, extensionData]
+    [gameState, isAnimating, enableExtensions, customValidation, customDropLogic, onMoveComplete, onGameEnd, extensionData, options.onPiecePlaced]
   );
 
   // CHANGE: Animation management for extensions

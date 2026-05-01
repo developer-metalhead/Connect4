@@ -7,8 +7,9 @@ import {
   blockColumn,
   updateBlockedColumns,
   isColumnBlocked,
-  clearOpponentDiscsFromRandomRow,
-  applyGravityAfterRowClear,
+  selectNonEmptyRowForRooster,
+  clearOpponentDiscsInRow,
+  applyGravityAfterClear,
   isRoosterOfRageActivation,
   findNearestAvailableColumn,
 } from "../../helperFunction/funMode/chaosChickenFeatures";
@@ -52,14 +53,14 @@ export const useChaosChicken = (options = {}) => {
   );
 
   const triggerChaosChicken = useCallback(
-    (board, player, soundManager, onBoardUpdate) => {
+    (board, player, soundManager, onBoardUpdate, isUpsideDown = false) => {
       if (!chaosChickenEnabled || isChickenAnimating) return;
 
       console.log("🐔 TRIGGERING CHAOS CHICKEN:", player);
 
       const playerKey = player === "🔴" ? "player1" : "player2";
       const currentActivations = chaosChickenState.chickenActivations[playerKey];
-      const willBeRooster = currentActivations === 1;
+      const willBeRooster = currentActivations === 0; // TEST MODE: Rooster of Rage activates after 1 chicken activation
 
       // Play appropriate sound
       if (soundManager) {
@@ -100,16 +101,14 @@ export const useChaosChicken = (options = {}) => {
         }
 
         animationTimeoutRef.current = setTimeout(() => {
-          const { newBoard, clearedRow } = clearOpponentDiscsFromRandomRow(
-            board,
-            player
-          );
+          const selectedRow = selectNonEmptyRowForRooster(board);
+          const { newBoard, clearedCount } = clearOpponentDiscsInRow(board, selectedRow, player);
 
-          if (clearedRow !== -1) {
+          if (clearedCount > 0 || selectedRow !== -1) {
             // Apply gravity after clearing
-            const finalBoard = applyGravityAfterRowClear(
+            const finalBoard = applyGravityAfterClear(
               newBoard,
-              false // Pass isUpsideDown if needed
+              isUpsideDown
             );
             onBoardUpdate(finalBoard);
           }
@@ -123,7 +122,7 @@ export const useChaosChicken = (options = {}) => {
         setChickenVoiceLine(getRandomChickenVoiceLine());
 
         // Find column to block
-        const columnToBlock = getRandomUnblockedColumn(blockedColumns);
+        const columnToBlock = getRandomUnblockedColumn(blockedColumns, board);
         if (columnToBlock !== null) {
           setTargetColumn(columnToBlock);
 

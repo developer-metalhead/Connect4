@@ -61,13 +61,33 @@ export const detectNew2x2Squares = (board, player, lastRow, lastCol) => {
   return { count: squares.length, squares };
 };
 
-// Get random unblocked column
-export const getRandomUnblockedColumn = (blockedColumns) => {
+// === CHAOS CHICKEN COLUMN BLOCKING PROBABILITY (70-30) ===
+export const getRandomUnblockedColumn = (blockedColumns, board) => {
   const availableColumns = [];
+  const nonEmptyColumns = [];
+  const emptyColumns = [];
+
   for (let col = 0; col < COLS; col++) {
     const blocked = blockedColumns.find(b => b.columnIndex === col && b.turnsLeft > 0);
     if (!blocked) {
       availableColumns.push(col);
+      
+      // Check if column has at least one disc
+      let hasDisc = false;
+      if (board) {
+        for (let row = 0; row < ROWS; row++) {
+          if (board[row][col] !== EMPTY) {
+            hasDisc = true;
+            break;
+          }
+        }
+      }
+      
+      if (hasDisc) {
+        nonEmptyColumns.push(col);
+      } else {
+        emptyColumns.push(col);
+      }
     }
   }
   
@@ -76,8 +96,28 @@ export const getRandomUnblockedColumn = (blockedColumns) => {
     return null;
   }
   
-  const randomCol = availableColumns[Math.floor(Math.random() * availableColumns.length)];
-  console.log("🎯 SELECTED RANDOM UNBLOCKED COLUMN:", randomCol);
+  // 70% chance to block a non-empty column, 30% chance for empty
+  const roll = Math.random();
+  console.log(`🎲 Probability roll for column blocking: ${roll.toFixed(2)} (Target: < 0.70 for Non-Empty)`);
+  
+  let targetColArray;
+  if (roll < 0.70 && nonEmptyColumns.length > 0) {
+    console.log("📈 Selected 70% probability: Choosing a non-empty column");
+    targetColArray = nonEmptyColumns;
+  } else if (emptyColumns.length > 0) {
+    if (roll < 0.70) {
+      console.log("📈 Rolled 70% but NO non-empty columns exist. Falling back to empty columns.");
+    } else {
+      console.log("📉 Selected 30% probability: Choosing an empty column");
+    }
+    targetColArray = emptyColumns;
+  } else {
+    console.log("⚠️ No empty columns either. Falling back to any available column.");
+    targetColArray = availableColumns;
+  }
+  
+  const randomCol = targetColArray[Math.floor(Math.random() * targetColArray.length)];
+  console.log("🎯 FINAL SELECTED RANDOM UNBLOCKED COLUMN:", randomCol);
   return randomCol;
 };
 
@@ -91,7 +131,7 @@ export const blockColumn = (blockedColumns, columnIndex) => {
   // Add new block
   filtered.push({
     columnIndex,
-    turnsLeft: 2,
+    turnsLeft: 3,
     createdAt: Date.now()
   });
   
@@ -115,48 +155,54 @@ export const isColumnBlocked = (blockedColumns, columnIndex) => {
   return !!blocked;
 };
 
-// Clear opponent discs from a random row (Rooster of Rage)
-export const clearOpponentDiscsFromRandomRow = (board, triggeringPlayer) => {
-  console.log("🔥 ROOSTER OF RAGE - CLEARING OPPONENT DISCS:", triggeringPlayer);
+// === ROOSTER OF RAGE ROW SELECTION ===
+export const selectNonEmptyRowForRooster = (board) => {
+  const nonEmptyRows = [];
   
-  const opponentPlayer = triggeringPlayer === "🔴" ? "🟡" : "🔴";
-  
-  // Find rows that contain opponent discs
-  const rowsWithOpponent = [];
   for (let row = 0; row < ROWS; row++) {
-    let hasOpponent = false;
+    let hasDisc = false;
     for (let col = 0; col < COLS; col++) {
-      if (board[row][col] === opponentPlayer) {
-        hasOpponent = true;
+      if (board[row][col] !== EMPTY) {
+        hasDisc = true;
         break;
       }
     }
-    if (hasOpponent) {
-      rowsWithOpponent.push(row);
+    if (hasDisc) {
+      nonEmptyRows.push(row);
     }
   }
   
-  if (rowsWithOpponent.length === 0) {
-    console.log("❌ NO ROWS WITH OPPONENT DISCS TO CLEAR");
-    return { newBoard: board, clearedRow: -1 };
+  if (nonEmptyRows.length === 0) {
+    console.log("❌ ROOSTER OF RAGE: No non-empty rows available (board is empty)");
+    return -1;
   }
   
-  const randomRow = rowsWithOpponent[Math.floor(Math.random() * rowsWithOpponent.length)];
-  console.log("🎯 CLEARING ROW:", randomRow);
-  
-  const newBoard = board.map((row, r) => {
-    if (r === randomRow) {
-      return row.map(cell => cell === opponentPlayer ? EMPTY : cell);
-    }
-    return [...row];
-  });
-  
-  console.log("🔥 ROOSTER CLEARED OPPONENT DISCS FROM ROW:", randomRow);
-  return { newBoard, clearedRow: randomRow };
+  const randomRow = nonEmptyRows[Math.floor(Math.random() * nonEmptyRows.length)];
+  console.log("🎯 ROOSTER OF RAGE: Selected non-empty row:", randomRow);
+  return randomRow;
 };
 
-// Apply gravity after row clearing (compatible with upside-down mode)
-export const applyGravityAfterRowClear = (board, isUpsideDown = false) => {
+// === ROOSTER OF RAGE DISC REMOVAL ===
+export const clearOpponentDiscsInRow = (board, rowIndex, player) => {
+  if (rowIndex === -1) return { newBoard: board, clearedCount: 0 };
+  
+  const opponentPlayer = player === "🔴" ? "🟡" : "🔴";
+  const newBoard = board.map(r => [...r]);
+  
+  let clearedCount = 0;
+  for (let col = 0; col < COLS; col++) {
+    if (newBoard[rowIndex][col] === opponentPlayer) {
+      newBoard[rowIndex][col] = EMPTY;
+      clearedCount++;
+    }
+  }
+  
+  console.log(`🔥 ROOSTER OF RAGE: Cleared ${clearedCount} opponent discs from row ${rowIndex}`);
+  return { newBoard, clearedCount };
+};
+
+// === GRAVITY AFTER ROW CLEAR (Normal + Upside Down) ===
+export const applyGravityAfterClear = (board, isUpsideDown = false) => {
   console.log("🌊 APPLYING GRAVITY AFTER ROW CLEAR:", { isUpsideDown });
   
   const newBoard = Array(ROWS).fill(null).map(() => Array(COLS).fill(EMPTY));

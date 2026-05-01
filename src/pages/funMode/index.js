@@ -58,12 +58,12 @@ const FunMode = () => {
     updateBoard,
   } = useMonkeyMode({ 
     monkeyModeEnabled,
-    onPiecePlaced: (newBoard, row, col, player) => {
+    onPiecePlaced: (newBoard, row, col, player, extensionData) => {
       // Execute immediately synchronously on piece drop
       if (chaosChickenEnabled && checkChaosChickenTrigger(newBoard, row, col, player)) {
         triggerChaosChicken(newBoard, player, soundManager, (updatedBoard) => {
           updateBoard(updatedBoard);
-        });
+        }, extensionData?.isUpsideDown || false);
       }
     }
   });
