@@ -14,10 +14,12 @@ import {
 } from "./index.style";
 
 import FunModeSettings from "../../components/organisms/funModeSettings/funModeSettings.js";
+import SoundSettings from "../../components/designSystem/SoundSettings";
 
 const HomeV2 = () => {
   const navigate = useNavigate();
   const [showFunModeSettings, setShowFunModeSettings] = useState(false);
+  const [showSoundSettings, setShowSoundSettings] = useState(false);
   const soundManager = useSoundManager();
 
   return (
@@ -62,6 +64,16 @@ const HomeV2 = () => {
             >
               Fun Mode Settings
             </Button>
+
+            <Button 
+              variant="ghost" 
+              size="md" 
+              fullWidth 
+              onClick={() => setShowSoundSettings(true)}
+              soundManager={soundManager}
+            >
+              🔊 Sound Settings
+            </Button>
           </MenuGrid>
         </div>
       </MainContent>
@@ -75,6 +87,17 @@ const HomeV2 = () => {
         <FunModeSettings
           soundManager={soundManager}
           onClose={() => setShowFunModeSettings(false)}
+        />
+      </Modal>
+
+      <Modal 
+        isOpen={showSoundSettings} 
+        onClose={() => setShowSoundSettings(false)}
+        title="Sound Settings"
+      >
+        <SoundSettings
+          soundManager={soundManager}
+          onClose={() => setShowSoundSettings(false)}
         />
       </Modal>
     </PageWrapper>

@@ -19,7 +19,7 @@ import {
 
 // Original Logic
 import Board from "../../components/organisms/boardStyles";
-import SoundSettings from "../../components/organisms/SoundSettings";
+import SoundSettings from "../../components/designSystem/SoundSettings";
 import useSoundManager from "../../hooks/core/useSoundManager";
 import useOnlineConnect4 from "../../hooks/core/useOnlineConnect4";
 import { PLAYER1, PLAYER2 } from "../../helperFunction/helperFunction";

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo,useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useSoundManager from "../../../hooks/core/useSoundManager";
 import { useConnect4 } from "../../../hooks/core/useConnect4";
@@ -9,15 +9,18 @@ import { PageWrapper, Header, HeaderContent, AppLogo, MainContent } from "../../
 import Button from "../../../components/designSystem/Button";
 import Scoreboard from "../../../components/designSystem/Scoreboard";
 import { GameStatus, MatchResultOverlay } from "../../../components/designSystem/Status";
+import Modal from "../../../components/designSystem/Modal";
+import SoundSettings from "../../../components/designSystem/SoundSettings";
 import { GameLayout, ControlGroup } from "./index.style";
 
 // Original Logic Components
 import Board from "../../../components/organisms/boardStyles";
-import BoredVideoButton from "../../../components/organisms/VideoButton";
+import VideoButton from "../../../components/designSystem/VideoButton";
 
 const Game2PV2 = () => {
   const navigate = useNavigate();
   const soundManager = useSoundManager();
+  const [showSoundSettings, setShowSoundSettings] = useState(false);
   const { gameState, makeMove, reset } = useConnect4();
   const { board, currentPlayer, winner, isDraw } = gameState;
 
@@ -51,9 +54,14 @@ const Game2PV2 = () => {
           <AppLogo onClick={() => navigate("/v2")}>
             Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>2 Players</span>
           </AppLogo>
-          <Button variant="outline" size="sm" onClick={() => navigate("/v2/play-offline")} soundManager={soundManager}>
-            Exit
-          </Button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <Button variant="ghost" size="sm" onClick={() => setShowSoundSettings(true)} soundManager={soundManager}>
+              🔊 Sound
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/v2/play-offline")} soundManager={soundManager}>
+              Exit
+            </Button>
+          </div>
         </HeaderContent>
       </Header>
 
@@ -83,9 +91,9 @@ const Game2PV2 = () => {
           />
 
           <ControlGroup>
-            <BoredVideoButton onGameReset={reset}>
-               <Button variant="danger" fullWidth soundManager={soundManager}>Give Up!</Button>
-            </BoredVideoButton>
+            <VideoButton onGameReset={reset}>
+               Give Up!
+            </VideoButton>
             <Button variant="secondary" fullWidth onClick={reset} soundManager={soundManager}>
               Reset
             </Button>
@@ -104,6 +112,17 @@ const Game2PV2 = () => {
           soundManager={soundManager}
         />
       )}
+
+      <Modal 
+        isOpen={showSoundSettings} 
+        onClose={() => setShowSoundSettings(false)}
+        title="Sound Settings"
+      >
+        <SoundSettings
+          soundManager={soundManager}
+          onClose={() => setShowSoundSettings(false)}
+        />
+      </Modal>
     </PageWrapper>
   );
 };
