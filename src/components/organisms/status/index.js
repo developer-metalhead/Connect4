@@ -6,6 +6,7 @@ const StatusWrapper = styled("div")({
   textAlign: "center",
   margin: "20px 0",
   minHeight: "60px",
+  
 });
 
 const coinColor = (coin) =>
