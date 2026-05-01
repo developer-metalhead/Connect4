@@ -32,12 +32,18 @@ import useFunModeSettings from "../../hooks/funMode/useFunModeSettings";
 import { useFunModeEffects } from "../../hooks/funMode/useFunModeEffects";
 import { getPlayerNames, createMonkeyButtonHandler, canInteractWithBoard } from "../../helperFunction/funMode/monkeyModeFeatures";
 import Board from "../../components/organisms/boardStyles";
+import BackButton from "../../components/designSystem/BackButton";
+import SettingsMenu from "../../components/designSystem/SettingsMenu";
+import SidePanel from "../../components/designSystem/SidePanel";
+import FunModeSettings from "../../components/designSystem/FunModeSettings";
+import SoundSettings from "../../components/designSystem/SoundSettings";
 
 const FunModeV2 = () => {
   const navigate = useNavigate();
   const [removalOverlay, setRemovalOverlay] = useState(null);
   const { monkeyModeEnabled, chaosChickenEnabled } = useFunModeSettings();
   const soundManager = useSoundManager();
+  const [activePanel, setActivePanel] = useState(null); // 'fun', 'sound' or null
 
   const {
     chaosChickenState,
@@ -142,16 +148,33 @@ const FunModeV2 = () => {
 
   return (
     <PageWrapper>
+      <BackButton soundManager={soundManager} />
       <Header>
         <HeaderContent>
           <AppLogo onClick={() => navigate("/home")}>
             Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>Fun Mode</span>
           </AppLogo>
-          <Button variant="outline" size="sm" onClick={() => navigate("/play-offline")} soundManager={soundManager}>
-            Exit
-          </Button>
+          
+          <SettingsMenu
+            soundManager={soundManager}
+            activeOption={activePanel}
+            onOptionClick={(id) => setActivePanel(activePanel === id ? null : id)}
+            options={[
+              { id: 'fun', label: 'Fun Mode Settings', icon: <span>🔥</span> },
+              { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
+            ]}
+          />
         </HeaderContent>
       </Header>
+
+      <SidePanel 
+        isOpen={activePanel !== null} 
+        onClose={() => setActivePanel(null)}
+        title={activePanel === 'fun' ? 'Fun Mode Settings' : 'Sound Settings'}
+      >
+        {activePanel === 'fun' && <FunModeSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'sound' && <SoundSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+      </SidePanel>
 
       <MainContent>
         <GameLayout>

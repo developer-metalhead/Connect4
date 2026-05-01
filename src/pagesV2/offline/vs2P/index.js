@@ -10,6 +10,10 @@ import Button from "../../../components/designSystem/Button";
 import Scoreboard from "../../../components/designSystem/Scoreboard";
 import { GameStatus, MatchResultOverlay } from "../../../components/designSystem/Status";
 import Modal from "../../../components/designSystem/Modal";
+import BackButton from "../../../components/designSystem/BackButton";
+import SettingsMenu from "../../../components/designSystem/SettingsMenu";
+import SidePanel from "../../../components/designSystem/SidePanel";
+import FunModeSettings from "../../../components/designSystem/FunModeSettings";
 import SoundSettings from "../../../components/designSystem/SoundSettings";
 import PoopBlockIndicator from "../../../components/designSystem/Features/chaosChicken/PoopBlockIndicator";
 import { GameLayout, ControlGroup } from "./index.style";
@@ -21,7 +25,7 @@ import VideoButton from "../../../components/designSystem/VideoButton";
 const Game2PV2 = () => {
   const navigate = useNavigate();
   const soundManager = useSoundManager();
-  const [showSoundSettings, setShowSoundSettings] = useState(false);
+  const [activePanel, setActivePanel] = useState(null); // 'fun', 'sound' or null
   const { gameState, makeMove, reset } = useConnect4();
   const { board, currentPlayer, winner, isDraw } = gameState;
 
@@ -50,21 +54,33 @@ const Game2PV2 = () => {
 
   return (
     <PageWrapper>
+     
       <Header>
         <HeaderContent>
           <AppLogo onClick={() => navigate("/home")}>
             Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>2 Players</span>
           </AppLogo>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <Button variant="ghost" size="sm" onClick={() => setShowSoundSettings(true)} soundManager={soundManager}>
-              🔊 Sound
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/play-offline")} soundManager={soundManager}>
-              Exit
-            </Button>
-          </div>
+          
+          <SettingsMenu
+            soundManager={soundManager}
+            activeOption={activePanel}
+            onOptionClick={(id) => setActivePanel(activePanel === id ? null : id)}
+            options={[
+              { id: 'fun', label: 'Fun Mode Settings', icon: <span>🔥</span> },
+              { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
+            ]}
+          />
         </HeaderContent>
       </Header>
+
+      <SidePanel 
+        isOpen={activePanel !== null} 
+        onClose={() => setActivePanel(null)}
+        title={activePanel === 'fun' ? 'Fun Mode Settings' : 'Sound Settings'}
+      >
+        {activePanel === 'fun' && <FunModeSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'sound' && <SoundSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+      </SidePanel>
 
       <MainContent>
         <GameLayout>
@@ -115,16 +131,6 @@ const Game2PV2 = () => {
         />
       )}
 
-      <Modal 
-        isOpen={showSoundSettings} 
-        onClose={() => setShowSoundSettings(false)}
-        title="Sound Settings"
-      >
-        <SoundSettings
-          soundManager={soundManager}
-          onClose={() => setShowSoundSettings(false)}
-        />
-      </Modal>
     </PageWrapper>
   );
 };
