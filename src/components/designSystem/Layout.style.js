@@ -34,7 +34,9 @@ export const GlobalLayoutStyles = (
   />
 );
 
-export const PageWrapper = styled("div")({
+export const PageWrapper = styled("div", {
+  shouldForwardProp: (prop) => prop !== "disableScroll",
+})(({ disableScroll = true }) => ({
   height: "100vh",
   width: "100%",
   backgroundColor: tokens.colors.background,
@@ -43,10 +45,10 @@ export const PageWrapper = styled("div")({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  overflow: "hidden", // Prevent any page-level scrolling
+  overflow: "hidden", 
   position: "relative",
-  touchAction: "none", // Prevent accidental scrolling/bouncing on mobile
-});
+  touchAction: "none",
+}));
 
 export const Header = styled("header")({
   width: "100%",
@@ -97,20 +99,15 @@ export const MainContent = styled("main")({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  padding: "12px 16px", // Minimized for 1080x2400
+  padding: "16px",
   gap: "16px",
-  overflow: "hidden", // Keep game content contained
-  justifyContent: "center",
-
-  "@media (max-width: 768px)": {
-    padding: "8px 12px",
-    justifyContent: "flex-start", // Start from top on mobile to avoid being cut off
-    gap: "8px",
-  },
+  overflowY: "auto", // Allow internal scrolling if content is too tall
+  overflowX: "hidden",
+  justifyContent: "flex-start", // Start from top to avoid vertical clipping
 
   "@media (min-width: 768px)": {
-    padding: "100px 24px 40px 24px", // Significant top padding to clear header
-    gap: "32px",
+    padding: "24px", 
+    gap: "24px",
     justifyContent: "center",
   }
 });
@@ -125,4 +122,33 @@ export const GameContainer = styled("div")({
     from: { opacity: 0, transform: "translateY(10px)" },
     to: { opacity: 1, transform: "translateY(0)" },
   },
+});
+
+export const RefreshIconButton = styled("button")({
+  background: "rgba(255, 255, 255, 0.05)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  borderRadius: tokens.radius.full,
+  width: "40px",
+  height: "40px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  color: "rgba(255, 255, 255, 0.6)",
+  transition: "all 0.2s",
+  backdropFilter: "blur(8px)",
+
+  "&:hover": {
+    background: "rgba(255, 255, 255, 0.1)",
+    color: "#fff",
+    transform: "rotate(180deg)",
+  },
+
+  "& svg": {
+    width: "20px",
+    height: "20px",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+  }
 });

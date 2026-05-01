@@ -20,13 +20,15 @@ const ConfirmationModal = ({
   title = "Are you sure?",
   message = "This action cannot be undone.",
   acceptLabel = "Yes",
-  declineLabel = "No"
+  declineLabel = "No",
+  showClose="false"
 }) => {
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={title}
+      showClose={showClose}
       maxWidth="400px"
       footer={
         <>

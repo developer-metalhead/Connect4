@@ -56,6 +56,8 @@ export const ModalHeader = styled("div")({
 export const ModalTitle = styled("h3")({
   margin: 0,
   fontSize: "18px",
+  textAlign:'center',
+  alignItems:'center',
   fontWeight: 700,
   color: tokens.colors.text,
 });

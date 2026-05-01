@@ -8,7 +8,12 @@ const IndicatorsContainer = styled("div")({
   justifyContent: "center",
   gap: "16px",
   width: "100%",
-  margin: "0 0 16px 0",
+  margin: "8px 0 16px 0",
+
+  "@media (max-width: 768px)": {
+    margin: "12px 0 12px 0", // Increased gap from scoreboard
+    gap: "8px",
+  }
 });
 
 const StatusBadge = styled("div", {

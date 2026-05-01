@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useSoundManager from "../../hooks/core/useSoundManager.js";
+import { RefreshIconButton } from "../../components/designSystem/Layout.style";
 
 // New UI Components
 import { PageWrapper, MainContent } from "../../components/designSystem/Layout.style";
@@ -33,6 +34,12 @@ const HomeV2 = () => {
   return (
     <PageWrapper>
       <BackButton onClick={() => navigate("/")} soundManager={soundManager} />
+      <RefreshIconButton 
+        onClick={() => window.location.reload()} 
+        style={{ position: 'fixed', top: '12px', right: '12px', zIndex: 1001 }}
+      >
+        <svg viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </RefreshIconButton>
       
       <SettingsMenu
         soundManager={soundManager}
