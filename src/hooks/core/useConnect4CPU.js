@@ -291,6 +291,9 @@ const updateMemoryOnGameEnd = ({ winner }, historyRef) => {
 
 export const useConnect4CPU = () => {
   const [gameState, setGameState] = useState(resetGame);
+  // CHANGE: Add state to track when CPU is dropping a piece for animation
+  const [isCpuDropping, setIsCpuDropping] = useState(false);
+  const [cpuDroppingCol, setCpuDroppingCol] = useState(null);
   const aiTimerRef = useRef(null);
   const historyRef = useRef([]); // track states & CPU moves for mistake memory
 
@@ -341,18 +344,29 @@ export const useConnect4CPU = () => {
         player: CPU,
       });
 
-      const { newBoard, row } = dropPiece(board, col, CPU);
-      setGameState((prev) => {
-        const next = { ...prev, board: newBoard };
-        if (checkWin(newBoard, row, col, CPU)) {
-          next.winner = CPU;
-        } else if (isBoardFull(newBoard)) {
-          next.isDraw = true;
-        } else {
-          next.currentPlayer = getNextPlayer(prev.currentPlayer); // back to human
-        }
-        return next;
-      });
+      // CHANGE: Set CPU dropping state before making the move
+      setIsCpuDropping(true);
+      setCpuDroppingCol(col);
+
+      // CHANGE: Delay the actual game state update to allow animation
+      setTimeout(() => {
+        const { newBoard, row } = dropPiece(board, col, CPU);
+        setGameState((prev) => {
+          const next = { ...prev, board: newBoard };
+          if (checkWin(newBoard, row, col, CPU)) {
+            next.winner = CPU;
+          } else if (isBoardFull(newBoard)) {
+            next.isDraw = true;
+          } else {
+            next.currentPlayer = getNextPlayer(prev.currentPlayer); // back to human
+          }
+          return next;
+        });
+
+        // CHANGE: Clear CPU dropping state after move is complete
+        setIsCpuDropping(false);
+        setCpuDroppingCol(null);
+      }, 800); // Animation duration to match player animation
     }, 350); // small delay for UX
 
     return () => {
@@ -370,12 +384,25 @@ export const useConnect4CPU = () => {
   const reset = useCallback(() => {
     if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
     historyRef.current = [];
+    // CHANGE: Reset CPU dropping state on game reset
+    setIsCpuDropping(false);
+    setCpuDroppingCol(null);
     setGameState(resetGame());
   }, []);
 
   const isCpuTurn = gameState.currentPlayer === CPU;
 
-  return { gameState, makeHumanMove, reset, isCpuTurn, HUMAN, CPU };
+  return { 
+    gameState, 
+    makeHumanMove, 
+    reset, 
+    isCpuTurn, 
+    HUMAN, 
+    CPU,
+    // CHANGE: Export CPU dropping state for Board component
+    isCpuDropping,
+    cpuDroppingCol
+  };
 };
 
 export default useConnect4CPU;

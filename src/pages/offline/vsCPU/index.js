@@ -19,7 +19,8 @@ import BoredVideoButton from "../../../components/organisms/VideoButton";
 
 const PlayCPU = () => {
   const navigate = useNavigate();
-  const { gameState, makeHumanMove, reset, isCpuTurn } = useConnect4CPU();
+  // CHANGE: Destructure CPU dropping state from the hook
+  const { gameState, makeHumanMove, reset, isCpuTurn, isCpuDropping, cpuDroppingCol } = useConnect4CPU();
   const { board, currentPlayer, winner, isDraw } = gameState;
   const soundManager = useSoundManager();
 
@@ -35,6 +36,16 @@ const PlayCPU = () => {
       soundManager.playDrawSound();
     }
   }, [winner, isDraw, soundManager]);
+
+  // CHANGE: Play drop sound when CPU is dropping
+  useEffect(() => {
+    if (isCpuDropping && soundManager) {
+      // Delay sound to match animation timing
+      setTimeout(() => {
+        soundManager.playDropSound();
+      }, 100);
+    }
+  }, [isCpuDropping, soundManager]);
 
   return (
     <PageContainer>
@@ -54,6 +65,9 @@ const PlayCPU = () => {
         onDrop={makeHumanMove}
         canInteract={!isCpuTurn}
         soundManager={soundManager}
+        // CHANGE: Pass CPU dropping state to Board component
+        isCpuDropping={isCpuDropping}
+        cpuDroppingCol={cpuDroppingCol}
       />
 
       <ButtonContainer>

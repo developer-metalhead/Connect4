@@ -18,7 +18,9 @@ const Board = ({
   soundManager, // Add sound manager prop
   isUpsideDown = false, // CHANGE: Add isUpsideDown prop
   gravityAnimation = null, // NEW: batch animation plan for restoring gravity
-
+  // CHANGE: Add CPU dropping props for animation
+  isCpuDropping = false,
+  cpuDroppingCol = null,
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
@@ -172,6 +174,37 @@ const Board = ({
   // CHANGE: Determine which column should show preview/highlight
   const activeCol = hoverCol !== null ? hoverCol : touchCol;
 
+  // CHANGE: Create CPU falling disc animation when CPU is dropping
+  const cpuFallingDisc = isCpuDropping && cpuDroppingCol !== null ? (() => {
+    // Find target row for CPU drop
+    let targetRow = -1;
+    if (isUpsideDown) {
+      for (let row = 0; row < board.length; row++) {
+        if (board[row][cpuDroppingCol] === "⚪") {
+          targetRow = row;
+          break;
+        }
+      }
+    } else {
+      for (let row = board.length - 1; row >= 0; row--) {
+        if (board[row][cpuDroppingCol] === "⚪") {
+          targetRow = row;
+          break;
+        }
+      }
+    }
+    
+    if (targetRow === -1) return null;
+    
+    const startRow = isUpsideDown ? board.length : -1;
+    return {
+      col: cpuDroppingCol,
+      targetRow,
+      currentRow: startRow,
+      player: "🟡", // CPU player emoji
+    };
+  })() : null;
+
   return (
     <>
       {/* CHANGE: Conditionally render preview row based on board orientation */}
@@ -226,6 +259,21 @@ const Board = ({
             }}
           >
             {fallingDisc.player}
+          </FallingDisc>
+        )}
+
+        {/* CHANGE: Add CPU falling disc animation */}
+        {cpuFallingDisc && (
+          <FallingDisc
+            style={{
+              left: `calc(${cpuFallingDisc.col} * (var(--cell) + var(--gap)) + var(--gap))`,
+              animationDuration: `${400 + Math.abs(cpuFallingDisc.targetRow - cpuFallingDisc.currentRow) * 50}ms`,
+              "--target-row": cpuFallingDisc.targetRow,
+              "--start-row": cpuFallingDisc.currentRow,
+              "--is-upside-down": isUpsideDown ? 1 : 0,
+            }}
+          >
+            {cpuFallingDisc.player}
           </FallingDisc>
         )}
 
