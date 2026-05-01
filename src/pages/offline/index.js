@@ -16,7 +16,7 @@ const Offline = () => {
 
   return (
     <PageContainer>
-      <BackButton soundManager={soundManager} />
+      <BackButton soundManager={soundManager} onClick={() => navigate("/legacy")}/>
       <HeaderContainer>Connect 4</HeaderContainer>
       <BodyContainer>Choose Game Mode</BodyContainer>
 

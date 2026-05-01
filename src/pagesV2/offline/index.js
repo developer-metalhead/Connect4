@@ -18,7 +18,7 @@ const OfflineV2 = () => {
 
   return (
     <PageWrapper>
-      <BackButton soundManager={soundManager} />
+      <BackButton soundManager={soundManager} onClick={() => navigate("/home")} />
       <MainContent style={{ justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
           <OfflineHeader>Offline Mode</OfflineHeader>
