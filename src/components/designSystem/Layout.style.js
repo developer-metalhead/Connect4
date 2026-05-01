@@ -1,5 +1,38 @@
 import { styled } from "@mui/material/styles";
+import GlobalStyles from "@mui/material/GlobalStyles";
 import { tokens } from "./tokens";
+
+export const GlobalLayoutStyles = (
+  <GlobalStyles
+    styles={{
+      "*": {
+        boxSizing: "border-box",
+        margin: 0,
+        padding: 0,
+      },
+      "body": {
+        overflow: "hidden",
+      },
+      /* Custom Themed Scrollbar */
+      "*::-webkit-scrollbar": {
+        width: "6px",
+      },
+      "*::-webkit-scrollbar-track": {
+        background: "transparent",
+      },
+      "*::-webkit-scrollbar-thumb": {
+        background: "rgba(255, 255, 255, 0.1)",
+        borderRadius: "10px",
+        border: "2px solid transparent",
+        backgroundClip: "content-box",
+      },
+      "*::-webkit-scrollbar-thumb:hover": {
+        background: "rgba(255, 255, 255, 0.2)",
+        backgroundClip: "content-box",
+      },
+    }}
+  />
+);
 
 export const PageWrapper = styled("div")({
   height: "100vh",
@@ -12,6 +45,7 @@ export const PageWrapper = styled("div")({
   alignItems: "center",
   overflow: "hidden", // Prevent any page-level scrolling
   position: "relative",
+  touchAction: "none", // Prevent accidental scrolling/bouncing on mobile
 });
 
 export const Header = styled("header")({
@@ -75,8 +109,9 @@ export const MainContent = styled("main")({
   },
 
   "@media (min-width: 768px)": {
-    padding: "40px 24px",
+    padding: "100px 24px 40px 24px", // Significant top padding to clear header
     gap: "32px",
+    justifyContent: "center",
   }
 });
 

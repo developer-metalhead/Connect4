@@ -109,15 +109,24 @@ const Content = styled("div")({
   overflowY: "auto",
   paddingRight: "8px",
   
+  /* Premium Themed Scrollbar */
   "&::-webkit-scrollbar": {
-    width: "4px",
+    width: "3px",
   },
   "&::-webkit-scrollbar-track": {
     background: "transparent",
   },
   "&::-webkit-scrollbar-thumb": {
-    background: "rgba(255, 255, 255, 0.1)",
+    background: "rgba(255, 255, 255, 0.08)",
     borderRadius: "10px",
+    border: "1px solid transparent",
+    backgroundClip: "content-box",
+    transition: "all 0.3s",
+    
+    "&:hover": {
+      background: tokens.colors.primary,
+      boxShadow: `0 0 10px ${tokens.colors.primary}4D`,
+    }
   },
 });
 

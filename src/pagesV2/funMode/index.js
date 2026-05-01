@@ -145,7 +145,6 @@ const FunModeV2 = () => {
 
   return (
     <PageWrapper>
-      <BackButton soundManager={soundManager} />
       <GiveUpButton onGiveUp={() => navigate("/play-offline")} soundManager={soundManager} />
       <Header>
         <HeaderContent>

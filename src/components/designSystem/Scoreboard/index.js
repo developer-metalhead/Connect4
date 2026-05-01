@@ -20,7 +20,6 @@ const Scoreboard = ({ p1, p2 }) => {
       <PlayerInfo active={p1.active}>
         <Avatar color="red">{p1.emoji || "🔴"}</Avatar>
         <PlayerName>{p1.name}</PlayerName>
-        <ScoreValue>{p1.score}</ScoreValue>
       </PlayerInfo>
 
       <VersusLabel>VS</VersusLabel>
@@ -28,7 +27,6 @@ const Scoreboard = ({ p1, p2 }) => {
       <PlayerInfo active={p2.active}>
         <Avatar color="yellow">{p2.emoji || "🟡"}</Avatar>
         <PlayerName>{p2.name}</PlayerName>
-        <ScoreValue>{p2.score}</ScoreValue>
       </PlayerInfo>
     </ScoreboardCard>
   );
