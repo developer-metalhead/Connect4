@@ -108,7 +108,7 @@ const RemovalOverlay = ({ data, onComplete }) => {
       <Text>
         {data.type === "monkey"
           ? `Monkey stole ${data.player} disc from row ${data.row + 1}!`
-          : `Rooster of Rage cleared ${data.count} ${data.player} discs!`}
+          : `Rooster of Rage gnawed at ${data.count} ${data.player} discs!`}
       </Text>
       
       {particles.map((p) => (
