@@ -174,6 +174,26 @@ const Board = ({
   // CHANGE: Determine which column should show preview/highlight
   const activeCol = hoverCol !== null ? hoverCol : touchCol;
 
+  // Calculate target row for the active column highlight
+  let activeTargetRow = -1;
+  if (activeCol !== null) {
+    if (isUpsideDown) {
+      for (let row = 0; row < board.length; row++) {
+        if (board[row][activeCol] === "⚪") {
+          activeTargetRow = row;
+          break;
+        }
+      }
+    } else {
+      for (let row = board.length - 1; row >= 0; row--) {
+        if (board[row][activeCol] === "⚪") {
+          activeTargetRow = row;
+          break;
+        }
+      }
+    }
+  }
+
   // CHANGE: Create CPU falling disc animation when CPU is dropping
   const cpuFallingDisc = isCpuDropping && cpuDroppingCol !== null ? (() => {
     // Find target row for CPU drop
@@ -240,10 +260,21 @@ const Board = ({
 
       <BoardContainer data-board-container>
         {/* Column highlights */}
-        {activeCol !== null && droppingCol === null && (
+        {activeCol !== null && droppingCol === null && activeTargetRow !== -1 && (
           <ColumnHighlight
             style={{
-              left: `calc(${activeCol} * (var(--cell) + var(--gap)) + var(--gap))`,
+              left: `calc(var(--board-padding) + ${activeCol} * (var(--cell) + var(--gap)) - 3px)`,
+              ...(isUpsideDown
+                ? {
+                    top: "auto",
+                    bottom: "calc(var(--board-padding) - 3px)",
+                    height: `calc(${board.length - 1 - activeTargetRow} * (var(--cell) + var(--gap)) + var(--cell) + 6px)`,
+                  }
+                : {
+                    top: "calc(var(--board-padding) - 3px)",
+                    bottom: "auto",
+                    height: `calc(${activeTargetRow} * (var(--cell) + var(--gap)) + var(--cell) + 6px)`,
+                  }),
               backgroundColor:
                 currentPlayer === "🔴"
                   ? "rgba(255, 68, 68, 0.35)"

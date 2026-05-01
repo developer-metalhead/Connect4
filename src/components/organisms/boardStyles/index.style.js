@@ -4,9 +4,10 @@ export const BoardContainer = styled("div")({
   // Fluid sizing across devices
   "--cell": "clamp(34px, 9vmin, 50px)",
   "--gap": "clamp(6px, 2vmin, 12px)",
+  "--board-padding": "clamp(8px, 2.5vmin, 16px)",
 
   background: "#0a1f45",
-  padding: "clamp(8px, 2.5vmin, 16px)",
+  padding: "var(--board-padding)",
   borderRadius: "16px",
   boxShadow: "0 12px 28px rgba(0, 0, 0, 0.5)",
   display: "inline-block",
@@ -113,13 +114,11 @@ export const PreviewRow = styled("div")({
 
 export const ColumnHighlight = styled("div")({
   position: "absolute",
-  top: "clamp(8px, 2.5vmin, 16px)",
-  bottom: "clamp(8px, 2.5vmin, 10px)",
   width: "calc(var(--cell) + 6px)",
-  borderRadius: "120px",
+  borderRadius: "999px",
   pointerEvents: "none",
   // CHANGE: Faster and smoother transition for column highlight sliding
-  transition: "left 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
+  transition: "left 0.15s cubic-bezier(0.4, 0, 0.2, 1), height 0.15s cubic-bezier(0.4, 0, 0.2, 1), top 0.15s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
   zIndex: 1,
   // CHANGE: Disable text selection for column highlights
   userSelect: "none",
