@@ -14,7 +14,7 @@ import { GameLayout, ControlGroup } from "./index.style";
 
 // Original Logic Components
 import Board from "../../../components/organisms/boardStyles";
-import PostVideoOverlay from "../../../components/organisms/postVideoOverlay";
+import PostVideoOverlay from "../../../components/designSystem/PostVideoOverlay";
 import VideoButton from "../../../components/designSystem/VideoButton";
 import SoundSettings from "../../../components/designSystem/SoundSettings";
 import Modal from "../../../components/designSystem/Modal";

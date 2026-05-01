@@ -13,7 +13,7 @@ import {
   Decoration 
 } from "./index.style";
 
-import FunModeSettings from "../../components/organisms/funModeSettings/funModeSettings.js";
+import FunModeSettings from "../../components/designSystem/FunModeSettings";
 import SoundSettings from "../../components/designSystem/SoundSettings";
 
 const HomeV2 = () => {
