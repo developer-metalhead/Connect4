@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { styled, keyframes } from "@mui/material/styles";
 import { tokens } from "../designSystem/tokens";
+import { EMOJIS } from "../../logic/core/coreConfig";
 
 // --- ANIMATIONS ---
 const actorRun = keyframes`
@@ -86,8 +87,8 @@ const ProjectileOverlay = styled("div")(({ columnIndex }) => ({
  */
 const FeatureAnimation = ({
   isAnimating,
-  actor = "🐒",
-  projectile = "🍌",
+  actor = EMOJIS.MONKEY,
+  projectile = EMOJIS.BANANA,
   voiceLine = "",
   targetColumn = null,
   onAnimationComplete,

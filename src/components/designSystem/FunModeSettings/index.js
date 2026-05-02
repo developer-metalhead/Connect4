@@ -1,5 +1,6 @@
 import React from 'react';
 import useFunModeSettings from '../../../hooks/funMode/useFunModeSettings';
+import { EMOJIS } from '../../../logic/core/coreConfig';
 import {
   SettingsContainer,
   FeatureCard,
@@ -47,7 +48,7 @@ const FunModeSettings = ({ soundManager, onClose }) => {
       <FeatureCard active={pendingMonkey}>
         <CardHeader>
           <TitleGroup>
-            <FeatureTitle>🐒 Monkey Mode</FeatureTitle>
+            <FeatureTitle>{EMOJIS.MONKEY} Monkey Mode</FeatureTitle>
             <FeatureDescription>
               Unleash the mayhem! Flip the board, scramble gravity, and swap colors when players reach 3-in-a-row.
             </FeatureDescription>
@@ -66,7 +67,7 @@ const FunModeSettings = ({ soundManager, onClose }) => {
       <FeatureCard active={pendingChicken}>
         <CardHeader>
           <TitleGroup>
-            <FeatureTitle>🐔 Chaos Chicken</FeatureTitle>
+            <FeatureTitle>{EMOJIS.CHICKEN} Chaos Chicken</FeatureTitle>
             <FeatureDescription>
               The chicken strikes! Form a 2x2 square to block columns with poop or trigger the Rooster of Rage.
             </FeatureDescription>
