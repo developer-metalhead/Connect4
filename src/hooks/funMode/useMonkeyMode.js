@@ -133,10 +133,12 @@ export const useMonkeyMode = (options = {}) => {
             setGravityAnimation(animations);
             setGravity("normal");
             
+            // CHANGE: Hide monkey overlay as soon as gravity restore begins so discs are visible
+            setIsMonkeyAnimating(false);
+            setMonkeyVoiceLine("");
+
             setTimeout(() => {
               funModeHook.updateBoard(finalBoard);
-              setIsMonkeyAnimating(false);
-              setMonkeyVoiceLine("");
               setGravityAnimation(null);
               setIsGravityFalling(false);
               funModeHook.updateExtensionData('isUpsideDown', isUpsideDown);
@@ -150,6 +152,9 @@ export const useMonkeyMode = (options = {}) => {
     // CHANGE: Check for monkey trigger (unified logic)
     if (shouldTriggerMonkeyMayhem(newState.board, moveData.player, monkeyState)) {
       console.log("🎯 MONKEY MODE TRIGGERED FOR:", moveData.player);
+      
+      // CHANGE: Play monkey laugh immediately on trigger
+      soundManager?.playSound("monkeylaugh");
 
       if (monkeyButtonTimerRef.current) {
         clearTimeout(monkeyButtonTimerRef.current);
