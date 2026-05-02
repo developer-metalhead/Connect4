@@ -113,11 +113,13 @@ const OnlineV2 = () => {
   }, [status, gameState.winner, gameState.isDraw]);
 
   const nameByDisc = useMemo(
-    () =>
-      (players || []).reduce((acc, p) => {
+    () => {
+      const base = { [PLAYER1]: "Player 1", [PLAYER2]: "Player 2" };
+      return (players || []).reduce((acc, p) => {
         if (p?.disc) acc[p.disc] = p?.name || "Guest";
         return acc;
-      }, {}),
+      }, base);
+    },
     [players],
   );
 
@@ -415,6 +417,11 @@ const OnlineV2 = () => {
         )}
       </MainContent>
 
+      {/* 
+          Simultaneous Surrender Synchronization:
+          Both players update via the 'surrendered' socket event, 
+          triggering mirrored overlays (FORFEIT vs OPPONENT FORFEIT) at the same time.
+      */}
       {(gameState.winner || gameState.isDraw) && (
         <MatchResultOverlay 
           title={
@@ -429,11 +436,15 @@ const OnlineV2 = () => {
           }
           variant={gameState.winner ? (gameState.winner === myDisc ? "win" : "loss") : "draw"}
           icon={gameState.winner ? (gameState.winner === myDisc ? "🏆" : "🏳️") : "🤝"}
+          
+          /* Only allow Rematch for natural wins, not forfeits */
           onPrimaryAction={!!gameState.winningLine ? () => {
             soundManager?.playSound('coinsfalling');
             resetRoom();
           } : null}
           primaryActionLabel={!!gameState.winningLine ? "Rematch" : null}
+          
+          /* Unified Exit Logic: Both players use this to clear room and go home */
           onSecondaryAction={() => {
             leaveRoom();
             navigate("/home");

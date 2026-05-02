@@ -6,7 +6,10 @@ import {
   PLAYER1, 
   PLAYER2, 
   EMPTY, 
-  resetGame as initialState 
+  resetGame as initialState,
+  ROWS,
+  COLS,
+  checkWin
 } from "../../helperFunction/helperFunction";
 
 // Simple local UUID for anonymous players
@@ -46,6 +49,7 @@ const useOnlineConnect4 = () => {
   const nameRef = useRef(defaultName());
   const roomIdRef = useRef(null);
   const myDiscRef = useRef(null);
+  const playersRef = useRef([]);
 
   // Derived flags
   const myTurn = useMemo(
@@ -105,6 +109,7 @@ const useOnlineConnect4 = () => {
       setMyDisc(disc);
       myDiscRef.current = disc;
       setPlayers(ps);
+      playersRef.current = ps;
       setGameState(state);
       setStatus("room");
     });
@@ -115,13 +120,50 @@ const useOnlineConnect4 = () => {
       setMyDisc(disc);
       myDiscRef.current = disc;
       setPlayers(ps);
+      playersRef.current = ps;
       setGameState(state);
       setStatus("room");
     });
 
     socket.on("room_state", ({ players: ps, state }) => {
-      if (ps) setPlayers(ps);
-      if (state) setGameState(state);
+      if (ps) {
+        // If we were in a match and now only 1 player is left, trigger forfeit
+        if (playersRef.current.length === 2 && ps.length === 1 && !gameState.winner) {
+          console.log("🏳️ Room state updated: Opponent gone. Triggering forfeit.");
+          setGameState(prev => ({
+            ...prev,
+            winner: myDiscRef.current || ps[0]?.disc || PLAYER2,
+            winningLine: null
+          }));
+        }
+        setPlayers(ps);
+        playersRef.current = ps;
+      }
+      if (state) {
+        setGameState(prev => {
+          // If we already have a forfeit winner, don't let the server overwrite it with null
+          if (prev.winner && !state.winner) {
+             return { ...state, winner: prev.winner, winningLine: prev.winningLine };
+          }
+
+          // If server says there's a winner but didn't send the line, calculate it locally
+          if (state.winner && !state.winningLine && state.board) {
+            for (let r = 0; r < ROWS; r++) {
+              for (let c = 0; c < COLS; c++) {
+                if (state.board[r][c] === state.winner) {
+                  const line = checkWin(state.board, r, c, state.winner);
+                  if (line) {
+                    state.winningLine = line;
+                    break;
+                  }
+                }
+              }
+              if (state.winningLine) break;
+            }
+          }
+          return state;
+        });
+      }
     });
 
     socket.on("matched", ({ roomId: rid, disc }) => {
@@ -133,30 +175,57 @@ const useOnlineConnect4 = () => {
     });
 
     socket.on("player_left", ({ playerId: leftId, name: leftName }) => {
-      setPlayers(prev => prev.filter(p => p.id !== leftId));
+      console.log(`👤 Opponent left: ${leftName} (${leftId}). Checking for forfeit...`);
       
-      // If we are in a match and the opponent leaves, they forfeit
+      let wasInMatch = false;
+      setPlayers(prev => {
+        if (prev.length >= 2) wasInMatch = true;
+        const next = prev.filter(p => p.id !== leftId);
+        playersRef.current = next;
+        return next;
+      });
+      
+      // Force result overlay if they left during a match
       setGameState(prev => {
         if (prev.winner || prev.isDraw) return prev;
         
-        // Find the disc of the player who stayed
         const myDiscLocal = myDiscRef.current;
-        if (!myDiscLocal) return prev;
+        console.log("🏳️ Match active. Awarding win to local player:", myDiscLocal);
         
         return {
           ...prev,
-          winner: myDiscLocal,
-          winningLine: null // Forfeit
+          winner: myDiscLocal || (playersRef.current?.[0]?.disc) || PLAYER2,
+          winningLine: null // Forfeit signal
         };
       });
     });
 
     socket.on("surrendered", ({ playerId: surrenderingId, winnerDisc }) => {
-      setGameState(prev => ({
-        ...prev,
-        winner: winnerDisc,
-        winningLine: null // No winning line for surrender
-      }));
+      console.log("🏁 Surrender event received:", { surrenderingId, winnerDisc });
+      setGameState(prev => {
+        if (prev.winner) return prev;
+        
+        // If server didn't provide winnerDisc, calculate it from surrenderingId
+        let finalWinner = winnerDisc;
+        if (!finalWinner && surrenderingId) {
+          const surrenderingPlayer = playersRef.current?.find(p => p.id === surrenderingId);
+          if (surrenderingPlayer) {
+            finalWinner = surrenderingPlayer.disc === PLAYER1 ? PLAYER2 : PLAYER1;
+          }
+        }
+
+        // Fallback: if we still don't have a winner but we received the event, 
+        // assume the person who didn't surrender (us) won, if the surrenderingId isn't us.
+        if (!finalWinner && surrenderingId !== playerIdRef.current) {
+          finalWinner = myDiscRef.current;
+        }
+
+        return {
+          ...prev,
+          winner: finalWinner || prev.winner,
+          winningLine: null
+        };
+      });
     });
 
     socket.on("error_msg", ({ message }) => {
@@ -262,18 +331,26 @@ const useOnlineConnect4 = () => {
 
   const surrender = useCallback(() => {
     if (!connected || !roomId) return;
-    console.log("🏳️ Emitting surrender for room:", roomId);
-    socket.emit("surrender", { roomId, playerId: playerIdRef.current });
+    console.log("🏳️ Surrendering (via leave_room) for room:", roomId);
     
-    // Local fallback: set winner immediately to show overlay for the surrendering player
+    // Emit leave_room so the server notifies the opponent via 'player_left'
+    socket.emit("leave_room", { roomId, playerId: playerIdRef.current });
+    
+    // Local update for the player who clicked "Quit" to show the FORFEIT overlay
     setGameState(prev => {
-      const otherDisc = myDiscRef.current === PLAYER1 ? PLAYER2 : PLAYER1;
+      if (prev.winner) return prev;
+      const myDiscLocal = myDiscRef.current;
+      const opponentDisc = myDiscLocal === PLAYER1 ? PLAYER2 : PLAYER1;
       return {
         ...prev,
-        winner: otherDisc,
+        winner: opponentDisc,
         winningLine: null
       };
     });
+
+    // We DON'T call setRoomId(null) here yet, because we want the UI 
+    // to stay in the room view to show the result overlay.
+    // The full cleanup happens when they click "Main Menu" in OnlineV2.
   }, [connected, roomId]);
 
   const makeMove = useCallback(
