@@ -70,7 +70,7 @@ export const MatchResultOverlay = ({
   if (!isVisible) return null;
 
   const hasRequested = rematchState?.requestedBy?.includes(myPlayerId);
-  const isDeclined = rematchState?.isDeclined;
+  const isDeclined = rematchState?.isDeclined && isNaturalEnding; // Only show decline if rematch was possible
   
   let dynamicPrimaryLabel = primaryActionLabel;
   let isPrimaryDisabled = false;
