@@ -16,7 +16,7 @@ import {
   HeaderContainerNotInRoom,
   BodyContainerNotInRoom,
 } from "./index.style";
-import useOnlineConnect4 from "../../hooks/core/useOnlineConnect4";
+import useOnlineConnect4 from "../../hooks/gameplay/useOnlineConnect4";
 import { PLAYER1 } from "../../helperFunction/helperFunction";
 
 const Online = () => {

@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import useSoundManager from "../../../hooks/core/useSoundManager";
-import useConnect4CPU from "../../../hooks/core/useConnect4CPU";
+import useConnect4CPU from "../../../hooks/gameplay/useConnect4CPU";
 import { useGameSettings } from "../../../hooks/core/useGameSettings";
 import { useCPUSettings } from "../../../hooks/core/useCPUSettings";
 import { PLAYER1, PLAYER2 } from "../../../logic/core/coreConfig";

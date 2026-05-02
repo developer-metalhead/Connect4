@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useSoundManager from "../../../hooks/core/useSoundManager";
-import { useConnect4 } from "../../../hooks/core/useConnect4";
+import { useConnect4 } from "../../../hooks/gameplay/useConnect4";
 import { PLAYERS } from "../../../logic/core/coreConfig";
 
 // New UI Components
