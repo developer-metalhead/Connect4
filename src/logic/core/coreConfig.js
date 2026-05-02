@@ -19,7 +19,7 @@ export const CORE_CONFIG = {
   ROWS: 6,
   COLS: 7,
   // PLUG & PLAY: Change this to ANY pattern to change the goal of the game!
-  WIN_PATTERN: { type: PATTERNS.LINE, length: 1}, 
+  WIN_PATTERN: { type: PATTERNS.LINE, length: 4 }, 
   DEFAULT_FIRST_PLAYER: "🔴",
 };
 
