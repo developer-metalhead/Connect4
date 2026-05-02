@@ -141,10 +141,10 @@ const OnlineV2 = () => {
           activeOption={activePanel}
           onOptionClick={(id) => setActivePanel(activePanel === id ? null : id)}
           options={[
-            { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
-            { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
             { id: 'game', label: 'Game Settings', icon: <span>🎮</span> },
+            { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
             { id: 'board', label: 'Board Settings', icon: <span>⚙️</span> },
+            { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
           ]}
         />
       ) : (

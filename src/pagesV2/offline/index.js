@@ -36,12 +36,11 @@ const OfflineV2 = () => {
         activeOption={activePanel}
         onOptionClick={(id) => setActivePanel(activePanel === id ? null : id)}
         options={[
+          { id: 'game', label: 'Game Settings', icon: <span>🎮</span> },
+          { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
+          { id: 'board', label: 'Board Settings', icon: <span>⚙️</span> },
           { id: 'cpu', label: 'CPU Settings', icon: <span>🤖</span> },
           { id: 'fun', label: 'Fun Mode Settings', icon: <span>🔥</span> },
-          { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
-          { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
-          { id: 'game', label: 'Game Settings', icon: <span>🎮</span> },
-          { id: 'board', label: 'Board Settings', icon: <span>⚙️</span> },
         ]}
       />
 
@@ -49,17 +48,15 @@ const OfflineV2 = () => {
         isOpen={activePanel !== null} 
         onClose={() => setActivePanel(null)}
         title={
-          activePanel === 'cpu' ? 'CPU Settings' :
-          activePanel === 'fun' ? 'Fun Mode Settings' :
-          activePanel === 'online' ? 'Online Settings' :
           activePanel === 'game' ? 'Game Settings' :
+          activePanel === 'sound' ? 'Sound Settings' :
           activePanel === 'board' ? 'Board Settings' :
-          'Sound Settings'
+          activePanel === 'cpu' ? 'CPU Settings' :
+          'Fun Mode Settings'
         }
       >
         {activePanel === 'cpu' && <CPUSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'fun' && <FunModeSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
-        {activePanel === 'online' && <OnlineSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'sound' && <SoundSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'game' && <GameSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'board' && <BoardSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
