@@ -1,28 +1,33 @@
 /**
  * FUN MODE CONFIGURATION
  * This file centralizes the thresholds and probabilities for all special features.
+ * 
+ * PLUG & PLAY: You can swap REQUIRED_PATTERN between PATTERNS.IN_A_ROW and PATTERNS.SQUARE
+ * without touching the core logic.
  */
 
+import { PATTERNS } from "./constants";
+
 export const MONKEY_CONFIG = {
-  // Pattern type: "IN_A_ROW"
-  REQUIRED_PATTERN: "IN_A_ROW",
+  // The type of board pattern that fuels this ability
+  REQUIRED_PATTERN: PATTERNS.IN_A_ROW,
   
-  // Size of the pattern
+  // The dimension of the pattern (e.g. 3 for 3-in-a-row, 2 for 2x2 square)
   PATTERN_SIZE: 3,
 
-  // Number of matches required to trigger the Monkey Mayhem button
+  // Number of completed pattern matches required to enable the Monkey Mayhem button
   TRIGGER_THRESHOLD: 2,
   
-  // Chance that the monkey will steal a disc after it appears
+  // Chance that the monkey will steal a disc after it appears (0.0 to 1.0)
   STEAL_PROBABILITY: 0.75,
 
   // How many turns the board stays upside down after mayhem is activated
   MAYHEM_DURATION: 4,
 
-  // Total times Monkey Mayhem can be triggered in a single match (both players combined)
+  // Global match limit: total times Monkey Mayhem can trigger in a single game
   MAX_ACTIVATIONS_PER_MATCH: 1,
   
-  // Voice lines for the monkey
+  // The monkey's personality lines
   VOICE_LINES: [
     "Time to flip things up!",
     "Ooo-ooo! Gravity is my playground!",
@@ -33,31 +38,31 @@ export const MONKEY_CONFIG = {
 };
 
 export const CHICKEN_CONFIG = {
-  // Pattern type: "SQUARE"
-  REQUIRED_PATTERN: "SQUARE",
+  // The type of board pattern that fuels this ability
+  REQUIRED_PATTERN: PATTERNS.SQUARE,
 
-  // Size of the square (e.g. 2 means 2x2)
+  // The dimension of the pattern
   PATTERN_SIZE: 2,
 
-  // Number of squares required to trigger a Chaos Chicken event
+  // Matches required to trigger a standard Chaos Chicken event
   TRIGGER_THRESHOLD: 1,
   
-  // Number of squares required to trigger a Rooster of Rage event (replaces chicken)
+  // Matches required to escalate to a Rooster of Rage event (replaces chicken)
   ROOSTER_THRESHOLD: 2,
 
-  // Max times a player can use the Rooster of Rage in one match
+  // Max times a single player can unleash the Rooster per match
   MAX_ROOSTER_PER_PLAYER: 1,
 
-  // If true, chicken activations reset to 0 after a rooster strike
+  // Whether to reset the pattern counter after a Rooster strike
   RESET_AFTER_ROOSTER: false,
   
-  // Probability split for poop blocking: 70% chance to target a non-empty column
+  // Probability split: Chance to target a column that already has discs
   POOP_NON_EMPTY_PROBABILITY: 0.70,
   
-  // How many turns a column stays blocked by poop
+  // Duration of the column block effect
   POOP_BLOCK_DURATION: 3,
   
-  // Voice lines for the chicken
+  // Standard chicken commentary
   CHICKEN_VOICE_LINES: [
     "Bawk bawk! Chaos time!",
     "Cluck cluck! Here comes trouble!",
@@ -66,7 +71,7 @@ export const CHICKEN_CONFIG = {
     "Time to ruffle some feathers!",
   ],
   
-  // Voice lines for the rooster
+  // High-stakes rooster commentary
   ROOSTER_VOICE_LINES: [
     "RAAAWR! Rooster of Rage!",
     "COCK-A-DOODLE-DOOM!",

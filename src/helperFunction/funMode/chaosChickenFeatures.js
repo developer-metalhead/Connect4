@@ -1,48 +1,7 @@
-import { ROWS, COLS, EMPTY } from "../helperFunction";
+import { ROWS, COLS, EMPTY } from "../../logic/constants";
 import { CHICKEN_CONFIG } from "../../logic/funMode";
-
-// Improved Square Detection Function (Decoupled size)
-export const detectNewSquares = (board, player, lastRow, lastCol, size) => {
-  console.log(`🔍 Checking ${size}x${size} squares immediately after placement at [${lastRow}][${lastCol}]`);
-  
-  if (lastRow === -1 || lastCol === -1) return { count: 0, squares: [] };
-  
-  const squares = [];
-  const ROWS = board.length;
-  const COLS = board[0].length;
-  
-  // A square of size 'size' can be in 'size * size' relative positions to the new piece.
-  // We iterate through all possible top-left corners that could include [lastRow, lastCol].
-  for (let rOffset = -(size - 1); rOffset <= 0; rOffset++) {
-    for (let cOffset = -(size - 1); cOffset <= 0; cOffset++) {
-      const r = lastRow + rOffset;
-      const c = lastCol + cOffset;
-
-      // Bounds check for the whole square
-      if (r >= 0 && r + size <= ROWS && c >= 0 && c + size <= COLS) {
-        let isSquare = true;
-        
-        // Check all cells in the square
-        for (let i = 0; i < size; i++) {
-          for (let j = 0; j < size; j++) {
-            if (board[r + i][c + j] !== player) {
-              isSquare = false;
-              break;
-            }
-          }
-          if (!isSquare) break;
-        }
-
-        if (isSquare) {
-          squares.push({ startRow: r, startCol: c });
-          console.log(`✅ Found new ${size}x${size} at [${r}][${c}]`);
-        }
-      }
-    }
-  }
-  
-  return { count: squares.length, squares };
-};
+import { detectPattern } from "./patternDispatcher";
+import { detectNewSquares } from "./patternDetectors";
 
 // === CHAOS CHICKEN COLUMN BLOCKING PROBABILITY (70-30) ===
 export const getRandomUnblockedColumn = (blockedColumns, board) => {
@@ -241,8 +200,8 @@ export const shouldTriggerChaosChicken = (board, lastRow, lastCol, player, chaos
     return false;
   }
   
-  // Check if new square was formed based on configuration
-  const { count } = detectNewSquares(board, player, lastRow, lastCol, CHICKEN_CONFIG.PATTERN_SIZE);
+  // PLUG & PLAY: Use the dispatcher to find matches based on REQUIRED_PATTERN
+  const { count } = detectPattern(board, player, CHICKEN_CONFIG, { row: lastRow, col: lastCol });
   const hasNewPattern = count > 0;
   
   return hasNewPattern;

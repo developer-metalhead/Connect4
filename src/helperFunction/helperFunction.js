@@ -1,12 +1,24 @@
-import { 
+/**
+ * HELPER FUNCTIONS (Compatibility Layer)
+ * This file acts as a bridge, re-exporting constants and engine logic
+ * so that legacy components and hooks continue to work correctly.
+ */
+
+import { PLAYER1 } from "../logic/constants";
+import { createEmptyBoard, getTargetRow } from "../logic/engine";
+
+// Re-export constants
+export { 
   ROWS, 
   COLS, 
   PLAYER1, 
   PLAYER2, 
-  EMPTY 
+  EMPTY,
+  ANIMATION_CONFIG 
 } from "../logic/constants";
 
-import {
+// Re-export core engine logic
+export {
   createEmptyBoard,
   isValidMove,
   checkWin,
@@ -16,7 +28,9 @@ import {
   getTargetRow
 } from "../logic/engine";
 
-// Legacy wrapper for dropPiece used by older hooks
+/**
+ * Drop a piece into the board (Legacy wrapper)
+ */
 export const dropPiece = (board, col, player) => {
   const row = getTargetRow(board, col);
   if (row === -1) return { newBoard: board, row: -1 };
@@ -26,7 +40,9 @@ export const dropPiece = (board, col, player) => {
   return { newBoard, row };
 };
 
-// Reset game state
+/**
+ * Reset game state (Legacy wrapper)
+ */
 export const resetGame = () => {
   return {
     board: createEmptyBoard(),
@@ -35,18 +51,4 @@ export const resetGame = () => {
     winningLine: null,
     isDraw: false,
   };
-};
-
-export { 
-  ROWS, 
-  COLS, 
-  PLAYER1, 
-  PLAYER2, 
-  EMPTY,
-  createEmptyBoard,
-  isValidMove,
-  checkWin,
-  isBoardFull,
-  getNextPlayer,
-  formatCoords
 };

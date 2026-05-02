@@ -1,56 +1,7 @@
-import { ROWS, COLS, EMPTY } from "../helperFunction";
+import { ROWS, COLS, EMPTY } from "../../logic/constants";
 import { MONKEY_CONFIG } from "../../logic/funMode";
-
-// General pattern counting function (decoupled from "3-in-a-row")
-export const countSeparateInARows = (board, player, size) => {
-  console.log(`🔍 COUNTING ${size}-IN-A-ROWS FOR PLAYER:`, player);
-  
-  let count = 0;
-
-  const directions = [
-    [0, 1], // horizontal
-    [1, 0], // vertical
-    [1, 1], // diagonal down-right
-    [1, -1], // diagonal up-right
-  ];
-
-  for (let row = 0; row < ROWS; row++) {
-    for (let col = 0; col < COLS; col++) {
-      if (board[row][col] !== player) continue;
-
-      for (let [dr, dc] of directions) {
-        let valid = true;
-
-        for (let i = 0; i < size; i++) {
-          const r = row + i * dr;
-          const c = col + i * dc;
-
-          if (
-            r < 0 ||
-            r >= ROWS ||
-            c < 0 ||
-            c >= COLS ||
-            board[r][c] !== player
-          ) {
-            valid = false;
-            break;
-          }
-        }
-
-        if (valid) {
-          count++;
-        }
-      }
-    }
-  }
-
-  console.log(`📊 FINAL ${size}-IN-A-ROW COUNT:`, {
-    player,
-    count,
-  });
-
-  return count;
-};
+import { detectPattern } from "./patternDispatcher";
+import { countSeparateInARows } from "./patternDetectors";
 
 export const shouldTriggerMonkeyMayhem = (board, player, monkeyState) => {
   // Check if we reached the match limit
@@ -59,10 +10,11 @@ export const shouldTriggerMonkeyMayhem = (board, player, monkeyState) => {
     return false;
   }
 
-  const patternCount = countSeparateInARows(board, player, MONKEY_CONFIG.PATTERN_SIZE);
+  // PLUG & PLAY: Use the dispatcher to find matches based on REQUIRED_PATTERN
+  const { count: patternCount } = detectPattern(board, player, MONKEY_CONFIG);
   const shouldTrigger = patternCount >= MONKEY_CONFIG.TRIGGER_THRESHOLD;
   
-  console.log(`📊 MONKEY MAYHEM DECISION: ${shouldTrigger} (Found ${patternCount}/${MONKEY_CONFIG.TRIGGER_THRESHOLD} of size ${MONKEY_CONFIG.PATTERN_SIZE})`);
+  console.log(`📊 MONKEY MAYHEM DECISION: ${shouldTrigger} (Found ${patternCount}/${MONKEY_CONFIG.TRIGGER_THRESHOLD})`);
 
   return shouldTrigger;
 };

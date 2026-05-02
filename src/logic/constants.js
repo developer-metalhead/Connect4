@@ -12,3 +12,8 @@ export const ANIMATION_CONFIG = {
   SHAKE_DURATION: 150,
   RIPPLE_DURATION: 500,
 };
+
+export const PATTERNS = {
+  IN_A_ROW: "IN_A_ROW",
+  SQUARE: "SQUARE",
+};
