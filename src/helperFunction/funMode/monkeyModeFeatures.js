@@ -77,14 +77,10 @@ export const countSeparateThreeInARows = (board, player) => {
   return count;
 };
 
-export const shouldTriggerMonkeyMayhem = (board, player, monkeyMayhemState) => {
-  console.log("🐒 CHECKING MONKEY MAYHEM TRIGGER:", {
-    player,
-    monkeyMayhemState,
-  });
-
-  if (monkeyMayhemState.wasOffered || monkeyMayhemState.wasUsed) {
-    console.log("❌ MONKEY MAYHEM ALREADY OFFERED/USED:", monkeyMayhemState);
+export const shouldTriggerMonkeyMayhem = (board, player, monkeyState) => {
+  // Check if we reached the match limit
+  if (monkeyState.totalActivations >= MONKEY_CONFIG.MAX_ACTIVATIONS_PER_MATCH) {
+    console.log("❌ MONKEY MAYHEM MATCH LIMIT REACHED:", MONKEY_CONFIG.MAX_ACTIVATIONS_PER_MATCH);
     return false;
   }
 

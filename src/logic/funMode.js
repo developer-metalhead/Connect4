@@ -12,6 +12,9 @@ export const MONKEY_CONFIG = {
 
   // How many turns the board stays upside down after mayhem is activated
   MAYHEM_DURATION: 4,
+
+  // Total times Monkey Mayhem can be triggered in a single match (both players combined)
+  MAX_ACTIVATIONS_PER_MATCH: 1,
   
   // Voice lines for the monkey
   VOICE_LINES: [
@@ -29,6 +32,12 @@ export const CHICKEN_CONFIG = {
   
   // Number of 2x2 squares required to trigger a Rooster of Rage event (replaces chicken)
   ROOSTER_THRESHOLD: 2,
+
+  // Max times a player can use the Rooster of Rage in one match
+  MAX_ROOSTER_PER_PLAYER: 1,
+
+  // If true, chicken activations reset to 0 after a rooster strike
+  RESET_AFTER_ROOSTER: false,
   
   // Probability split for poop blocking: 70% chance to target a non-empty column
   POOP_NON_EMPTY_PROBABILITY: 0.70,

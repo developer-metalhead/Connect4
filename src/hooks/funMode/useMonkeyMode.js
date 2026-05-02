@@ -29,10 +29,9 @@ export const useMonkeyMode = (options = {}) => {
   const [gravity, setGravity] = useState("normal");
   const [upsideDownTurnsLeft, setUpsideDownTurnsLeft] = useState(0);
   const [monkeyState, setMonkeyState] = useState({
-    wasOffered: false,
-    wasUsed: false,
-    offeredTo: null,
-    usedBy: null,
+    totalActivations: 0,
+    lastOfferedTo: null,
+    lastUsedBy: null,
   });
   const [isMonkeyAnimating, setIsMonkeyAnimating] = useState(false);
   const [monkeyVoiceLine, setMonkeyVoiceLine] = useState("");
@@ -96,13 +95,11 @@ export const useMonkeyMode = (options = {}) => {
             );
             
             // CHANGE: Always commit applyNormalGravity as final board.
-            // After setIsUpsideDown(false) un-rotates the wrapper, bottom rows = visual bottom. ✓
             const finalBoard = applyNormalGravity(currentBoard);
 
             setGravityAnimation(animations);
             setGravity("normal");
             
-            // CHANGE: Hide monkey overlay as soon as gravity restore begins so discs are visible
             setIsMonkeyAnimating(false);
             setMonkeyVoiceLine("");
 
@@ -120,11 +117,10 @@ export const useMonkeyMode = (options = {}) => {
       }
     }
 
-    // CHANGE: Check for monkey trigger (unified logic)
+    // CHANGE: Check for monkey trigger (Allow multiple activations)
     if (shouldTriggerMonkeyMayhem(newState.board, moveData.player, monkeyState)) {
-      console.log("🎯 MONKEY MODE TRIGGERED FOR:", moveData.player);
+      console.log("🎯 MONKEY MODE OFFERED TO:", moveData.player);
       
-      // CHANGE: Play monkey laugh immediately on trigger
       soundManager?.playSound("monkeylaugh");
 
       if (monkeyButtonTimerRef.current) {
@@ -134,8 +130,7 @@ export const useMonkeyMode = (options = {}) => {
 
       setMonkeyState(prev => ({
         ...prev,
-        wasOffered: true,
-        offeredTo: moveData.player,
+        lastOfferedTo: moveData.player,
       }));
 
       setShowMonkeyButton(true);
@@ -174,7 +169,7 @@ export const useMonkeyMode = (options = {}) => {
     onPiecePlaced,
   });
 
-  // CHANGE: Trigger monkey mode (unified from previous "mayhem" function)
+  // CHANGE: Trigger monkey mode (Supports Stacking and Multiple activations)
   const triggerMonkeyMode = useCallback(() => {
     if (!monkeyModeEnabled || !showMonkeyButton || !monkeyButtonPlayer || isMonkeyAnimating) {
       console.log("❌ MONKEY MODE TRIGGER BLOCKED");
@@ -187,10 +182,11 @@ export const useMonkeyMode = (options = {}) => {
     }
 
     setShowMonkeyButton(false);
+    
     setMonkeyState(prev => ({
       ...prev,
-      wasUsed: true,
-      usedBy: monkeyButtonPlayer,
+      totalActivations: prev.totalActivations + 1,
+      lastUsedBy: monkeyButtonPlayer,
     }));
 
     setIsMonkeyAnimating(true);
@@ -198,22 +194,24 @@ export const useMonkeyMode = (options = {}) => {
     setMonkeyVoiceLine(voiceLine);
     console.log("🎬 STARTING MONKEY ANIMATION:", voiceLine);
     
-    // Play monkey laugh sound
     soundManager?.playSound('monkeylaugh');
 
     setTimeout(() => {
-      // CHANGE: Stop the laugh sound immediately when the board flips
       soundManager?.stopSound('monkeylaugh');
 
       let currentBoard = funModeHook.gameState.board;
+      
+      // If already upside down, we "flip back" visually but maybe keep inverted gravity logic?
+      // Actually, user said "flip again", so we toggle states.
+      const newIsUpsideDown = !isUpsideDown;
+      const newGravity = gravity === "normal" ? "inverted" : "normal";
+      
       let flippedBoard = useRotation ? currentBoard : flipBoardUpsideDown(currentBoard);
       
       const { newBoard: afterStealBoard, stolenCell, opponentPlayer } = maybeStealDisc(flippedBoard, monkeyButtonPlayer, !useRotation);
       flippedBoard = afterStealBoard;
 
-      // === MONKEY MAYHEM OVERLAY ===
       if (stolenCell && onOverlayShow) {
-        // === AUDIO: Play coinfalling.mp3 when discs are removed ===
         soundManager?.playSound('coinsfalling');
         onOverlayShow({
           type: "monkey",
@@ -225,23 +223,29 @@ export const useMonkeyMode = (options = {}) => {
       }
 
       funModeHook.updateBoard(flippedBoard);
-      setIsUpsideDown(true);
-      setGravity("inverted"); // Gravity pulls to visual top
+      setIsUpsideDown(newIsUpsideDown);
+      setGravity(newGravity); 
       setUpsideDownTurnsLeft(MONKEY_CONFIG.MAYHEM_DURATION);
       setIsMonkeyAnimating(false);
       setMonkeyButtonPlayer(null);
       setMonkeyVoiceLine("");
-      funModeHook.updateExtensionData('isUpsideDown', true);
-      funModeHook.updateExtensionData('isLogicUpsideDown', false); // 180deg + inverted = Row 5 (visual top)
+      
+      // Update extension data for game logic sync
+      funModeHook.updateExtensionData('isUpsideDown', newIsUpsideDown);
+      // Re-calculate logical gravity for the engine
+      const newLogicUpsideDown = newIsUpsideDown ? (newGravity === "normal") : (newGravity === "inverted");
+      funModeHook.updateExtensionData('isLogicUpsideDown', newLogicUpsideDown);
 
-      console.log("🙃 UPSIDE DOWN MODE ACTIVATED");
+      console.log("🙃 MONKEY MAYHEM STACKED/ACTIVATED", { newIsUpsideDown, newGravity, newLogicUpsideDown });
     }, 2500);
   }, [
     monkeyModeEnabled,
     showMonkeyButton,
     monkeyButtonPlayer,
     isMonkeyAnimating,
-    funModeHook
+    funModeHook,
+    isUpsideDown,
+    gravity
   ]);
 
   // CHANGE: Enhanced reset that includes monkey state

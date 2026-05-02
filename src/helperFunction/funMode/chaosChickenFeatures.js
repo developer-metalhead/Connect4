@@ -231,17 +231,12 @@ export const getRandomRoosterVoiceLine = () => {
 
 // Check if player should trigger Chaos Chicken
 export const shouldTriggerChaosChicken = (board, lastRow, lastCol, player, chaosChickenState) => {
-  console.log("🐔 CHECKING CHAOS CHICKEN TRIGGER:", {
-    player,
-    lastRow,
-    lastCol,
-    chaosChickenState
-  });
-  
-  // Check if player has retired their chicken
+  // Check if player has reached their Rooster limit
   const playerKey = player === "🔴" ? "player1" : "player2";
-  if (chaosChickenState.hasUsedRooster[playerKey]) {
-    console.log("❌ PLAYER HAS RETIRED THEIR CHICKEN:", player);
+  const roosterCount = chaosChickenState.roosterCount?.[playerKey] || 0;
+  
+  if (roosterCount >= CHICKEN_CONFIG.MAX_ROOSTER_PER_PLAYER) {
+    console.log("❌ PLAYER HAS REACHED ROOSTER LIMIT:", player);
     return false;
   }
   
@@ -249,26 +244,16 @@ export const shouldTriggerChaosChicken = (board, lastRow, lastCol, player, chaos
   const { count } = detectNew2x2Squares(board, player, lastRow, lastCol);
   const hasNew2x2 = count > 0;
   
-  console.log("🎯 CHAOS CHICKEN DECISION:", {
-    player,
-    hasNew2x2,
-    playerActivations: chaosChickenState.chickenActivations[playerKey],
-    hasUsedRooster: chaosChickenState.hasUsedRooster[playerKey]
-  });
-  
   return hasNew2x2;
-};
-
-// Get player activation count
-export const getPlayerActivationCount = (chaosChickenState, player) => {
-  const playerKey = player === "🔴" ? "player1" : "player2";
-  return chaosChickenState.chickenActivations[playerKey];
 };
 
 // Check if this will be a Rooster of Rage activation
 export const isRoosterOfRageActivation = (chaosChickenState, player) => {
   const playerKey = player === "🔴" ? "player1" : "player2";
-  return chaosChickenState.chickenActivations[playerKey] === (CHICKEN_CONFIG.ROOSTER_THRESHOLD - 1) && !chaosChickenState.hasUsedRooster[playerKey];
+  const currentActivations = chaosChickenState.chickenActivations[playerKey];
+  
+  // Triggers if it's the (ROOSTER_THRESHOLD)-th activation
+  return currentActivations === (CHICKEN_CONFIG.ROOSTER_THRESHOLD - 1);
 };
 
 // Find nearest available column

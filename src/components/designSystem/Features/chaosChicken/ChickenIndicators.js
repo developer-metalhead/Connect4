@@ -1,6 +1,7 @@
 import React from "react";
 import { styled, keyframes } from "@mui/material/styles";
 import { tokens } from "../../tokens";
+import { CHICKEN_CONFIG } from "../../../../logic/funMode";
 
 
 const IndicatorsContainer = styled("div")({
@@ -61,14 +62,18 @@ const Count = styled("span")(({ count }) => ({
 }));
 
 const ChickenIndicators = ({ chaosChickenState, currentPlayer }) => {
-  const p1Activations = chaosChickenState.chickenActivations.player1;
-  const p2Activations = chaosChickenState.chickenActivations.player2;
-  const p1Retired = chaosChickenState.hasUsedRooster.player1;
-  const p2Retired = chaosChickenState.hasUsedRooster.player2;
+  const p1Activations = chaosChickenState.chickenActivations?.player1 || 0;
+  const p2Activations = chaosChickenState.chickenActivations?.player2 || 0;
+  
+  const p1Roosters = chaosChickenState.roosterCount?.player1 || 0;
+  const p2Roosters = chaosChickenState.roosterCount?.player2 || 0;
+
+  const p1Retired = p1Roosters >= CHICKEN_CONFIG.MAX_ROOSTER_PER_PLAYER;
+  const p2Retired = p2Roosters >= CHICKEN_CONFIG.MAX_ROOSTER_PER_PLAYER;
 
   const getEmoji = (count, retired) => {
     if (retired) return "🐓💤";
-    if (count === 1) return "🐓";
+    if (count === (CHICKEN_CONFIG.ROOSTER_THRESHOLD - 1)) return "🐓";
     return "🐔";
   };
 
@@ -78,7 +83,7 @@ const ChickenIndicators = ({ chaosChickenState, currentPlayer }) => {
         <Emoji>{getEmoji(p1Activations, p1Retired)}</Emoji>
         <Label>P1</Label>
         <Count count={p1Activations}>
-          {p1Retired ? "X" : `${p1Activations}/2`}
+          {p1Retired ? "MAX" : `${p1Activations}/${CHICKEN_CONFIG.ROOSTER_THRESHOLD}`}
         </Count>
       </StatusBadge>
 
@@ -86,7 +91,7 @@ const ChickenIndicators = ({ chaosChickenState, currentPlayer }) => {
         <Emoji>{getEmoji(p2Activations, p2Retired)}</Emoji>
         <Label>P2</Label>
         <Count count={p2Activations}>
-          {p2Retired ? "X" : `${p2Activations}/2`}
+          {p2Retired ? "MAX" : `${p2Activations}/${CHICKEN_CONFIG.ROOSTER_THRESHOLD}`}
         </Count>
       </StatusBadge>
     </IndicatorsContainer>

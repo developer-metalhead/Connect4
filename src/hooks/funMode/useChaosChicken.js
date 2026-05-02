@@ -13,13 +13,14 @@ import {
   isRoosterOfRageActivation,
   findNearestAvailableColumn,
 } from "../../helperFunction/funMode/chaosChickenFeatures";
+import { CHICKEN_CONFIG } from "../../logic/funMode";
 
 export const useChaosChicken = (options = {}) => {
   const { chaosChickenEnabled = true } = options;
 
   const [chaosChickenState, setChaosChickenState] = useState({
     chickenActivations: { player1: 0, player2: 0 },
-    hasUsedRooster: { player1: false, player2: false },
+    roosterCount: { player1: 0, player2: 0 },
   });
 
   const [blockedColumns, setBlockedColumns] = useState([]);
@@ -33,14 +34,6 @@ export const useChaosChicken = (options = {}) => {
   const checkChaosChickenTrigger = useCallback(
     (board, lastRow, lastCol, player) => {
       if (!chaosChickenEnabled) return false;
-
-      console.log("🐔 CHECKING CHAOS CHICKEN TRIGGER:", {
-        player,
-        lastRow,
-        lastCol,
-        chaosChickenState,
-      });
-
       return shouldTriggerChaosChicken(
         board,
         lastRow,
@@ -56,11 +49,10 @@ export const useChaosChicken = (options = {}) => {
     (board, player, soundManager, onBoardUpdate, isUpsideDown = false) => {
       if (!chaosChickenEnabled || isChickenAnimating) return;
 
-      console.log("🐔 TRIGGERING CHAOS CHICKEN:", player);
-
       const playerKey = player === "🔴" ? "player1" : "player2";
-      const currentActivations = chaosChickenState.chickenActivations[playerKey];
-      const willBeRooster = currentActivations === 1; // TEST MODE: Rooster of Rage activates after 1 chicken activation
+      const willBeRooster = isRoosterOfRageActivation(chaosChickenState, player);
+
+      console.log(`🐔 TRIGGERING ${willBeRooster ? "ROOSTER" : "CHICKEN"} FOR:`, player);
 
       // Play appropriate sound
       if (soundManager) {
@@ -71,20 +63,28 @@ export const useChaosChicken = (options = {}) => {
         }
       }
 
-      // Update activation count
-      setChaosChickenState((prev) => ({
-        ...prev,
-        chickenActivations: {
-          ...prev.chickenActivations,
-          [playerKey]: prev.chickenActivations[playerKey] + 1,
-        },
-        ...(willBeRooster && {
-          hasUsedRooster: {
-            ...prev.hasUsedRooster,
-            [playerKey]: true,
+      // Update state
+      setChaosChickenState((prev) => {
+        const nextActivations = willBeRooster && CHICKEN_CONFIG.RESET_AFTER_ROOSTER
+          ? 0 
+          : prev.chickenActivations[playerKey] + 1;
+        
+        const nextRoosterCount = willBeRooster 
+          ? prev.roosterCount[playerKey] + 1 
+          : prev.roosterCount[playerKey];
+
+        return {
+          ...prev,
+          chickenActivations: {
+            ...prev.chickenActivations,
+            [playerKey]: nextActivations,
           },
-        }),
-      }));
+          roosterCount: {
+            ...prev.roosterCount,
+            [playerKey]: nextRoosterCount
+          }
+        };
+      });
 
       // Start animation
       setIsChickenAnimating(true);
@@ -95,7 +95,6 @@ export const useChaosChicken = (options = {}) => {
         setChickenVoiceLine(getRandomRoosterVoiceLine());
         setTargetColumn(null);
 
-        // Clear opponent discs after animation
         if (animationTimeoutRef.current) {
           clearTimeout(animationTimeoutRef.current);
         }
@@ -104,27 +103,19 @@ export const useChaosChicken = (options = {}) => {
           const selectedRow = selectNonEmptyRowForRooster(board);
           const { newBoard, clearedCount } = clearOpponentDiscsInRow(board, selectedRow, player);
 
-          if (clearedCount > 0) {
-            // === ROOSTER OF RAGE OVERLAY ===
-            if (options.onOverlayShow) {
-              const opponentPlayer = player === "🔴" ? "🟡" : "🔴";
-              // === AUDIO: Play coinfalling.mp3 when discs are removed ===
-              soundManager?.playSound('coinsfalling');
-              options.onOverlayShow({
-                type: "rooster",
-                count: clearedCount,
-                row: selectedRow,
-                player: opponentPlayer
-              });
-            }
+          if (clearedCount > 0 && options.onOverlayShow) {
+            const opponentPlayer = player === "🔴" ? "🟡" : "🔴";
+            soundManager?.playSound('coinsfalling');
+            options.onOverlayShow({
+              type: "rooster",
+              count: clearedCount,
+              row: selectedRow,
+              player: opponentPlayer
+            });
           }
 
           if (clearedCount > 0 || selectedRow !== -1) {
-            // Apply gravity after clearing
-            const finalBoard = applyGravityAfterClear(
-              newBoard,
-              isUpsideDown
-            );
+            const finalBoard = applyGravityAfterClear(newBoard, isUpsideDown);
             onBoardUpdate(finalBoard);
           }
 
@@ -136,12 +127,9 @@ export const useChaosChicken = (options = {}) => {
         // Regular chicken
         setChickenVoiceLine(getRandomChickenVoiceLine());
 
-        // Find column to block
         const columnToBlock = getRandomUnblockedColumn(blockedColumns, board);
         if (columnToBlock !== null) {
           setTargetColumn(columnToBlock);
-
-          // Block column after animation
           if (animationTimeoutRef.current) {
             clearTimeout(animationTimeoutRef.current);
           }
@@ -153,11 +141,9 @@ export const useChaosChicken = (options = {}) => {
             setTargetColumn(null);
           }, 2500);
         } else {
-          // No columns to block
           if (animationTimeoutRef.current) {
             clearTimeout(animationTimeoutRef.current);
           }
-
           animationTimeoutRef.current = setTimeout(() => {
             setIsChickenAnimating(false);
             setChickenVoiceLine("");
@@ -171,6 +157,7 @@ export const useChaosChicken = (options = {}) => {
       isChickenAnimating,
       chaosChickenState,
       blockedColumns,
+      options.onOverlayShow
     ]
   );
 
