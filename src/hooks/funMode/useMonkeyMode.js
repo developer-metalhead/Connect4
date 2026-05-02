@@ -180,6 +180,9 @@ export const useMonkeyMode = (options = {}) => {
     const voiceLine = getRandomMonkeyVoiceLine();
     setMonkeyVoiceLine(voiceLine);
     console.log("🎬 STARTING MONKEY ANIMATION:", voiceLine);
+    
+    // Play monkey laugh sound
+    soundManager?.playSound('monkeylaugh');
 
     setTimeout(() => {
       let currentBoard = funModeHook.gameState.board;

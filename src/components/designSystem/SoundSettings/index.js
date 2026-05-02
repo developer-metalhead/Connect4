@@ -26,7 +26,6 @@ const SoundSettings = ({ soundManager, onClose }) => {
 
   const handleMuteToggle = () => {
     setIsMuted(!isMuted);
-    if (playClickSound) playClickSound();
   };
 
   const handleVolumeChange = (e) => {
@@ -41,7 +40,6 @@ const SoundSettings = ({ soundManager, onClose }) => {
 
   const handleMusicToggle = () => {
     toggleBackgroundMusic();
-    if (playClickSound) playClickSound();
   };
 
   const handleTestSound = () => {
@@ -56,7 +54,7 @@ const SoundSettings = ({ soundManager, onClose }) => {
         <p style={{ textAlign: 'center', color: '#ef4444', fontSize: '14px' }}>
           Audio is not supported in this browser environment.
         </p>
-        <Button variant="primary" fullWidth onClick={onClose}>
+        <Button variant="primary" fullWidth onClick={onClose} soundManager={soundManager}>
           Close
         </Button>
       </SettingsContainer>
@@ -76,6 +74,7 @@ const SoundSettings = ({ soundManager, onClose }) => {
           variant={isMuted ? "danger" : "primary"}
           size="sm"
           onClick={handleMuteToggle}
+          soundManager={soundManager}
         >
           {isMuted ? 'Muted' : 'Enabled'}
         </Button>
@@ -109,6 +108,7 @@ const SoundSettings = ({ soundManager, onClose }) => {
           size="sm"
           onClick={handleMusicToggle}
           disabled={isMuted}
+          soundManager={soundManager}
         >
           {isMusicEnabled ? 'On' : 'Off'}
         </Button>
@@ -131,10 +131,10 @@ const SoundSettings = ({ soundManager, onClose }) => {
       </SettingRow>
 
       <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-        <Button variant="outline" fullWidth onClick={handleTestSound} disabled={isMuted}>
+        <Button variant="outline" fullWidth onClick={handleTestSound} disabled={isMuted} soundManager={soundManager}>
           Test Sound
         </Button>
-        <Button variant="primary" fullWidth onClick={onClose}>
+        <Button variant="primary" fullWidth onClick={onClose} soundManager={soundManager}>
           Done
         </Button>
       </div>

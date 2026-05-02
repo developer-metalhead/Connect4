@@ -68,6 +68,7 @@ const PlayCPUV2 = () => {
   };
 
   const handleReset = () => {
+    soundManager?.playSound('coinsfalling');
     setSurrendered(false);
     reset();
   };
@@ -103,7 +104,10 @@ const PlayCPUV2 = () => {
       />
       <Header>
         <HeaderContent>
-          <AppLogo onClick={() => navigate("/home")}>
+          <AppLogo onClick={() => {
+            soundManager?.playClickSound();
+            navigate("/home");
+          }}>
             Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>vs CPU</span>
           </AppLogo>
         </HeaderContent>

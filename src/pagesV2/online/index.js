@@ -120,7 +120,10 @@ const OnlineV2 = () => {
   return (
     <PageWrapper>
       <RefreshIconButton 
-        onClick={() => window.location.reload()} 
+        onClick={() => {
+          soundManager?.playClickSound();
+          window.location.reload();
+        }} 
         style={{ position: 'fixed', top: '12px', right: '12px', zIndex: 1001 }}
       >
         <svg viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -149,7 +152,10 @@ const OnlineV2 = () => {
         />
       ) : (
         <RefreshIconButton 
-          onClick={() => window.location.reload()} 
+          onClick={() => {
+            soundManager?.playClickSound();
+            window.location.reload();
+          }} 
           style={{ position: 'fixed', top: '10px', right: '12px', zIndex: 1001 }}
         >
           <svg viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -157,6 +163,7 @@ const OnlineV2 = () => {
       )}
 
       <Header/>
+      
         
    
       <BackButton soundManager={soundManager} />
@@ -290,7 +297,7 @@ const OnlineV2 = () => {
                     onFocus={(e) => e.target.select()}
                     style={{ flex: 1 }}
                   />
-                  <Button variant="secondary" size="sm" onClick={() => navigator.clipboard.writeText(inviteLink)}>
+                  <Button variant="secondary" size="sm" onClick={() => navigator.clipboard.writeText(inviteLink)} soundManager={soundManager}>
                     Copy
                   </Button>
                 </div>
@@ -307,7 +314,10 @@ const OnlineV2 = () => {
           title={gameState.winner ? (gameState.winner === myDisc ? "VICTORY" : "DEFEAT") : "DRAW"}
           subtitle={gameState.winner ? (gameState.winner === myDisc ? "You dominated the board!" : "Better luck next time.") : "A perfect stalemate."}
           variant={gameState.winner ? (gameState.winner === myDisc ? "win" : "loss") : "draw"}
-          onPrimaryAction={resetRoom}
+          onPrimaryAction={() => {
+            soundManager?.playSound('coinsfalling');
+            resetRoom();
+          }}
           primaryActionLabel="Rematch"
           onSecondaryAction={() => navigate("/home")}
           soundManager={soundManager}

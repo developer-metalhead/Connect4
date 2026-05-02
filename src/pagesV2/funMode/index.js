@@ -122,6 +122,7 @@ const FunModeV2 = () => {
   };
 
   const enhancedReset = () => {
+    soundManager?.playSound('coinsfalling');
     reset();
     if (chaosChickenEnabled) {
       resetChaosChicken();
@@ -148,7 +149,10 @@ const FunModeV2 = () => {
       <GiveUpButton onGiveUp={() => navigate("/play-offline")} soundManager={soundManager} />
       <Header>
         <HeaderContent>
-          <AppLogo onClick={() => navigate("/home")}>
+          <AppLogo onClick={() => {
+            soundManager?.playClickSound();
+            navigate("/home");
+          }}>
             Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>Fun Mode</span>
           </AppLogo>
         </HeaderContent>

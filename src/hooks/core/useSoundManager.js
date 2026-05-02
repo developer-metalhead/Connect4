@@ -39,6 +39,16 @@ const SOUND_CONFIG = {
     volume: 0.8,
     pitchVariation: false,
   },
+  chickenbawk: {
+    files: ["chickenbawk.mp3", "chickenbawk.ogg"],
+    volume: 0.8,
+    pitchVariation: false,
+  },
+  rooster: {
+    files: ["rooster.mp3", "rooster.ogg"],
+    volume: 0.8,
+    pitchVariation: false,
+  },
   bgMusic: {
     files: ["background.mp3", "background.ogg"],
     volume: 0.3,

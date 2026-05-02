@@ -118,12 +118,12 @@ const SettingsMenu = ({ options, activeOption, onOptionClick, soundManager }) =>
   }, []);
 
   const handleToggle = () => {
-    if (soundManager) soundManager.playHoverSound();
+    if (soundManager) soundManager.playClickSound();
     setIsOpen(!isOpen);
   };
 
   const handleItemClick = (id) => {
-    if (soundManager) soundManager.playHoverSound();
+    if (soundManager) soundManager.playClickSound();
     onOptionClick(id);
     setIsOpen(false);
   };

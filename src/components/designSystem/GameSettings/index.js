@@ -41,6 +41,7 @@ const GameSettings = ({ soundManager, onClose }) => {
           variant={enableBoardShake ? "primary" : "secondary"}
           size="sm"
           onClick={handleToggleShake}
+          soundManager={soundManager}
         >
           {enableBoardShake ? 'On' : 'Off'}
         </Button>
@@ -82,13 +83,14 @@ const GameSettings = ({ soundManager, onClose }) => {
           variant={monkeyAnimationEnabled ? "primary" : "secondary"}
           size="sm"
           onClick={handleToggleMonkey}
+          soundManager={soundManager}
         >
           {monkeyAnimationEnabled ? 'On' : 'Off'}
         </Button>
       </ToggleGroup>
       
       <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-        <Button variant="primary" fullWidth onClick={onClose}>
+        <Button variant="primary" fullWidth onClick={onClose} soundManager={soundManager}>
           Done
         </Button>
       </div>

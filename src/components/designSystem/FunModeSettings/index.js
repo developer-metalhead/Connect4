@@ -69,7 +69,7 @@ const FunModeSettings = ({ soundManager, onClose }) => {
       </FeatureCard>
 
       <div style={{ marginTop: '12px' }}>
-        <Button variant="primary" fullWidth onClick={onClose}>
+        <Button variant="primary" fullWidth onClick={onClose} soundManager={soundManager}>
           Save & Close
         </Button>
       </div>

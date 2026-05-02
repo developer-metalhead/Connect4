@@ -65,9 +65,9 @@ export const useChaosChicken = (options = {}) => {
       // Play appropriate sound
       if (soundManager) {
         if (willBeRooster) {
-          soundManager.playSound("rooster"); // Add rooster sound to sound config
+          soundManager.playSound("rooster"); 
         } else {
-          soundManager.playSound("chicken"); // Add chicken sound to sound config
+          soundManager.playSound("chickenbawk"); 
         }
       }
 
