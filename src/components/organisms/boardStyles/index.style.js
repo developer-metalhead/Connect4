@@ -190,14 +190,38 @@ export const GhostDisc = styled("span")({
 export const GlobalStyles = `
   @keyframes discFall {
     0% {
-      transform: translateY(calc(var(--start-row, -1) * (var(--cell) + var(--gap)) + 80px * (var(--is-upside-down, 0) * 2 - 1)));
+      transform: translateY(calc(var(--start-row, -1) * (var(--cell) + var(--gap)) - 80px * (1 - var(--is-upside-down, 0) * 2)));
       opacity: 1;
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* ease-in (accelerating fall) */
     }
-    85% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) + 10px * (var(--is-upside-down, 0) * 2 - 1)));
+    50% {
+      /* First impact */
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* ease-out (decelerating upward bounce) */
     }
-    95% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 5px * (var(--is-upside-down, 0) * 2 - 1)));
+    68% {
+      /* Peak of 1st bounce (highest) */
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 35px * (1 - var(--is-upside-down, 0) * 2)));
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* ease-in (accelerating fall) */
+    }
+    82% {
+      /* Second impact */
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* ease-out (decelerating upward bounce) */
+    }
+    91% {
+      /* Peak of 2nd bounce (smaller) */
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 12px * (1 - var(--is-upside-down, 0) * 2)));
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* ease-in (accelerating fall) */
+    }
+    97% {
+      /* Third impact (settle) */
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* ease-out (very tiny bounce) */
+    }
+    98.5% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 3px * (1 - var(--is-upside-down, 0) * 2)));
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* ease-in down */
     }
     100% {
       transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
@@ -210,12 +234,31 @@ export const GlobalStyles = `
     0% {
       transform: translateY(calc(var(--start-row) * (var(--cell) + var(--gap))));
       opacity: 1;
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
     }
-    85% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) + 10px));
+    50% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
-    95% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 5px));
+    68% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 35px));
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+    }
+    82% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    91% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 12px));
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+    }
+    97% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    98.5% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 3px));
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
     }
     100% {
       transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));

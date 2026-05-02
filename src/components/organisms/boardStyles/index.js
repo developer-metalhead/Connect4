@@ -121,13 +121,22 @@ const Board = ({
     });
 
     const distance = isUpsideDown ? targetRow + 1 : board.length - targetRow;
-    const animationDuration = 300 + distance * 50;
+    const animationDuration = 500 + distance * 30; // Snappy physics duration
 
+    // Impact 1
     setTimeout(() => {
-      if (soundManager) {
-        soundManager.playDropSound();
-      }
-    }, animationDuration * 0.1);
+      if (soundManager) soundManager.playDropSound();
+    }, animationDuration * 0.5);
+
+    // Impact 2
+    setTimeout(() => {
+      if (soundManager) soundManager.playDropSound();
+    }, animationDuration * 0.82);
+
+    // Impact 3 (settle)
+    setTimeout(() => {
+      if (soundManager) soundManager.playDropSound();
+    }, animationDuration * 0.97);
 
     setTimeout(() => {
       setFallingDisc(null);
