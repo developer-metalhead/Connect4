@@ -54,6 +54,7 @@ const HomeV2 = () => {
       <SidePanel 
         isOpen={activePanel !== null} 
         onClose={() => setActivePanel(null)}
+        soundManager={soundManager}
         title={
           activePanel === 'game' ? 'Game Settings' :
           activePanel === 'sound' ? 'Sound Settings' :
@@ -112,6 +113,7 @@ const HomeV2 = () => {
         onClose={() => setShowFunModeSettings(false)}
         title="Fun Mode Settings"
         maxWidth="600px"
+        soundManager={soundManager}
       >
         <FunModeSettings
           soundManager={soundManager}
@@ -123,6 +125,7 @@ const HomeV2 = () => {
         isOpen={showSoundSettings} 
         onClose={() => setShowSoundSettings(false)}
         title="Sound Settings"
+        soundManager={soundManager}
       >
         <SoundSettings
           soundManager={soundManager}

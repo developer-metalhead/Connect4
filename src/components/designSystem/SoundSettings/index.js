@@ -86,7 +86,12 @@ const SoundSettings = ({ soundManager, onClose }) => {
         <Button 
           variant={pendingMuted ? "danger" : "primary"}
           size="sm"
-          onClick={() => setPendingMuted(!pendingMuted)}
+          onClick={() => {
+            const newState = !pendingMuted;
+            setPendingMuted(newState);
+            saveSoundSettings({ isMuted: newState });
+            if (soundManager?.playClickSound) soundManager.playClickSound();
+          }}
           soundManager={soundManager}
         >
           {pendingMuted ? 'Muted' : 'Enabled'}

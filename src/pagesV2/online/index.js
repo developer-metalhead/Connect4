@@ -278,6 +278,7 @@ const OnlineV2 = () => {
       <SidePanel 
         isOpen={activePanel !== null} 
         onClose={() => setActivePanel(null)}
+        soundManager={soundManager}
         title={
           activePanel === 'online' ? 'Online Settings' :
           activePanel === 'game' ? 'Game Settings' :

@@ -70,8 +70,7 @@ export const SoundProvider = ({ children }) => {
   const playingSoundsRef = useRef({});
   const dropSoundQueueRef = useRef([]);
   const isPlayingDropRef = useRef(false);
-  const bgFadeIntervalRef = useRef(null);
-  const matchFadeIntervalRef = useRef(null);
+  const fadeIntervalsRef = useRef({}); // { [soundKey]: intervalId }
 
   const [isMuted, setIsMuted] = useState(() => {
     try {
@@ -160,6 +159,8 @@ export const SoundProvider = ({ children }) => {
           instance.pause(); instance.src = "";
         }
       });
+      // Clear all intervals
+      Object.values(fadeIntervalsRef.current).forEach(clearInterval);
     };
   }, []); 
 
@@ -172,79 +173,94 @@ export const SoundProvider = ({ children }) => {
       if (Array.isArray(instance)) {
         instance.forEach((audio) => { if (audio) audio.volume = newVolume; });
       } else if (instance) {
-        instance.volume = newVolume;
+        // Only set directly if not currently fading
+        if (!fadeIntervalsRef.current[key]) {
+          instance.volume = newVolume;
+        }
       }
     });
   }, [volume, musicVolume]);
 
+  const fadeAudio = useCallback((audio, targetVolume, soundKey, onComplete) => {
+    if (!audio) return;
+    if (fadeIntervalsRef.current[soundKey]) {
+      clearInterval(fadeIntervalsRef.current[soundKey]);
+    }
+
+    const startVolume = audio.volume;
+    const duration = 1500; // 1.5 seconds for very smooth transition
+    const stepTime = 30;
+    const steps = duration / stepTime;
+    const volumeStep = (targetVolume - startVolume) / steps;
+    
+    let currentStep = 0;
+    fadeIntervalsRef.current[soundKey] = setInterval(() => {
+      currentStep++;
+      const newVol = startVolume + (volumeStep * currentStep);
+      
+      if (currentStep >= steps) {
+        audio.volume = targetVolume;
+        clearInterval(fadeIntervalsRef.current[soundKey]);
+        delete fadeIntervalsRef.current[soundKey];
+        if (onComplete) onComplete();
+      } else {
+        // Ensure volume stays in [0, 1]
+        audio.volume = Math.min(Math.max(newVol, 0), 1);
+      }
+    }, stepTime);
+  }, []);
+
   const pauseBackgroundMusic = useCallback(() => {
     const bg = audioInstancesRef.current.bgMusic;
     const match = audioInstancesRef.current.matchMusic;
-    if (!bg) return;
     
-    if (bgFadeIntervalRef.current) clearInterval(bgFadeIntervalRef.current);
-    if (matchFadeIntervalRef.current) clearInterval(matchFadeIntervalRef.current);
-
-    bgFadeIntervalRef.current = setInterval(() => {
-      if (bg.volume > 0.01) {
-        bg.volume -= 0.01;
-      } else {
-        bg.volume = 0;
+    // Fade out BG
+    if (bg) {
+      fadeAudio(bg, 0, "bgMusic", () => {
         bg.pause();
-        clearInterval(bgFadeIntervalRef.current);
-      }
-    }, 30);
+      });
+    }
 
+    // Fade in Match
     if (match && isMatchMusicEnabled && !isMuted) {
       const targetMatchVol = (SOUND_CONFIG.matchMusic.volume || 1) * musicVolume;
+      match.currentTime = 0; // Restart from beginning
       match.volume = 0;
       match.play().catch(() => {});
-      matchFadeIntervalRef.current = setInterval(() => {
-        if (match.volume < targetMatchVol - 0.01) {
-          match.volume += 0.01;
-        } else {
-          match.volume = targetMatchVol;
-          clearInterval(matchFadeIntervalRef.current);
-        }
-      }, 30);
+      fadeAudio(match, targetMatchVol, "matchMusic");
     }
-  }, [musicVolume, isMuted, isMatchMusicEnabled]);
+  }, [musicVolume, isMuted, isMatchMusicEnabled, fadeAudio]);
 
   const resumeBackgroundMusic = useCallback(() => {
     const bg = audioInstancesRef.current.bgMusic;
     const match = audioInstancesRef.current.matchMusic;
     
-    if (bgFadeIntervalRef.current) clearInterval(bgFadeIntervalRef.current);
-    if (matchFadeIntervalRef.current) clearInterval(matchFadeIntervalRef.current);
-
+    // Fade out Match
     if (match) {
-      matchFadeIntervalRef.current = setInterval(() => {
-        if (match.volume > 0.01) {
-          match.volume -= 0.01;
-        } else {
-          match.volume = 0;
-          match.pause();
-          clearInterval(matchFadeIntervalRef.current);
-        }
-      }, 30);
+      fadeAudio(match, 0, "matchMusic", () => {
+        match.pause();
+      });
     }
 
+    // Fade in BG
     if (bg && isMusicEnabled && !isMuted) {
       const targetBgVol = (SOUND_CONFIG.bgMusic.volume || 1) * musicVolume;
       if (bg.paused) {
         bg.volume = 0;
         bg.play().catch(() => {});
       }
-      bgFadeIntervalRef.current = setInterval(() => {
-        if (bg.volume < targetBgVol - 0.01) {
-          bg.volume += 0.01;
-        } else {
-          bg.volume = targetBgVol;
-          clearInterval(bgFadeIntervalRef.current);
-        }
-      }, 30);
+      fadeAudio(bg, targetBgVol, "bgMusic");
     }
-  }, [isMusicEnabled, musicVolume, isMuted]);
+  }, [isMusicEnabled, musicVolume, isMuted, fadeAudio]);
+
+  const fadeMatchMusicOut = useCallback(() => {
+    const match = audioInstancesRef.current.matchMusic;
+    if (match && !match.paused) {
+      fadeAudio(match, 0, "matchMusic", () => {
+        match.pause();
+      });
+    }
+  }, [fadeAudio]);
 
   const stopSound = useCallback((soundKey) => {
     const audio = playingSoundsRef.current[soundKey];
@@ -302,14 +318,28 @@ export const SoundProvider = ({ children }) => {
       }
     }, 150);
   }, [playSound, isMuted]);
-
-  // Initial music play
+  // Handle music reliability and autoplay policy
   useEffect(() => {
-    const bg = audioInstancesRef.current.bgMusic;
-    if (bg && isMusicEnabled && !isMuted && bg.paused) {
-      bg.volume = (SOUND_CONFIG.bgMusic.volume || 1) * musicVolume;
-      bg.play().catch(() => {});
-    }
+    const startMusic = () => {
+      const bg = audioInstancesRef.current.bgMusic;
+      if (bg && isMusicEnabled && !isMuted && bg.paused) {
+        bg.volume = (SOUND_CONFIG.bgMusic.volume || 1) * musicVolume;
+        bg.play().catch(() => {});
+      }
+      window.removeEventListener('mousedown', startMusic);
+      window.removeEventListener('touchstart', startMusic);
+      window.removeEventListener('keydown', startMusic);
+    };
+
+    window.addEventListener('mousedown', startMusic);
+    window.addEventListener('touchstart', startMusic);
+    window.addEventListener('keydown', startMusic);
+
+    return () => {
+      window.removeEventListener('mousedown', startMusic);
+      window.removeEventListener('touchstart', startMusic);
+      window.removeEventListener('keydown', startMusic);
+    };
   }, [isMusicEnabled, isMuted, musicVolume]);
 
   const value = {
@@ -319,21 +349,25 @@ export const SoundProvider = ({ children }) => {
     playDropSound,
     playHoverSound: () => playSound("hover"),
     playWinSound: (opts = {}) => {
+      fadeMatchMusicOut();
       const soundsToStop = ["win", "lose", "draw", "winWow", "booWow", "surrender"];
       soundsToStop.forEach(s => stopSound(s));
       playSound((opts.alternate || alternateAudioEnabled || opts.isFunMode) ? "winWow" : "win");
     },
     playLoseSound: (opts = {}) => {
+      fadeMatchMusicOut();
       const soundsToStop = ["win", "lose", "draw", "winWow", "booWow", "surrender"];
       soundsToStop.forEach(s => stopSound(s));
       playSound((opts.alternate || alternateAudioEnabled || opts.isFunMode) ? "booWow" : "lose");
     },
     playSurrenderSound: () => {
+      fadeMatchMusicOut();
       const soundsToStop = ["win", "lose", "draw", "winWow", "booWow", "surrender"];
       soundsToStop.forEach(s => stopSound(s));
       playSound("surrender");
     },
     playDrawSound: () => {
+      fadeMatchMusicOut();
       const soundsToStop = ["win", "lose", "draw", "winWow", "booWow", "surrender"];
       soundsToStop.forEach(s => stopSound(s));
       playSound("draw");
