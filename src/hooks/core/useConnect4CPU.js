@@ -307,6 +307,8 @@ export const useConnect4CPU = (difficulty = "Expert") => {
   const [gameState, setGameState] = useState(resetGame);
   const [isCpuDropping, setIsCpuDropping] = useState(false);
   const [cpuDroppingCol, setCpuDroppingCol] = useState(null);
+  const [isCpuThinking, setIsCpuThinking] = useState(false);
+  const [cpuPreviewCol, setCpuPreviewCol] = useState(null);
   const [shouldShowPostVideoOverlay, setShouldShowPostVideoOverlay] = useState(false);
   const aiTimerRef = useRef(null);
   const historyRef = useRef([]); // track states & CPU moves for mistake memory
@@ -318,7 +320,8 @@ export const useConnect4CPU = (difficulty = "Expert") => {
         winner ||
         isDraw ||
         currentPlayer !== HUMAN ||
-        !isValidMove(board, col)
+        !isValidMove(board, col) ||
+        isCpuThinking // Prevent move while CPU is "targeting"
       )
         return false;
 
@@ -338,7 +341,7 @@ export const useConnect4CPU = (difficulty = "Expert") => {
       setGameState(next);
       return true;
     },
-    [gameState],
+    [gameState, isCpuThinking],
   );
 
   // CPU turn effect
@@ -353,48 +356,58 @@ export const useConnect4CPU = (difficulty = "Expert") => {
         return;
       }
 
-      // Record state for learning before applying the move
-      historyRef.current.push({
-        key: boardKey(board, CPU),
-        col,
-        player: CPU,
-      });
+      // Phase 1: Targeting (Show Highlight & Preview)
+      setIsCpuThinking(true);
+      setCpuPreviewCol(col);
 
-      setIsCpuDropping(true);
-      setCpuDroppingCol(col);
-
-      // Calculate animation duration to match Board component timing
-      let targetRow = -1;
-      for (let row = board.length - 1; row >= 0; row--) {
-        if (board[row][col] === "⚪") {
-          targetRow = row;
-          break;
-        }
-      }
-      const distance = board.length - targetRow;
-      const animationDuration = 230 + Math.abs(distance) * 50;
-
-      // Delay the actual game state update to match exact animation duration
+      // Wait a bit so human can see the targeting
       setTimeout(() => {
-        const { newBoard, row } = dropPiece(board, col, CPU);
-        setGameState((prev) => {
-          const next = { ...prev, board: newBoard };
-          const winResult = checkWin(newBoard, row, col, CPU);
-          if (winResult) {
-            next.winner = CPU;
-            next.winningLine = winResult;
-          } else if (isBoardFull(newBoard)) {
-            next.isDraw = true;
-          } else {
-            next.currentPlayer = getNextPlayer(prev.currentPlayer); // back to human
-          }
-          return next;
+        // Record state for learning before applying the move
+        historyRef.current.push({
+          key: boardKey(board, CPU),
+          col,
+          player: CPU,
         });
 
-        setIsCpuDropping(false);
-        setCpuDroppingCol(null);
-      }, animationDuration);
-    }, 450); // small delay for UX
+        // Phase 2: Dropping
+        setIsCpuThinking(false);
+        setCpuPreviewCol(null);
+        setIsCpuDropping(true);
+        setCpuDroppingCol(col);
+
+        // Calculate animation duration to match Board component timing
+        let targetRow = -1;
+        for (let row = board.length - 1; row >= 0; row--) {
+          if (board[row][col] === "⚪") {
+            targetRow = row;
+            break;
+          }
+        }
+        const distance = board.length - targetRow;
+        const animationDuration = 230 + Math.abs(distance) * 50;
+
+        // Delay the actual game state update to match exact animation duration
+        setTimeout(() => {
+          const { newBoard, row } = dropPiece(board, col, CPU);
+          setGameState((prev) => {
+            const next = { ...prev, board: newBoard };
+            const winResult = checkWin(newBoard, row, col, CPU);
+            if (winResult) {
+              next.winner = CPU;
+              next.winningLine = winResult;
+            } else if (isBoardFull(newBoard)) {
+              next.isDraw = true;
+            } else {
+              next.currentPlayer = getNextPlayer(prev.currentPlayer); // back to human
+            }
+            return next;
+          });
+
+          setIsCpuDropping(false);
+          setCpuDroppingCol(null);
+        }, animationDuration);
+      }, 300); // Targeting delay (snappier)
+    }, 350); // initial Thinking delay (quicker)
 
     return () => {
       if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
@@ -414,6 +427,8 @@ export const useConnect4CPU = (difficulty = "Expert") => {
     historyRef.current = [];
     setIsCpuDropping(false);
     setCpuDroppingCol(null);
+    setIsCpuThinking(false);
+    setCpuPreviewCol(null);
     setShouldShowPostVideoOverlay(false);
     setGameState(resetGame());
   }, []);
@@ -429,6 +444,8 @@ export const useConnect4CPU = (difficulty = "Expert") => {
     makeHumanMove, 
     reset, 
     isCpuTurn, 
+    isCpuThinking,
+    cpuPreviewCol,
     HUMAN, 
     CPU,
     isCpuDropping,

@@ -33,6 +33,8 @@ const Board = ({
   isUpsideDown = false, // Visual rotation (true = 180deg)
   gravity = "normal",   // Gravity direction ('normal' = to screen bottom, 'inverted' = to screen top)
   gravityAnimation = null,
+  isCpuThinking = false,
+  cpuPreviewCol = null,
   isCpuDropping = false,
   cpuDroppingCol = null,
   winningLine = null,
@@ -320,7 +322,7 @@ const Board = ({
     }
   };
 
-  const activeCol = hoverCol !== null ? hoverCol : touchCol;
+  const activeCol = isCpuThinking && cpuPreviewCol !== null ? cpuPreviewCol : (hoverCol !== null ? hoverCol : touchCol);
 
   // Calculate target row for the active column highlight
   let activeTargetRow = -1;
@@ -342,7 +344,7 @@ const Board = ({
     }
   }
 
-  // CHANGE: Create CPU falling disc animation when CPU is dropping
+  // Create CPU falling disc animation when CPU is dropping
   const cpuFallingDisc = isCpuDropping && cpuDroppingCol !== null ? (() => {
     // Find target row for CPU drop
     let targetRow = -1;
@@ -372,15 +374,13 @@ const Board = ({
       targetRow,
       currentRow: startRow,
       player: "🟡", // CPU player emoji
-      // CHANGE: Calculate exact animation duration to match useConnect4CPU timing
       animationDuration: calculateDropDuration(Math.abs(distance)),
     };
   })() : null;
 
-
   // Preview row for "ghost" disc
   const previewRow = useMemo(() => {
-    if (activeCol === null || winner || isDraw || !canInteract) return null;
+    if (activeCol === null || winner || isDraw || (!canInteract && !isCpuThinking)) return null;
 
     if (isLogicUpsideDown) {
       // Find top-most empty cell
@@ -394,7 +394,7 @@ const Board = ({
       }
     }
     return null;
-  }, [activeCol, board, winner, isDraw, canInteract, isLogicUpsideDown]);
+  }, [activeCol, board, winner, isDraw, canInteract, isCpuThinking, isLogicUpsideDown]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -412,11 +412,11 @@ const Board = ({
               onTouchEnd={handleTouchEnd}
               onClick={() => canInteract && handleClick(col)}
             >
-              {activeCol === col &&
-                canInteract &&
+              {(canInteract || isCpuThinking) &&
                 !winner &&
                 !isDraw &&
                 droppingCol === null &&
+                activeCol === col &&
                 !isColumnBlockedByPoop(col) && (
                   <span className="preview-piece">{currentPlayer}</span>
                 )}
@@ -641,11 +641,11 @@ const Board = ({
               onTouchEnd={handleTouchEnd}
               onClick={() => handleClick(col)}
             >
-              {activeCol === col &&
-                canInteract &&
+              {(canInteract || isCpuThinking) &&
                 !winner &&
                 !isDraw &&
                 droppingCol === null &&
+                activeCol === col &&
                 !isColumnBlockedByPoop(col) && (
                   <span className="preview-piece">{currentPlayer}</span>
                 )}

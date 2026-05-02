@@ -39,6 +39,8 @@ const PlayCPUV2 = () => {
     makeHumanMove, 
     reset, 
     isCpuTurn, 
+    isCpuThinking,
+    cpuPreviewCol,
     isCpuDropping, 
     cpuDroppingCol,
     shouldShowPostVideoOverlay,
@@ -154,12 +156,14 @@ const PlayCPUV2 = () => {
 
           <Board
             board={board}
-            currentPlayer={PLAYER1}
+            currentPlayer={currentPlayer}
             winner={winner}
             isDraw={isDraw}
             onDrop={makeHumanMove}
-            canInteract={!isCpuTurn}
+            canInteract={!isCpuTurn && !isCpuThinking}
             soundManager={soundManager}
+            isCpuThinking={isCpuThinking}
+            cpuPreviewCol={cpuPreviewCol}
             isCpuDropping={isCpuDropping}
             cpuDroppingCol={cpuDroppingCol}
             winningLine={gameState.winningLine}
