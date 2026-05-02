@@ -1,10 +1,11 @@
 import { EMPTY, PATTERNS } from "../core/coreConfig";
 
 /**
- * COUPLED PATTERN ENGINE
- * Standardized to handle objects containing both { type, ...params }
+ * TRULY DYNAMIC PATTERN ENGINE
+ * Standardized to return { row, col } for UI compatibility.
  */
 
+// === 1. SHAPE FACTORY ===
 export const SHAPE_FACTORY = {
   [PATTERNS.SQUARE]: ({ size = 2 }) => {
     const offsets = [];
@@ -34,23 +35,18 @@ export const SHAPE_FACTORY = {
   }
 };
 
-/**
- * RESOLVER: Now takes a single coupled pattern object
- */
 const resolvePattern = (patternObj) => {
   if (!patternObj || !patternObj.type) return null;
-  
   const generator = SHAPE_FACTORY[patternObj.type];
   if (!generator) return null;
 
   return {
     shapes: generator(patternObj),
-    // All patterns can be completed by any of their pieces
-    sliding: true
+    sliding: true // All patterns can be completed from any position
   };
 };
 
-// === UNIVERSAL SCANNING ENGINE ===
+// === 2. SCANNING ENGINE ===
 const isShapeAt = (board, r, c, shape, player) => {
   const rows = board.length, cols = board[0].length;
   for (const offset of shape) {
@@ -70,8 +66,9 @@ export const findPatternAt = (board, targetR, targetC, player, patternObj) => {
     for (const rootOff of rootsToCheck) {
       const rootR = targetR - rootOff.dr, rootC = targetC - rootOff.dc;
       if (isShapeAt(board, rootR, rootC, shape, player)) {
-        const instance = shape.map(o => ({ r: rootR + o.dr, c: rootC + o.dc }));
-        const key = instance.map(p => `${p.r},${p.c}`).sort().join("|");
+        // UI expects { row, col }
+        const instance = shape.map(o => ({ row: rootR + o.dr, col: rootC + o.dc }));
+        const key = instance.map(p => `${p.row},${p.col}`).sort().join("|");
         if (!found.find(f => f.key === key)) found.push({ key, coords: instance });
       }
     }
@@ -89,8 +86,9 @@ export const findAllPatterns = (board, player, patternObj) => {
       if (board[r][c] !== player) continue;
       for (const shape of def.shapes) {
         if (isShapeAt(board, r, c, shape, player)) {
-          const instance = shape.map(o => ({ r: r + o.dr, c: c + o.dc }));
-          const key = instance.map(p => `${p.r},${p.c}`).sort().join("|");
+          // UI expects { row, col }
+          const instance = shape.map(o => ({ row: r + o.dr, col: c + o.dc }));
+          const key = instance.map(p => `${p.row},${p.col}`).sort().join("|");
           if (!found.find(f => f.key === key)) found.push({ key, coords: instance });
         }
       }

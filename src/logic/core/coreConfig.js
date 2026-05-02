@@ -3,10 +3,23 @@
  * All game rules, players, and animation constants live here.
  */
 
+/*
+* 1. { type: PATTERNS.LINE, length: N }     -> N pieces in a straight line (H, V, or D)
+* 2. { type: PATTERNS.SQUARE, size: N }     -> An N x N solid square (e.g. 2x2, 3x3)
+* 3. { type: PATTERNS.CROSS, armLength: N } -> A center piece with arms of length N
+*/
+
+// Gameplay Patterns (The Names)
+export const PATTERNS = {
+  LINE: "LINE",
+  SQUARE: "SQUARE",
+  CROSS: "CROSS",
+};
 export const CORE_CONFIG = {
   ROWS: 6,
   COLS: 7,
-  WIN_LENGTH: 4,
+  // PLUG & PLAY: Change this to ANY pattern to change the goal of the game!
+  WIN_PATTERN: { type: PATTERNS.LINE, length: 1}, 
   DEFAULT_FIRST_PLAYER: "🔴",
 };
 
@@ -22,7 +35,11 @@ export const COLS = CORE_CONFIG.COLS;
 export const PLAYER1 = PLAYERS.P1;
 export const PLAYER2 = PLAYERS.P2;
 export const EMPTY = PLAYERS.EMPTY;
-export const WIN_LENGTH = CORE_CONFIG.WIN_LENGTH;
+// We extract a 'Representative Length' for legacy UI components
+export const WIN_LENGTH = 
+  CORE_CONFIG.WIN_PATTERN.length || 
+  CORE_CONFIG.WIN_PATTERN.size || 
+  (CORE_CONFIG.WIN_PATTERN.armLength ? (CORE_CONFIG.WIN_PATTERN.armLength * 2 + 1) : 4);
 
 // Unified Animation & Timing
 export const ANIMATION_CONFIG = {
@@ -40,9 +57,4 @@ export const ANIMATION_CONFIG = {
   CPU_POST_DROP_DELAY: 150,
 };
 
-// Gameplay Patterns (The Names)
-export const PATTERNS = {
-  LINE: "LINE",
-  SQUARE: "SQUARE",
-  CROSS: "CROSS",
-};
+

@@ -1,4 +1,5 @@
-import { CORE_CONFIG, PLAYERS, ANIMATION_CONFIG } from "./coreConfig";
+import { CORE_CONFIG, PLAYERS, ANIMATION_CONFIG, PATTERNS } from "./coreConfig";
+import { findPatternAt } from "../patterns/patternEngine";
 
 const { EMPTY } = PLAYERS;
 
@@ -20,44 +21,16 @@ export const isValidMove = (board, col) => {
 };
 
 /**
- * Core win detection logic. Returns winning line coordinates or null.
+ * Core win detection logic.
+ * Now powered by the Registry-based Pattern Engine for 100% decoupling.
  */
-export const checkWin = (board, row, col, player, winLength = 4) => {
-  const rows = board.length;
-  const cols = board[0].length;
-
-  const directions = [
-    [0, 1],   // Horizontal
-    [1, 0],   // Vertical
-    [1, 1],   // Diagonal \
-    [1, -1],  // Diagonal /
-  ];
-
-  for (let [dr, dc] of directions) {
-    let count = 1;
-    let winningLine = [{ row, col }];
-
-    // Positive direction
-    let r = row + dr;
-    let c = col + dc;
-    while (r >= 0 && r < rows && c >= 0 && c < cols && board[r][c] === player) {
-      count++;
-      winningLine.push({ row: r, col: c });
-      r += dr;
-      c += dc;
-    }
-
-    // Negative direction
-    r = row - dr;
-    c = col - dc;
-    while (r >= 0 && r < rows && c >= 0 && c < cols && board[r][c] === player) {
-      count++;
-      winningLine.push({ row: r, col: c });
-      r -= dr;
-      c -= dc;
-    }
-
-    if (count >= winLength) return winningLine;
+export const checkWin = (board, row, col, player) => {
+  // We use the central WIN_PATTERN from CORE_CONFIG
+  const wins = findPatternAt(board, row, col, player, CORE_CONFIG.WIN_PATTERN);
+  
+  if (wins.length > 0) {
+    // Return the first winning line's coordinates (for highlighting)
+    return wins[0].coords;
   }
   return null;
 };

@@ -20,7 +20,7 @@ import {  returnToNormalGravity,
 import PoopBlockIndicator from "../../designSystem/Features/chaosChicken/PoopBlockIndicator";
 import { useGameSettings } from "../../../hooks/settings/useGameSettings";
 
-import { ANIMATION_CONFIG } from "../../../logic/core/coreConfig";
+import { ANIMATION_CONFIG, CORE_CONFIG, PATTERNS } from "../../../logic/core/coreConfig";
 
 const Board = ({
   board,
@@ -589,40 +589,106 @@ const Board = ({
           </Row>
         ))}
 
-        {/* Render a single connecting line if there's a winner and a winning line */}
+        {/* Render intelligent highlights based on the WIN_PATTERN type */}
         {(() => {
-          if (!winner || !winningLine || winningLine.length < 4) return null;
+          if (!winner || !winningLine || winningLine.length === 0) return null;
 
-          // Find start and end cells by sorting by column then row
-          const sorted = [...winningLine].sort((a, b) => a.col - b.col || a.row - b.row);
-          const first = sorted[0];
-          const last = sorted[sorted.length - 1];
+          const type = CORE_CONFIG.WIN_PATTERN.type;
 
-          // Vector from first to last
-          const dRow = last.row - first.row;
-          const dCol = last.col - first.col;
+          // Strategy 1: The Classic Connecting Line
+          if (type === PATTERNS.LINE) {
+            const sorted = [...winningLine].sort((a, b) => a.col - b.col || a.row - b.row);
+            const first = sorted[0];
+            const last = sorted[sorted.length - 1];
+            const dRow = last.row - first.row;
+            const dCol = last.col - first.col;
+            const angle = Math.atan2(dRow, dCol) * (180 / Math.PI);
+            const distance = Math.sqrt(dRow * dRow + dCol * dCol);
+            const midCol = (first.col + last.col) / 2;
+            const midRow = (first.row + last.row) / 2;
 
-          // Calculate visual parameters
-          const angle = Math.atan2(dRow, dCol) * (180 / Math.PI);
-          const distance = Math.sqrt(dRow * dRow + dCol * dCol);
-          
-          // Center point between the two extreme discs
-          const midCol = (first.col + last.col) / 2;
-          const midRow = (first.row + last.row) / 2;
+            return (
+              <WinningLineWrapper
+                style={{
+                  left: `calc(var(--board-padding) + ${midCol} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
+                  top: `calc(var(--board-padding) + ${midRow} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
+                  width: `calc(${distance} * (var(--cell) + var(--gap)) + var(--cell))`,
+                  height: "var(--cell)",
+                  transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+                }}
+              >
+                <WinningLine />
+              </WinningLineWrapper>
+            );
+          }
 
-          return (
-            <WinningLineWrapper
-              style={{
-                left: `calc(var(--board-padding) + ${midCol} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
-                top: `calc(var(--board-padding) + ${midRow} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
-                width: `calc(${distance} * (var(--cell) + var(--gap)) + var(--cell))`,
-                height: "var(--cell)",
-                transform: `translate(-50%, -50%) rotate(${angle}deg)`,
-              }}
-            >
-              <WinningLine />
-            </WinningLineWrapper>
-          );
+          // Strategy 2: The Solid Block (Square)
+          if (type === PATTERNS.SQUARE) {
+            const minRow = Math.min(...winningLine.map(p => p.row));
+            const maxRow = Math.max(...winningLine.map(p => p.row));
+            const minCol = Math.min(...winningLine.map(p => p.col));
+            const maxCol = Math.max(...winningLine.map(p => p.col));
+            
+            const width = maxCol - minCol;
+            const height = maxRow - minRow;
+            const midCol = (minCol + maxCol) / 2;
+            const midRow = (minRow + maxRow) / 2;
+
+            return (
+              <WinningLineWrapper
+                style={{
+                  left: `calc(var(--board-padding) + ${midCol} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
+                  top: `calc(var(--board-padding) + ${midRow} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
+                  width: `calc(${width} * (var(--cell) + var(--gap)) + var(--cell) + 10px)`,
+                  height: `calc(${height} * (var(--cell) + var(--gap)) + var(--cell) + 10px)`,
+                  transform: "translate(-50%, -50%)",
+                  borderRadius: "15px",
+                  border: "4px solid rgba(255, 255, 255, 0.8)",
+                  background: "rgba(255, 255, 255, 0.1)",
+                  boxShadow: "0 0 20px rgba(255, 255, 255, 0.5)",
+                }}
+              />
+            );
+          }
+
+          // Strategy 3: The Crosshair (Cross)
+          if (type === PATTERNS.CROSS) {
+            const center = winningLine.find(p => 
+              winningLine.filter(other => other.row === p.row).length > 1 &&
+              winningLine.filter(other => other.col === p.col).length > 1
+            ) || winningLine[0];
+
+            return (
+              <>
+                {/* Horizontal Bar */}
+                <WinningLineWrapper
+                  style={{
+                    left: `calc(var(--board-padding) + ${center.col} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
+                    top: `calc(var(--board-padding) + ${center.row} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
+                    width: `calc(${CORE_CONFIG.WIN_PATTERN.armLength * 2} * (var(--cell) + var(--gap)) + var(--cell))`,
+                    height: "var(--cell)",
+                    transform: "translate(-50%, -50%)",
+                  }}
+                >
+                  <WinningLine />
+                </WinningLineWrapper>
+                {/* Vertical Bar */}
+                <WinningLineWrapper
+                  style={{
+                    left: `calc(var(--board-padding) + ${center.col} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
+                    top: `calc(var(--board-padding) + ${center.row} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
+                    width: `calc(${CORE_CONFIG.WIN_PATTERN.armLength * 2} * (var(--cell) + var(--gap)) + var(--cell))`,
+                    height: "var(--cell)",
+                    transform: "translate(-50%, -50%) rotate(90deg)",
+                  }}
+                >
+                  <WinningLine />
+                </WinningLineWrapper>
+              </>
+            );
+          }
+
+          return null;
         })()}
 
       </BoardContainer>
