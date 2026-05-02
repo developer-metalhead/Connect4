@@ -1,4 +1,4 @@
-import { useState,useMemo,useEffect } from "react";
+import { useState,useMemo,useEffect,useRef } from "react";
 import {
   BoardContainer,
   Row,
@@ -10,6 +10,7 @@ import {
   WinningLine,
   GhostDisc,
   ImpactRipple,
+  EjectedPiece,
 } from "./index.style";
 import PoopBlockIndicator from "../../features/ChaosChicken/PoopBlockIndicator";
 import { useGameSettings } from "../../../hooks/core/useGameSettings";
@@ -39,13 +40,60 @@ const Board = ({
   const [touchCol, setTouchCol] = useState(null);
   const [touchTimeout, setTouchTimeout] = useState(null);
   const [jigglingCols, setJigglingCols] = useState({});
+  const [ejectedPieces, setEjectedPieces] = useState([]);
   const { enableBoardShake, shakeIntensity } = useGameSettings();
+  
+  const prevBoardRef = useRef(board);
+
+  // CHANGE: Physics-based reset animation detection
+  useEffect(() => {
+    const isNowEmpty = board.every(row => row.every(cell => cell === "⚪"));
+    const wasNotEmpty = prevBoardRef.current && prevBoardRef.current.some(row => row.some(cell => cell !== "⚪"));
+
+    if (isNowEmpty && wasNotEmpty) {
+      const newEjected = [];
+      prevBoardRef.current.forEach((row, r) => {
+        row.forEach((cell, c) => {
+          if (cell !== "⚪") {
+            // Random physics trajectories
+            const vx = (Math.random() - 0.5) * 1200; // Wider horizontal spread
+            const vy = -(Math.random() * 600 + 400); // Stronger upward pop
+            const vr = (Math.random() - 0.5) * 1080; // More rotation for chaos
+            
+            newEjected.push({
+              id: `eject-${r}-${c}-${Math.random()}`,
+              row: r,
+              col: c,
+              player: cell,
+              vx,
+              vy,
+              vr
+            });
+          }
+        });
+      });
+      
+      setEjectedPieces(newEjected);
+      // Play a special sound if possible
+      if (soundManager) {
+        soundManager.playSound('coinsfalling'); // Already added in previous turn
+      }
+      
+      setTimeout(() => setEjectedPieces([]), 1500);
+    }
+    prevBoardRef.current = board;
+  }, [board, soundManager]);
 
   // Build a quick mask to hide source cells during mass-fall overlays
-  const maskedKeys =
-    Array.isArray(gravityAnimation) && gravityAnimation.length > 0
-      ? new Set(gravityAnimation.map((a) => `${a.fromRow},${a.col}`))
-      : null;
+  const maskedKeys = useMemo(() => {
+    if (!Array.isArray(gravityAnimation) || gravityAnimation.length === 0) return null;
+    const keys = new Set();
+    gravityAnimation.forEach(a => {
+      keys.add(`${a.fromRow},${a.col}`);
+      keys.add(`${a.toRow},${a.col}`);
+    });
+    return keys;
+  }, [gravityAnimation]);
 
   const clearTouchTimeout = () => {
     if (touchTimeout) {
@@ -432,8 +480,8 @@ const Board = ({
         {Array.isArray(gravityAnimation) &&
           gravityAnimation.length > 0 &&
           gravityAnimation.map((d, i) => {
-            const distance = Math.max(0, d.toRow - d.fromRow);
-            const duration = 300 + distance * 70;
+            const distance = Math.abs(d.toRow - d.fromRow);
+            const duration = 400 + distance * 120; // Slower, more premium fall
             return (
               <FallingDisc
                 key={`grav-${i}`}
@@ -449,6 +497,23 @@ const Board = ({
               </FallingDisc>
             );
           })}
+
+        {/* Physics-based ejection pieces */}
+        {ejectedPieces.map((p) => (
+          <EjectedPiece
+            key={p.id}
+            style={{
+              left: `calc(var(--board-padding) + ${p.col} * (var(--cell) + var(--gap)))`,
+              top: `calc(var(--board-padding) + ${p.row} * (var(--cell) + var(--gap)))`,
+              "--vx": `${p.vx}px`,
+              "--vy": `${p.vy}px`,
+              "--vr": `${p.vr}deg`,
+              "--is-upside-down": isUpsideDown ? 1 : 0,
+            }}
+          >
+            {p.player}
+          </EjectedPiece>
+        ))}
 
         {board.map((row, r) => (
           <Row key={r}>

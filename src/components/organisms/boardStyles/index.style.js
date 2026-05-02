@@ -186,6 +186,22 @@ export const FallingDisc = styled("div")({
   WebkitUserSelect: "none",
 });
 
+export const EjectedPiece = styled("div")({
+  position: "absolute",
+  width: "var(--cell)",
+  height: "var(--cell)",
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "calc(var(--cell) * 0.72)",
+  pointerEvents: "none",
+  zIndex: 200,
+  animation: "ejectPiece 1.2s cubic-bezier(0.1, 0.2, 0.3, 1) forwards",
+  willChange: "transform, opacity",
+  backfaceVisibility: "hidden",
+});
+
 export const WinningLineWrapper = styled("div")({
   position: "absolute",
   zIndex: 100,
@@ -375,5 +391,30 @@ export const GlobalStyles = `
     25% { transform: translateY(var(--shake-amount, 2px)); }
     75% { transform: translateY(calc(var(--shake-amount, 2px) * -0.5)); }
     100% { transform: translateY(0); }
+  }
+
+  @keyframes ejectPiece {
+    0% {
+      transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+      opacity: 1;
+    }
+    20% {
+      /* Initial "pop" up - adjusted for orientation */
+      transform: translate3d(
+        calc(var(--vx) * 0.2), 
+        calc((var(--vy) * 0.2 - 40px) * (1 - var(--is-upside-down, 0) * 2)), 
+        0
+      ) rotate(calc(var(--vr) * 0.2)) scale(1.1);
+      opacity: 1;
+    }
+    100% {
+      /* Fly off with gravity effect - adjusted for orientation */
+      transform: translate3d(
+        var(--vx), 
+        calc((var(--vy) + 1000px) * (1 - var(--is-upside-down, 0) * 2)), 
+        0
+      ) rotate(var(--vr)) scale(0.8);
+      opacity: 0;
+    }
   }
 `;

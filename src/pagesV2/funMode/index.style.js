@@ -79,7 +79,7 @@ export const InstructionSection = styled("div")({
 export const FunModeBoardWrapper = styled("div", {
   shouldForwardProp: (prop) => prop !== "isUpsideDown",
 })(({ isUpsideDown }) => ({
-  transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+  // CHANGE: Removed transition to allow instant snap + piece fall animation
   transform: isUpsideDown ? "rotate(180deg)" : "rotate(0deg)",
   position: "relative",
 }));

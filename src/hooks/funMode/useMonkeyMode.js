@@ -75,33 +75,51 @@ export const useMonkeyMode = (options = {}) => {
           setIsMonkeyAnimating(true);
           setMonkeyVoiceLine("Phew! Back to normal!");
 
-          if (useRotation) {
-            // In rotation mode, we just rotate back, no board logic flip needed
+          // Unified restoration logic (handles both rotation and logic-flip modes)
+          setTimeout(() => {
+            setIsGravityFalling(true);
+            
+            // Use helper to calculate final logical board (pieces at bottom) and basic animations
+            const { finalBoard, animations, durationMs } = returnToNormalGravity(
+              newState.board,
+              { isUpsideDown: true } // We treat it as upside down to calculate the fall logic
+            );
+
+            let finalAnimations = animations;
+
+            // CHANGE: In rotation mode, pieces were logically at the bottom but visually at top.
+            // When we snap back to 0deg, we want to see them fall from visual top to visual bottom.
+            if (useRotation) {
+              finalAnimations = [];
+              newState.board.forEach((row, r) => {
+                row.forEach((cell, c) => {
+                  if (cell !== "⚪") {
+                    finalAnimations.push({
+                      col: c,
+                      fromRow: -2, // Start from above the board
+                      toRow: r,   // Fall to their current logical row
+                      player: cell
+                    });
+                  }
+                });
+              });
+            }
+
+            setGravityAnimation(finalAnimations);
+            setIsUpsideDown(false); // Snap visual board back instantly
+            
+            const totalDuration = useRotation ? 1500 : (durationMs + 50);
+
             setTimeout(() => {
-              setIsUpsideDown(false);
+              // CHANGE: CRITICAL - Update logical board to final state (pieces at bottom)
+              funModeHook.updateBoard(finalBoard);
               setIsMonkeyAnimating(false);
               setMonkeyVoiceLine("");
+              setGravityAnimation(null);
+              setIsGravityFalling(false);
               funModeHook.updateExtensionData('isUpsideDown', false);
-            }, 2500);
-          } else {
-            setTimeout(() => {
-              setIsGravityFalling(true);
-              const { finalBoard, animations, durationMs } = returnToNormalGravity(
-                newState.board,
-                { isUpsideDown: true }
-              );
-              setGravityAnimation(animations);
-              setTimeout(() => {
-                funModeHook.updateBoard(finalBoard);
-                setIsUpsideDown(false);
-                setIsMonkeyAnimating(false);
-                setMonkeyVoiceLine("");
-                setGravityAnimation(null);
-                setIsGravityFalling(false);
-                funModeHook.updateExtensionData('isUpsideDown', false);
-              }, durationMs + 50);
-            }, 2500);
-          }
+            }, totalDuration);
+          }, 2500);
         }, 500);
       }
     }
@@ -185,6 +203,9 @@ export const useMonkeyMode = (options = {}) => {
     soundManager?.playSound('monkeylaugh');
 
     setTimeout(() => {
+      // CHANGE: Stop the laugh sound immediately when the board flips
+      soundManager?.stopSound('monkeylaugh');
+
       let currentBoard = funModeHook.gameState.board;
       let flippedBoard = useRotation ? currentBoard : flipBoardUpsideDown(currentBoard);
       
