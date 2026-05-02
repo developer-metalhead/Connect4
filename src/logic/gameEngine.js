@@ -9,11 +9,12 @@ import {
 import { CORE_CONFIG } from "./coreConfig";
 
 /**
- * The "Single Source of Truth" for game state transitions.
- * Given a current state and a move, it calculates the next state.
+ * Pure Game State Transition Logic
+ * Focuses purely on taking a board and a move, and returning the next state.
  */
 export const processMove = (gameState, col) => {
   const { board, currentPlayer, winner, isDraw } = gameState;
+  const { WIN_LENGTH } = CORE_CONFIG;
 
   // 1. Validation
   if (winner || isDraw || !isValidMove(board, col)) {
@@ -24,7 +25,7 @@ export const processMove = (gameState, col) => {
   const { newBoard, row } = dropPiece(board, col, currentPlayer);
   
   // 3. Analyze Result
-  const winResult = checkWin(newBoard, row, col, currentPlayer);
+  const winResult = checkWin(newBoard, row, col, currentPlayer, WIN_LENGTH);
   
   let nextState = {
     ...gameState,
@@ -46,13 +47,17 @@ export const processMove = (gameState, col) => {
 };
 
 /**
- * Creates a brand new game state
+ * Creates the initial state for a standard game
  */
-export const createInitialState = () => ({
-  board: createEmptyBoard(),
-  currentPlayer: CORE_CONFIG.DEFAULT_FIRST_PLAYER,
-  winner: null,
-  winningLine: null,
-  isDraw: false,
-  lastMove: null,
-});
+export const createInitialState = () => {
+  const { ROWS, COLS, DEFAULT_FIRST_PLAYER } = CORE_CONFIG;
+  
+  return {
+    board: createEmptyBoard(ROWS, COLS),
+    currentPlayer: DEFAULT_FIRST_PLAYER,
+    winner: null,
+    winningLine: null,
+    isDraw: false,
+    lastMove: null
+  };
+};

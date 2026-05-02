@@ -5,7 +5,7 @@ import useSoundManager from "../../../hooks/core/useSoundManager";
 import useConnect4CPU from "../../../hooks/core/useConnect4CPU";
 import { useGameSettings } from "../../../hooks/core/useGameSettings";
 import { useCPUSettings } from "../../../hooks/core/useCPUSettings";
-import { PLAYER1, PLAYER2 } from "../../../helperFunction/helperFunction";
+import { PLAYERS } from "../../../logic/coreConfig";
 
 // New UI Components
 import { PageWrapper, Header, HeaderContent, AppLogo, MainContent } from "../../../components/designSystem/Layout.style";
@@ -18,17 +18,13 @@ import { GameLayout, ControlGroup, DifficultyContainer, DifficultyButton, Slidin
 import Board from "../../../components/organisms/boardStyles";
 import PostVideoOverlay from "../../../components/designSystem/PostVideoOverlay";
 import PoopBlockIndicator from "../../../components/designSystem/Features/chaosChicken/PoopBlockIndicator";
-import BackButton from "../../../components/designSystem/BackButton";
 import GiveUpButton from "../../../components/designSystem/GiveUpButton";
-import useFunModeSettings from "../../../hooks/funMode/useFunModeSettings";
-import Modal from "../../../components/designSystem/Modal";
 
 const PlayCPUV2 = () => {
   const navigate = useNavigate();
   const soundManager = useSoundManager();
   const { monkeyAnimationEnabled } = useGameSettings();
   const { difficulty, seriousCPU, saveDifficulty } = useCPUSettings();
-  const [activePanel, setActivePanel] = useState(null); // 'cpu', 'fun', 'sound' or null
   const [surrendered, setSurrendered] = useState(false);
 
   const levels = ['Novice', 'Skilled', 'Expert'];
@@ -58,7 +54,7 @@ const PlayCPUV2 = () => {
 
   useEffect(() => {
     if (winner) {
-      if (winner === PLAYER1) {
+      if (winner === PLAYERS.P1) {
         soundManager.playWinSound();
       } else {
         soundManager.playLoseSound();
@@ -67,14 +63,6 @@ const PlayCPUV2 = () => {
       soundManager.playDrawSound();
     }
   }, [winner, isDraw, soundManager]);
-
-  useEffect(() => {
-    if (isCpuDropping && soundManager) {
-      setTimeout(() => {
-        soundManager.playDropSound();
-      }, 100);
-    }
-  }, [isCpuDropping, soundManager]);
 
   const handleClosePostVideoOverlay = () => {
     closePostVideoOverlay();
@@ -97,16 +85,16 @@ const PlayCPUV2 = () => {
   // Scoreboard data
   const p1Data = useMemo(() => ({
     name: "Player",
-    score: gameState.scores?.[PLAYER1] || 0,
-    active: currentPlayer === PLAYER1 && !winner && !isDraw,
-    emoji: PLAYER1
+    score: gameState.scores?.[PLAYERS.P1] || 0,
+    active: currentPlayer === PLAYERS.P1 && !winner && !isDraw,
+    emoji: PLAYERS.P1
   }), [gameState.scores, currentPlayer, winner, isDraw]);
 
   const p2Data = useMemo(() => ({
     name: "CPU",
-    score: gameState.scores?.[PLAYER2] || 0,
-    active: currentPlayer === PLAYER2 && !winner && !isDraw,
-    emoji: PLAYER2
+    score: gameState.scores?.[PLAYERS.P2] || 0,
+    active: currentPlayer === PLAYERS.P2 && !winner && !isDraw,
+    emoji: PLAYERS.P2
   }), [gameState.scores, currentPlayer, winner, isDraw]);
 
   return (
@@ -114,10 +102,7 @@ const PlayCPUV2 = () => {
       <GiveUpButton 
         seriousCPU={seriousCPU}
         onGiveUp={() => {
-          if (seriousCPU) {
-            setSurrendered(true);
-            soundManager.playSurrenderSound();
-          } else if (monkeyAnimationEnabled) {
+          if (seriousCPU || monkeyAnimationEnabled) {
             setSurrendered(true);
             soundManager.playSurrenderSound();
           } else {
@@ -173,14 +158,14 @@ const PlayCPUV2 = () => {
           <GameStatus 
             message={
               winner 
-                ? (winner === PLAYER1 ? "You Win!" : "CPU Wins!") 
+                ? (winner === PLAYERS.P1 ? "You Win!" : "CPU Wins!") 
                 : isDraw 
                 ? "It's a Draw!" 
                 : isCpuTurn 
                 ? "CPU is thinking..." 
                 : "Your Turn"
             }
-            currentPlayerColor={currentPlayer === PLAYER1 ? "red" : "yellow"}
+            currentPlayerColor={currentPlayer === PLAYERS.P1 ? "red" : "yellow"}
           />
 
           <ControlGroup>
@@ -195,18 +180,18 @@ const PlayCPUV2 = () => {
         <MatchResultOverlay 
           title={
             surrendered ? "SURRENDER" :
-            winner === PLAYER1 ? "VICTORY" : 
-            winner === PLAYER2 ? "DEFEAT" :
+            winner === PLAYERS.P1 ? "VICTORY" : 
+            winner === PLAYERS.P2 ? "DEFEAT" :
             "DRAW"
           }
           subtitle={
-            surrendered ? "You've conceded to the machine. Better luck next time!" :
-            winner === PLAYER1 ? "You outsmarted the machine!" : 
-            winner === PLAYER2 ? "The CPU has claimed this victory." :
+            surrendered ? "You've conceded to the machine." :
+            winner === PLAYERS.P1 ? "You outsmarted the machine!" : 
+            winner === PLAYERS.P2 ? "The CPU has claimed this victory." :
             "A tactical stalemate."
           }
-          variant={isDraw ? "draw" : winner === PLAYER1 ? "win" : "loss"}
-          icon={surrendered ? "🏳️" : winner === PLAYER1 ? "🏆" : winner === PLAYER2 ? "😔" : "🤝"}
+          variant={isDraw ? "draw" : winner === PLAYERS.P1 ? "win" : "loss"}
+          icon={surrendered ? "🏳️" : winner === PLAYERS.P1 ? "🏆" : winner === PLAYERS.P2 ? "😔" : "🤝"}
           onPrimaryAction={handleReset}
           primaryActionLabel="Rematch"
           onSecondaryAction={() => navigate("/play-offline")}
@@ -220,7 +205,6 @@ const PlayCPUV2 = () => {
         onClose={handleClosePostVideoOverlay}
         soundManager={soundManager}
       />
-
     </PageWrapper>
   );
 };

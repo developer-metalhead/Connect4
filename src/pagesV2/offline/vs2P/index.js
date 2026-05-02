@@ -1,15 +1,14 @@
-import React, { useEffect, useMemo,useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useSoundManager from "../../../hooks/core/useSoundManager";
 import { useConnect4 } from "../../../hooks/core/useConnect4";
-import { PLAYER1, PLAYER2 } from "../../../helperFunction/helperFunction";
+import { PLAYERS } from "../../../logic/coreConfig";
 
 // New UI Components
 import { PageWrapper, Header, HeaderContent, AppLogo, MainContent } from "../../../components/designSystem/Layout.style";
 import Button from "../../../components/designSystem/Button";
 import Scoreboard from "../../../components/designSystem/Scoreboard";
 import { GameStatus, MatchResultOverlay } from "../../../components/designSystem/Status";
-import Modal from "../../../components/designSystem/Modal";
 import BackButton from "../../../components/designSystem/BackButton";
 import GiveUpButton from "../../../components/designSystem/GiveUpButton";
 import PoopBlockIndicator from "../../../components/designSystem/Features/chaosChicken/PoopBlockIndicator";
@@ -17,12 +16,10 @@ import { GameLayout, ControlGroup } from "./index.style";
 
 // Original Logic Components
 import Board from "../../../components/organisms/boardStyles";
-import VideoButton from "../../../components/designSystem/VideoButton";
 
 const Game2PV2 = () => {
   const navigate = useNavigate();
   const soundManager = useSoundManager();
-  const [activePanel, setActivePanel] = useState(null); // 'fun', 'sound' or null
   const [surrendered, setSurrendered] = useState(null); // PLAYER1 or PLAYER2
   const { gameState, makeMove, reset: baseReset } = useConnect4();
   const { board, currentPlayer, winner, isDraw } = gameState;
@@ -55,16 +52,16 @@ const Game2PV2 = () => {
   // Scoreboard data
   const p1Data = useMemo(() => ({
     name: "Player 1",
-    score: gameState.scores?.[PLAYER1] || 0,
-    active: currentPlayer === PLAYER1 && !winner && !isDraw,
-    emoji: PLAYER1
+    score: gameState.scores?.[PLAYERS.P1] || 0,
+    active: currentPlayer === PLAYERS.P1 && !winner && !isDraw,
+    emoji: PLAYERS.P1
   }), [gameState.scores, currentPlayer, winner, isDraw]);
 
   const p2Data = useMemo(() => ({
     name: "Player 2",
-    score: gameState.scores?.[PLAYER2] || 0,
-    active: currentPlayer === PLAYER2 && !winner && !isDraw,
-    emoji: PLAYER2
+    score: gameState.scores?.[PLAYERS.P2] || 0,
+    active: currentPlayer === PLAYERS.P2 && !winner && !isDraw,
+    emoji: PLAYERS.P2
   }), [gameState.scores, currentPlayer, winner, isDraw]);
 
   return (
@@ -99,12 +96,12 @@ const Game2PV2 = () => {
           <GameStatus 
             message={
               winner 
-                ? `${winner === PLAYER1 ? "Player 1" : "Player 2"} Wins!` 
+                ? `${winner === PLAYERS.P1 ? "Player 1" : "Player 2"} Wins!` 
                 : isDraw 
                 ? "It's a Draw!" 
-                : `${currentPlayer === PLAYER1 ? "Player 1" : "Player 2"}'s Turn`
+                : `${currentPlayer === PLAYERS.P1 ? "Player 1" : "Player 2"}'s Turn`
             }
-            currentPlayerColor={currentPlayer === PLAYER1 ? "red" : "yellow"}
+            currentPlayerColor={currentPlayer === PLAYERS.P1 ? "red" : "yellow"}
           />
 
           <ControlGroup>
@@ -123,8 +120,8 @@ const Game2PV2 = () => {
             "DRAW"
           }
           subtitle={
-            surrendered ? `${surrendered === PLAYER1 ? "Player 1" : "Player 2"} has conceded.` :
-            winner ? `${winner === PLAYER1 ? "Player 1" : "Player 2"} has claimed the board!` : 
+            surrendered ? `${surrendered === PLAYERS.P1 ? "Player 1" : "Player 2"} has conceded.` :
+            winner ? `${winner === PLAYERS.P1 ? "Player 1" : "Player 2"} has claimed the board!` : 
             "No winner this time."
           }
           variant={isDraw ? "draw" : "win"}
@@ -136,7 +133,6 @@ const Game2PV2 = () => {
           isNaturalEnding={!surrendered}
         />
       )}
-
     </PageWrapper>
   );
 };

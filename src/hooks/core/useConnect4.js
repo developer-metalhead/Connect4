@@ -2,7 +2,8 @@ import { useState, useCallback } from "react";
 import { createInitialState, processMove } from "../../logic/gameEngine";
 
 /**
- * Clean, decoupled hook for 2-Player Local matches.
+ * Hook for a standard 2-Player Local Connect 4 game.
+ * Completely decoupled from game-mode configurations.
  */
 export const useConnect4 = () => {
   const [gameState, setGameState] = useState(createInitialState);
@@ -10,11 +11,8 @@ export const useConnect4 = () => {
   const makeMove = useCallback((col) => {
     setGameState(prevState => {
       const nextState = processMove(prevState, col);
-      // Only update if the move was actually valid
       return nextState.moveValid ? nextState : prevState;
     });
-    
-    // Return true/false to let components know if the move was accepted
     return true; 
   }, []);
 
@@ -22,9 +20,9 @@ export const useConnect4 = () => {
     setGameState(createInitialState());
   }, []);
 
-  return { 
-    gameState, 
-    makeMove, 
-    reset 
+  return {
+    gameState,
+    makeMove,
+    reset,
   };
 };

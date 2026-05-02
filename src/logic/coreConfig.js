@@ -1,25 +1,24 @@
 /**
- * CORE GAME CONFIGURATION
- * 
- * Central rules for the Connect 4 engine.
+ * Core Game Constants & Rules
+ * This is the single source of truth for all game-related constants.
  */
-
 export const CORE_CONFIG = {
-  // --- BOARD DIMENSIONS ---
   ROWS: 6,
   COLS: 7,
-
-  // --- WIN CONDITIONS ---
-  WIN_LENGTH: 4,          // Connect 4! (Change to 5 for a challenge)
-  
-  // --- PLAYER IDENTIFIERS ---
-  PLAYERS: {
-    P1: "🔴",
-    P2: "🟡",
-    EMPTY: "⚪"
-  },
-
-  // --- GAMEPLAY SETTINGS ---
+  WIN_LENGTH: 4,
   DEFAULT_FIRST_PLAYER: "🔴",
-  ALLOW_DRAW: true,
+};
+
+export const PLAYERS = {
+  P1: "🔴",
+  P2: "🟡",
+  EMPTY: "⚪"
+};
+
+export const ANIMATION_CONFIG = {
+  DROP_BASE_DURATION: 300,
+  DROP_PER_ROW_ADDITION: 50,
+  SHAKE_DURATION: 150,
+  SHAKE_DELAY: 60,
+  RIPPLE_DURATION: 500,
 };
