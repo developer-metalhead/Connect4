@@ -41,31 +41,18 @@ export const useGameSettings = () => {
     }
   });
 
-  const [alternateAudioEnabled, setAlternateAudioEnabled] = useState(() => {
-    try {
-      const saved = localStorage.getItem('game_alternateAudioEnabled');
-      return saved !== null ? JSON.parse(saved) : false;
-    } catch {
-      return false;
-    }
-  });
-
   const saveGameSettings = (newSettings) => {
     if (newSettings.enableBoardShake !== undefined) {
       setEnableBoardShake(newSettings.enableBoardShake);
-      localStorage.setItem('game_enableShake', JSON.stringify(newSettings.enableBoardShake));
+      localStorage.setItem('game_enableBoardShake', JSON.stringify(newSettings.enableBoardShake));
     }
     if (newSettings.shakeIntensity !== undefined) {
       setShakeIntensity(newSettings.shakeIntensity);
-      localStorage.setItem('game_shakeIntensity', JSON.stringify(newSettings.shakeIntensity));
+      localStorage.setItem('game_shakeIntensity', newSettings.shakeIntensity.toString());
     }
     if (newSettings.monkeyAnimationEnabled !== undefined) {
       setMonkeyAnimationEnabled(newSettings.monkeyAnimationEnabled);
       localStorage.setItem('game_monkeyAnimationEnabled', JSON.stringify(newSettings.monkeyAnimationEnabled));
-    }
-    if (newSettings.alternateAudioEnabled !== undefined) {
-      setAlternateAudioEnabled(newSettings.alternateAudioEnabled);
-      localStorage.setItem('game_alternateAudioEnabled', JSON.stringify(newSettings.alternateAudioEnabled));
     }
   };
 
@@ -73,7 +60,6 @@ export const useGameSettings = () => {
     enableBoardShake, 
     shakeIntensity, 
     monkeyAnimationEnabled,
-    alternateAudioEnabled,
     saveGameSettings
   };
 };

@@ -74,7 +74,7 @@ const OnlineV2 = () => {
   } = useOnlineConnect4();
   
   const {
-    alternateAudioEnabled
+    monkeyAnimationEnabled
   } = useGameSettings();
 
   const inRoom = status === "room";
@@ -165,14 +165,14 @@ const OnlineV2 = () => {
     if (gameState.winner) {
       const isFunMode = false;
       if (gameState.winner === myDisc) {
-        soundManager.playWinSound({ alternate: alternateAudioEnabled, isFunMode });
+        soundManager.playWinSound({ isFunMode });
       } else {
-        soundManager.playLoseSound({ alternate: alternateAudioEnabled, isFunMode });
+        soundManager.playLoseSound({ isFunMode });
       }
     } else if (gameState.isDraw) {
       soundManager.playDrawSound();
     }
-  }, [gameState.winner, gameState.isDraw, myDisc, soundManager, alternateAudioEnabled]);
+  }, [gameState.winner, gameState.isDraw, myDisc, soundManager]);
 
   const handleSetName = () => {
     if (name.trim()) setDisplayName(name);

@@ -52,7 +52,12 @@ const SOUND_CONFIG = {
   },
   bgMusic: {
     files: ["bg2cut.mp3"],
-    volume: 0.5,
+    volume: 0.3,
+    loop: true,
+  },
+  matchMusic: {
+    files: ["matchMusic.mp3"],
+    volume: 0.7,
     loop: true,
   },
 };
@@ -65,6 +70,8 @@ export const SoundProvider = ({ children }) => {
   const playingSoundsRef = useRef({});
   const dropSoundQueueRef = useRef([]);
   const isPlayingDropRef = useRef(false);
+  const bgFadeIntervalRef = useRef(null);
+  const matchFadeIntervalRef = useRef(null);
 
   const [isMuted, setIsMuted] = useState(() => {
     try {
@@ -99,16 +106,31 @@ export const SoundProvider = ({ children }) => {
     }
   });
 
-  const logSoundEvent = useCallback((soundKey, action, details = {}) => {
-    // console.log(`[Sound] ${soundKey} - ${action}`, details);
-  }, []);
+  const [isMatchMusicEnabled, setIsMatchMusicEnabled] = useState(() => {
+    try {
+      const saved = localStorage.getItem("connect4_match_music_enabled");
+      return saved !== null ? JSON.parse(saved) : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const [alternateAudioEnabled, setAlternateAudioEnabled] = useState(() => {
+    try {
+      const saved = localStorage.getItem("connect4_alternate_audio");
+      return saved !== null ? JSON.parse(saved) : false;
+    } catch {
+      return false;
+    }
+  });
 
   const createAudioInstance = useCallback((soundKey, config) => {
     for (const file of config.files) {
       try {
         const audio = new Audio(`/sounds/${file}`);
         audio.preload = "auto";
-        audio.volume = (config.volume || 1) * (soundKey === "bgMusic" ? musicVolume : volume);
+        const baseVolume = config.volume || 1;
+        audio.volume = baseVolume * (["bgMusic", "matchMusic"].includes(soundKey) ? musicVolume : volume);
         if (config.loop) audio.loop = true;
         return audio;
       } catch (error) {
@@ -139,14 +161,14 @@ export const SoundProvider = ({ children }) => {
         }
       });
     };
-  }, []); // Only run once on mount of Provider
+  }, []); 
 
-  // Update volumes when settings change
   useEffect(() => {
     Object.entries(audioInstancesRef.current).forEach(([key, instance]) => {
       const config = SOUND_CONFIG[key];
       if (!config) return;
-      const newVolume = key === "bgMusic" ? (config.volume || 1) * musicVolume : (config.volume || 1) * volume;
+      const isMusicTrack = ["bgMusic", "matchMusic"].includes(key);
+      const newVolume = isMusicTrack ? (config.volume || 1) * musicVolume : (config.volume || 1) * volume;
       if (Array.isArray(instance)) {
         instance.forEach((audio) => { if (audio) audio.volume = newVolume; });
       } else if (instance) {
@@ -155,17 +177,74 @@ export const SoundProvider = ({ children }) => {
     });
   }, [volume, musicVolume]);
 
-  // Handle music when mute or enabled state changes
-  useEffect(() => {
-    const bgMusic = audioInstancesRef.current.bgMusic;
-    if (!bgMusic) return;
+  const pauseBackgroundMusic = useCallback(() => {
+    const bg = audioInstancesRef.current.bgMusic;
+    const match = audioInstancesRef.current.matchMusic;
+    if (!bg) return;
+    
+    if (bgFadeIntervalRef.current) clearInterval(bgFadeIntervalRef.current);
+    if (matchFadeIntervalRef.current) clearInterval(matchFadeIntervalRef.current);
 
-    if (isMuted || !isMusicEnabled) {
-      bgMusic.pause();
-    } else {
-      bgMusic.play().catch(() => {});
+    bgFadeIntervalRef.current = setInterval(() => {
+      if (bg.volume > 0.01) {
+        bg.volume -= 0.01;
+      } else {
+        bg.volume = 0;
+        bg.pause();
+        clearInterval(bgFadeIntervalRef.current);
+      }
+    }, 30);
+
+    if (match && isMatchMusicEnabled && !isMuted) {
+      const targetMatchVol = (SOUND_CONFIG.matchMusic.volume || 1) * musicVolume;
+      match.volume = 0;
+      match.play().catch(() => {});
+      matchFadeIntervalRef.current = setInterval(() => {
+        if (match.volume < targetMatchVol - 0.01) {
+          match.volume += 0.01;
+        } else {
+          match.volume = targetMatchVol;
+          clearInterval(matchFadeIntervalRef.current);
+        }
+      }, 30);
     }
-  }, [isMuted, isMusicEnabled]);
+  }, [musicVolume, isMuted, isMatchMusicEnabled]);
+
+  const resumeBackgroundMusic = useCallback(() => {
+    const bg = audioInstancesRef.current.bgMusic;
+    const match = audioInstancesRef.current.matchMusic;
+    
+    if (bgFadeIntervalRef.current) clearInterval(bgFadeIntervalRef.current);
+    if (matchFadeIntervalRef.current) clearInterval(matchFadeIntervalRef.current);
+
+    if (match) {
+      matchFadeIntervalRef.current = setInterval(() => {
+        if (match.volume > 0.01) {
+          match.volume -= 0.01;
+        } else {
+          match.volume = 0;
+          match.pause();
+          clearInterval(matchFadeIntervalRef.current);
+        }
+      }, 30);
+    }
+
+    if (bg && isMusicEnabled && !isMuted) {
+      const targetBgVol = (SOUND_CONFIG.bgMusic.volume || 1) * musicVolume;
+      if (bg.paused) {
+        bg.volume = 0;
+        bg.play().catch(() => {});
+      }
+      bgFadeIntervalRef.current = setInterval(() => {
+        if (bg.volume < targetBgVol - 0.01) {
+          bg.volume += 0.01;
+        } else {
+          bg.volume = targetBgVol;
+          clearInterval(bgFadeIntervalRef.current);
+        }
+      }, 30);
+    }
+  }, [isMusicEnabled, musicVolume, isMuted]);
 
   const stopSound = useCallback((soundKey) => {
     const audio = playingSoundsRef.current[soundKey];
@@ -224,6 +303,15 @@ export const SoundProvider = ({ children }) => {
     }, 150);
   }, [playSound, isMuted]);
 
+  // Initial music play
+  useEffect(() => {
+    const bg = audioInstancesRef.current.bgMusic;
+    if (bg && isMusicEnabled && !isMuted && bg.paused) {
+      bg.volume = (SOUND_CONFIG.bgMusic.volume || 1) * musicVolume;
+      bg.play().catch(() => {});
+    }
+  }, [isMusicEnabled, isMuted, musicVolume]);
+
   const value = {
     playSound,
     stopSound,
@@ -233,12 +321,12 @@ export const SoundProvider = ({ children }) => {
     playWinSound: (opts = {}) => {
       const soundsToStop = ["win", "lose", "draw", "winWow", "booWow", "surrender"];
       soundsToStop.forEach(s => stopSound(s));
-      playSound((opts.alternate || opts.isFunMode) ? "winWow" : "win");
+      playSound((opts.alternate || alternateAudioEnabled || opts.isFunMode) ? "winWow" : "win");
     },
     playLoseSound: (opts = {}) => {
       const soundsToStop = ["win", "lose", "draw", "winWow", "booWow", "surrender"];
       soundsToStop.forEach(s => stopSound(s));
-      playSound((opts.alternate || opts.isFunMode) ? "booWow" : "lose");
+      playSound((opts.alternate || alternateAudioEnabled || opts.isFunMode) ? "booWow" : "lose");
     },
     playSurrenderSound: () => {
       const soundsToStop = ["win", "lose", "draw", "winWow", "booWow", "surrender"];
@@ -255,6 +343,8 @@ export const SoundProvider = ({ children }) => {
     volume,
     musicVolume,
     isMusicEnabled,
+    isMatchMusicEnabled,
+    alternateAudioEnabled,
     saveSoundSettings: (newSettings) => {
       if (newSettings.isMuted !== undefined) {
         setIsMuted(newSettings.isMuted);
@@ -272,43 +362,32 @@ export const SoundProvider = ({ children }) => {
         setIsMusicEnabled(newSettings.isMusicEnabled);
         localStorage.setItem("connect4_music_enabled", JSON.stringify(newSettings.isMusicEnabled));
       }
+      if (newSettings.isMatchMusicEnabled !== undefined) {
+        setIsMatchMusicEnabled(newSettings.isMatchMusicEnabled);
+        localStorage.setItem("connect4_match_music_enabled", JSON.stringify(newSettings.isMatchMusicEnabled));
+      }
+      if (newSettings.alternateAudioEnabled !== undefined) {
+        setAlternateAudioEnabled(newSettings.alternateAudioEnabled);
+        localStorage.setItem("connect4_alternate_audio", JSON.stringify(newSettings.alternateAudioEnabled));
+      }
     },
     toggleBackgroundMusic: () => {
       const newState = !isMusicEnabled;
       setIsMusicEnabled(newState);
       localStorage.setItem("connect4_music_enabled", JSON.stringify(newState));
     },
-    pauseBackgroundMusic: () => {
-      const bg = audioInstancesRef.current.bgMusic;
-      if (!bg) return;
-      
-      const fadeOut = setInterval(() => {
-        if (bg.volume > 0.05) {
-          bg.volume -= 0.05;
-        } else {
-          bg.volume = 0;
-          bg.pause();
-          clearInterval(fadeOut);
-        }
-      }, 50);
+    toggleMatchMusic: () => {
+      const newState = !isMatchMusicEnabled;
+      setIsMatchMusicEnabled(newState);
+      localStorage.setItem("connect4_match_music_enabled", JSON.stringify(newState));
     },
-    resumeBackgroundMusic: () => {
-      const bg = audioInstancesRef.current.bgMusic;
-      if (!bg || !isMusicEnabled || isMuted) return;
-
-      const targetVolume = (SOUND_CONFIG.bgMusic.volume || 1) * musicVolume;
-      bg.volume = 0;
-      bg.play().catch(() => {});
-      
-      const fadeIn = setInterval(() => {
-        if (bg.volume < targetVolume - 0.05) {
-          bg.volume += 0.05;
-        } else {
-          bg.volume = targetVolume;
-          clearInterval(fadeIn);
-        }
-      }, 50);
+    toggleAlternateAudio: () => {
+      const newState = !alternateAudioEnabled;
+      setAlternateAudioEnabled(newState);
+      localStorage.setItem("connect4_alternate_audio", JSON.stringify(newState));
     },
+    pauseBackgroundMusic,
+    resumeBackgroundMusic,
     isAudioSupported: Object.keys(audioInstancesRef.current).length > 0,
   };
 

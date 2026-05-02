@@ -26,7 +26,7 @@ import Modal from "../../../components/designSystem/Modal";
 const PlayCPUV2 = () => {
   const navigate = useNavigate();
   const soundManager = useSoundManager();
-  const { monkeyAnimationEnabled, alternateAudioEnabled } = useGameSettings();
+  const { monkeyAnimationEnabled } = useGameSettings();
   const { difficulty, seriousCPU } = useCPUSettings();
   const [activePanel, setActivePanel] = useState(null); // 'cpu', 'fun', 'sound' or null
   const [surrendered, setSurrendered] = useState(false);
@@ -54,14 +54,14 @@ const PlayCPUV2 = () => {
   useEffect(() => {
     if (winner) {
       if (winner === PLAYER1) {
-        soundManager.playWinSound({ alternate: alternateAudioEnabled });
+        soundManager.playWinSound();
       } else {
-        soundManager.playLoseSound({ alternate: alternateAudioEnabled });
+        soundManager.playLoseSound();
       }
     } else if (isDraw) {
       soundManager.playDrawSound();
     }
-  }, [winner, isDraw, soundManager, alternateAudioEnabled]);
+  }, [winner, isDraw, soundManager]);
 
   useEffect(() => {
     if (isCpuDropping && soundManager) {
