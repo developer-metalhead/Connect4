@@ -201,7 +201,7 @@ export const GlobalStyles = `
     }
     68% {
       /* Peak of 1st bounce (highest) */
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 35px * (1 - var(--is-upside-down, 0) * 2)));
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 48px * (1 - var(--is-upside-down, 0) * 2)));
       animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* ease-in (accelerating fall) */
     }
     82% {
@@ -211,7 +211,7 @@ export const GlobalStyles = `
     }
     91% {
       /* Peak of 2nd bounce (smaller) */
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 12px * (1 - var(--is-upside-down, 0) * 2)));
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 22px * (1 - var(--is-upside-down, 0) * 2)));
       animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* ease-in (accelerating fall) */
     }
     97% {
@@ -220,7 +220,7 @@ export const GlobalStyles = `
       animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* ease-out (very tiny bounce) */
     }
     98.5% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 3px * (1 - var(--is-upside-down, 0) * 2)));
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 5px * (1 - var(--is-upside-down, 0) * 2)));
       animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* ease-in down */
     }
     100% {
@@ -241,7 +241,7 @@ export const GlobalStyles = `
       animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
     68% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 35px));
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 48px));
       animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
     }
     82% {
@@ -249,7 +249,7 @@ export const GlobalStyles = `
       animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
     91% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 12px));
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 22px));
       animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
     }
     97% {
@@ -257,7 +257,7 @@ export const GlobalStyles = `
       animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
     98.5% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 3px));
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 5px));
       animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
     }
     100% {

@@ -121,21 +121,21 @@ const Board = ({
     });
 
     const distance = isUpsideDown ? targetRow + 1 : board.length - targetRow;
-    const animationDuration = 500 + distance * 30; // Snappy physics duration
+    const animationDuration = 550 + distance * 25; // Slightly longer for juicier bounces
 
-    // Impact 1
+    // Impact 1 (50%)
     setTimeout(() => {
-      if (soundManager) soundManager.playDropSound();
+      if (soundManager) soundManager.playSound("drop");
     }, animationDuration * 0.5);
 
-    // Impact 2
+    // Impact 2 (82%)
     setTimeout(() => {
-      if (soundManager) soundManager.playDropSound();
+      if (soundManager) soundManager.playSound("drop");
     }, animationDuration * 0.82);
 
-    // Impact 3 (settle)
+    // Impact 3 (97% - settle)
     setTimeout(() => {
-      if (soundManager) soundManager.playDropSound();
+      if (soundManager) soundManager.playSound("drop");
     }, animationDuration * 0.97);
 
     setTimeout(() => {
