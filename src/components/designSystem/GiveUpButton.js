@@ -113,7 +113,7 @@ const VideoRenderer = ({ videoElement }) => {
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 };
 
-const GiveUpButton = ({ onGiveUp, soundManager }) => {
+const GiveUpButton = ({ onGiveUp, soundManager, seriousCPU }) => {
   const { 
     playBoredVideo, 
     isLoaded, 
@@ -135,11 +135,14 @@ const GiveUpButton = ({ onGiveUp, soundManager }) => {
   const handleAccept = () => {
     setShowConfirmModal(false);
     
-    if (monkeyAnimationEnabled) {
+    if (seriousCPU) {
+      // Serious CPU overrides all animations/overlays
+      if (onGiveUp) onGiveUp();
+    } else if (monkeyAnimationEnabled) {
       playBoredVideo();
       setShouldNavigate(true);
     } else {
-      // Immediate navigation if animation is disabled
+      // Immediate navigation (which will trigger PostVideoOverlay or card)
       if (onGiveUp) onGiveUp();
     }
   };

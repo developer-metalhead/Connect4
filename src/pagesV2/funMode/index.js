@@ -106,6 +106,12 @@ const FunModeV2 = () => {
   const handleMonkeyButtonClick = useMemo(() => createMonkeyButtonHandler(soundManager, triggerMonkeyMayhem), [soundManager, triggerMonkeyMayhem]);
   const canInteract = useMemo(() => canInteractWithBoard(isMonkeyAnimating, showMonkeyButton, isGravityFalling), [isMonkeyAnimating, showMonkeyButton, isGravityFalling]);
 
+  // Background music management
+  useEffect(() => {
+    soundManager.pauseBackgroundMusic();
+    return () => soundManager.resumeBackgroundMusic();
+  }, [soundManager]);
+
   const enhancedMakeMove = (col) => {
     if (chaosChickenEnabled) {
       // Logic uses normal gravity because the board rotation handles visual anti-gravity

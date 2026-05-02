@@ -16,18 +16,21 @@ const GameSettings = ({ soundManager, onClose }) => {
     enableBoardShake, 
     shakeIntensity, 
     monkeyAnimationEnabled,
+    alternateAudioEnabled,
     saveGameSettings
   } = useGameSettings();
 
   const [pendingShake, setPendingShake] = React.useState(enableBoardShake);
   const [pendingIntensity, setPendingIntensity] = React.useState(shakeIntensity);
   const [pendingMonkey, setPendingMonkey] = React.useState(monkeyAnimationEnabled);
+  const [pendingAlternateAudio, setPendingAlternateAudio] = React.useState(alternateAudioEnabled);
 
   const handleSave = () => {
     saveGameSettings({
       enableBoardShake: pendingShake,
       shakeIntensity: pendingIntensity,
-      monkeyAnimationEnabled: pendingMonkey
+      monkeyAnimationEnabled: pendingMonkey,
+      alternateAudioEnabled: pendingAlternateAudio
     });
     if (soundManager?.playSound) soundManager.playSound('coinsfalling');
     onClose();
@@ -35,6 +38,26 @@ const GameSettings = ({ soundManager, onClose }) => {
 
   return (
     <SettingsContainer>
+      <ToggleGroup>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <Label>🔊 Alternate Audio</Label>
+          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
+            Use fun winWow/booWow sounds for matches
+          </span>
+        </div>
+        <Button 
+          variant={pendingAlternateAudio ? "primary" : "secondary"}
+          size="sm"
+          onClick={() => {
+            setPendingAlternateAudio(!pendingAlternateAudio);
+            if (soundManager?.playClickSound) soundManager.playClickSound();
+          }}
+          soundManager={soundManager}
+        >
+          {pendingAlternateAudio ? 'On' : 'Off'}
+        </Button>
+      </ToggleGroup>
+
       <ToggleGroup>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <Label>Board Shake</Label>

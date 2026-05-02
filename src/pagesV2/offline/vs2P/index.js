@@ -19,13 +19,22 @@ import { GameLayout, ControlGroup } from "./index.style";
 import Board from "../../../components/organisms/boardStyles";
 import VideoButton from "../../../components/designSystem/VideoButton";
 
+import { useGameSettings } from "../../../hooks/core/useGameSettings";
+
 const Game2PV2 = () => {
   const navigate = useNavigate();
   const soundManager = useSoundManager();
+  const { alternateAudioEnabled } = useGameSettings();
   const [activePanel, setActivePanel] = useState(null); // 'fun', 'sound' or null
   const [surrendered, setSurrendered] = useState(null); // PLAYER1 or PLAYER2
   const { gameState, makeMove, reset: baseReset } = useConnect4();
   const { board, currentPlayer, winner, isDraw } = gameState;
+
+  // Background music management
+  useEffect(() => {
+    soundManager.pauseBackgroundMusic();
+    return () => soundManager.resumeBackgroundMusic();
+  }, [soundManager]);
 
   const reset = () => {
     soundManager?.playSound('coinsfalling');
@@ -34,17 +43,17 @@ const Game2PV2 = () => {
   };
 
   const handleSurrender = () => {
-    // Current player surrenders, other player wins
+    soundManager.playSurrenderSound();
     setSurrendered(currentPlayer);
   };
 
   useEffect(() => {
     if (winner) {
-      soundManager.playWinSound();
+      soundManager.playWinSound({ alternate: alternateAudioEnabled });
     } else if (isDraw) {
       soundManager.playDrawSound();
     }
-  }, [winner, isDraw, soundManager]);
+  }, [winner, isDraw, soundManager, alternateAudioEnabled]);
 
   // Scoreboard data
   const p1Data = useMemo(() => ({

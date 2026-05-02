@@ -18,6 +18,9 @@ const SOUND_CONFIG = {
   win: { files: ["win.mp3", "win.ogg"], volume: 0.9, pitchVariation: false },
   lose: { files: ["lose.mp3", "lose.ogg"], volume: 0.7, pitchVariation: false },
   draw: { files: ["draw.mp3", "draw.ogg"], volume: 0.7, pitchVariation: false },
+  winWow: { files: ["winwow.mp3"], volume: 0.9, pitchVariation: false },
+  booWow: { files: ["booWow.mp3"], volume: 0.7, pitchVariation: false },
+  surrender: { files: ["surrender.mp3"], volume: 0.8, pitchVariation: false },
   click: {
     files: ["click.mp3", "click.ogg"],
     volume: 0.6,
@@ -50,8 +53,8 @@ const SOUND_CONFIG = {
     pitchVariation: false,
   },
   bgMusic: {
-    files: ["background.mp3", "background.ogg"],
-    volume: 0.3,
+    files: ["bg2cut.mp3"],
+    volume: 1.0,
     loop: true,
   },
 };
@@ -254,6 +257,13 @@ export const useSoundManager = () => {
     [logSoundEvent],
   );
 
+  const stopAllSounds = useCallback(() => {
+    Object.keys(playingSoundsRef.current).forEach(key => {
+      stopSound(key);
+    });
+    logSoundEvent("ALL", "STOPPED");
+  }, [stopSound, logSoundEvent]);
+
   // Play sound with pitch variation support
   const playSound = useCallback(
     (soundKey, options = {}) => {
@@ -426,12 +436,19 @@ export const useSoundManager = () => {
   return {
     // Sound controls
     playSound,
-    // CHANGE: Add stopSound to public API
     stopSound,
+    stopAllSounds,
     playDropSound,
     playHoverSound: () => playSound("hover"),
-    playWinSound: () => playSound("win"),
-    playLoseSound: () => playSound("lose"),
+    playWinSound: (opts = {}) => {
+      const useAlternate = opts.alternate || opts.isFunMode;
+      playSound(useAlternate ? "winWow" : "win");
+    },
+    playLoseSound: (opts = {}) => {
+      const useAlternate = opts.alternate || opts.isFunMode;
+      playSound(useAlternate ? "booWow" : "lose");
+    },
+    playSurrenderSound: () => playSound("surrender"),
     playDrawSound: () => playSound("draw"),
     playClickSound: () => playSound("click"),
 
@@ -442,6 +459,14 @@ export const useSoundManager = () => {
     isMusicEnabled,
     saveSoundSettings,
     toggleBackgroundMusic,
+    pauseBackgroundMusic: () => {
+      const bg = audioInstancesRef.current.bgMusic;
+      if (bg) bg.pause();
+    },
+    resumeBackgroundMusic: () => {
+      const bg = audioInstancesRef.current.bgMusic;
+      if (bg && isMusicEnabled && !isMuted) bg.play().catch(() => {});
+    },
 
     // Utility
     isAudioSupported: Object.keys(audioInstancesRef.current).length > 0,

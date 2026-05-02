@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 // New UI Components
@@ -38,9 +38,8 @@ import Board from "../../components/organisms/boardStyles";
 import PoopBlockIndicator from "../../components/designSystem/Features/chaosChicken/PoopBlockIndicator";
 import useSoundManager from "../../hooks/core/useSoundManager";
 import useOnlineConnect4 from "../../hooks/core/useOnlineConnect4";
+import { useGameSettings } from "../../hooks/core/useGameSettings";
 import { PLAYER1, PLAYER2 } from "../../helperFunction/helperFunction";
-
-
 
 const OnlineV2 = () => {
   const navigate = useNavigate();
@@ -74,6 +73,12 @@ const OnlineV2 = () => {
     playerId
   } = useOnlineConnect4();
   
+  const {
+    alternateAudioEnabled
+  } = useGameSettings();
+
+  const inRoom = status === "room";
+
   // Auto-exit if rematch expires
   useEffect(() => {
     if (rematchState.isExpired) {
@@ -82,6 +87,15 @@ const OnlineV2 = () => {
       navigate("/home");
     }
   }, [rematchState.isExpired, leaveRoom, navigate]);
+
+  // Background music management
+  useEffect(() => {
+    if (inRoom) {
+      soundManager.pauseBackgroundMusic();
+    } else {
+      soundManager.resumeBackgroundMusic();
+    }
+  }, [inRoom, soundManager]);
 
   const handleCopyRoomId = () => {
     if (!roomId) return;
@@ -92,8 +106,6 @@ const OnlineV2 = () => {
   };
 
   const handleSurrenderClick = () => {
-    // If game already ended, OR we are waiting alone for an opponent, just leave.
-    // No one should get a forfeit if the match never started (less than 2 players).
     if (gameState.winner || gameState.isDraw || players.length < 2) {
       console.log("🚶 Leaving room (No match active or already ended).");
       leaveRoom();
@@ -106,6 +118,7 @@ const OnlineV2 = () => {
 
   const handleConfirmSurrender = () => {
     setShowSurrenderConfirm(false);
+    soundManager.playSurrenderSound();
     surrender();
   };
 
@@ -127,48 +140,44 @@ const OnlineV2 = () => {
     return () => window.removeEventListener("popstate", handlePopState);
   }, [status, gameState.winner, gameState.isDraw]);
 
-  const nameByDisc = useMemo(
-    () => {
-      const base = { [PLAYER1]: "Player 1", [PLAYER2]: "Player 2" };
-      return (players || []).reduce((acc, p) => {
-        if (p?.disc) acc[p.disc] = p?.name || "Guest";
-        return acc;
-      }, base);
-    },
-    [players],
-  );
+  const nameByDisc = useMemo(() => {
+    const base = { [PLAYER1]: "Player 1", [PLAYER2]: "Player 2" };
+    return (players || []).reduce((acc, p) => {
+      if (p?.disc) acc[p.disc] = p?.name || "Guest";
+      return acc;
+    }, base);
+  }, [players]);
 
   const params = new URLSearchParams(location.search);
   const prefillRoom = params.get("room") || "";
   const [name, setName] = useState("");
   const codeRef = useRef(prefillRoom);
-  const inRoom = status === "room";
 
   const inviteLink = useMemo(() => {
     if (!roomId) return "";
     const url = new URL(window.location.href);
     url.searchParams.set("room", roomId);
-    url.pathname = "/play-online"; // Update path for primary routes
+    url.pathname = "/play-online";
     return url.toString();
   }, [roomId]);
 
   useEffect(() => {
     if (gameState.winner) {
+      const isFunMode = false;
       if (gameState.winner === myDisc) {
-        soundManager.playWinSound();
+        soundManager.playWinSound({ alternate: alternateAudioEnabled, isFunMode });
       } else {
-        soundManager.playLoseSound();
+        soundManager.playLoseSound({ alternate: alternateAudioEnabled, isFunMode });
       }
     } else if (gameState.isDraw) {
       soundManager.playDrawSound();
     }
-  }, [gameState.winner, gameState.isDraw, myDisc, soundManager]);
+  }, [gameState.winner, gameState.isDraw, myDisc, soundManager, alternateAudioEnabled]);
 
   const handleSetName = () => {
     if (name.trim()) setDisplayName(name);
   };
 
-  // Prepare data for Scoreboard
   const p1Data = useMemo(() => {
     const p1 = players?.find(p => p.disc === PLAYER1) || { name: "Waiting...", score: 0 };
     return {
@@ -196,22 +205,6 @@ const OnlineV2 = () => {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     soundManager?.playClickSound();
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Connect 4 Match',
-          text: 'Join my Connect 4 room and let\'s play!',
-          url: inviteLink,
-        });
-      } catch (err) {
-        console.log('Share failed:', err);
-      }
-    } else {
-      handleCopy();
-    }
   };
 
   return (
@@ -270,18 +263,6 @@ const OnlineV2 = () => {
         />
       )}
 
-      {!inRoom && !connected && (
-        <RefreshIconButton 
-          onClick={() => {
-            soundManager?.playClickSound();
-            window.location.reload();
-          }} 
-          style={{ position: 'fixed', top: '10px', right: '12px', zIndex: 1001 }}
-        >
-          <svg viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </RefreshIconButton>
-      )}
-
       {!inRoom && <Header />}
 
       {!inRoom && (
@@ -293,7 +274,6 @@ const OnlineV2 = () => {
           }} 
         />
       )}
-
 
       <SidePanel 
         isOpen={activePanel !== null} 
@@ -315,17 +295,11 @@ const OnlineV2 = () => {
         {!connected && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
             <GameStatus message="Connecting... (Try Refreshing)" />
-            {/* <Button variant="outline" size="sm" onClick={() => window.location.reload()} soundManager={soundManager}>
-              Refresh Server
-            </Button> */}
           </div>
         )}
         {error && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
             <GameStatus message={`Error: ${error}`} />
-            {/* <Button variant="outline" size="sm" onClick={() => window.location.reload()} soundManager={soundManager}>
-              Try Refreshing
-            </Button> */}
           </div>
         )}
 
@@ -406,45 +380,10 @@ const OnlineV2 = () => {
               }
               currentPlayerColor={gameState.currentPlayer === PLAYER1 ? "red" : "yellow"}
             />
-
-            {/* {inviteLink && myDisc === PLAYER1 && !players.find(p => p.disc === PLAYER2) && (
-              <InviteSection>
-                <SectionTitle>Invite a Friend</SectionTitle>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <Input 
-                    readOnly 
-                    value={inviteLink} 
-                    onFocus={(e) => e.target.select()}
-                    style={{ flex: 1 }}
-                  />
-                  {navigator.share ? (
-                    <Button variant="secondary" size="sm" onClick={handleShare} soundManager={soundManager}>
-                      Share
-                    </Button>
-                  ) : (
-                    <Button variant="secondary" size="sm" onClick={handleCopy} soundManager={soundManager}>
-                      {copied ? "Copied!" : "Copy"}
-                    </Button>
-                  )}
-                </div>
-                {navigator.share && (
-                  <div style={{ marginTop: '8px', textAlign: 'center' }}>
-                    <Button variant="ghost" size="sm" onClick={handleCopy} soundManager={soundManager}>
-                      {copied ? "Link Copied!" : "Copy Link Instead"}
-                    </Button>
-                  </div>
-                )}
-              </InviteSection> */}
-            {/* )} */}
           </GameLayout>
         )}
       </MainContent>
 
-      {/* 
-          Simultaneous Surrender Synchronization:
-          Both players update via the 'surrendered' socket event, 
-          triggering mirrored overlays (FORFEIT vs OPPONENT FORFEIT) at the same time.
-      */}
       {(gameState.winner || gameState.isDraw) && (
         <MatchResultOverlay 
           title={
@@ -460,14 +399,12 @@ const OnlineV2 = () => {
           variant={gameState.winner ? (gameState.winner === myDisc ? "win" : "loss") : "draw"}
           icon={gameState.winner ? (gameState.winner === myDisc ? "🏆" : "🏳️") : "🤝"}
           
-          /* Only allow Rematch for natural wins, not forfeits */
           onPrimaryAction={!!gameState.winningLine ? () => {
             soundManager?.playSound('click');
             requestRematch();
           } : null}
           primaryActionLabel={!!gameState.winningLine ? "Rematch" : null}
           
-          /* Unified Exit Logic: Both players use this to clear room and go home */
           onSecondaryAction={() => {
             declineRematch();
             leaveRoom();

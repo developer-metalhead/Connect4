@@ -3,6 +3,8 @@ import { styled } from "@mui/material/styles";
 import { tokens } from "../tokens";
 import { useCPUSettings } from "../../../hooks/core/useCPUSettings";
 import Button from "../Button";
+import { ToggleGroup, Label } from "../SoundSettings/SoundSettings.style";
+
 
 const Container = styled("div")({
   display: "flex",
@@ -34,9 +36,11 @@ const Description = styled("div")({
   color: "rgba(255, 255, 255, 0.6)",
 });
 
+
 const CPUSettings = ({ soundManager, onClose }) => {
-  const { difficulty, saveDifficulty } = useCPUSettings();
+  const { difficulty, seriousCPU, saveCPUSettings } = useCPUSettings();
   const [pendingDifficulty, setPendingDifficulty] = React.useState(difficulty);
+  const [pendingSerious, setPendingSerious] = React.useState(seriousCPU);
   const [isSaved, setIsSaved] = React.useState(false);
 
   const handleSelect = (diff) => {
@@ -46,7 +50,10 @@ const CPUSettings = ({ soundManager, onClose }) => {
   };
 
   const handleSave = () => {
-    saveDifficulty(pendingDifficulty);
+    saveCPUSettings({
+      difficulty: pendingDifficulty,
+      seriousCPU: pendingSerious
+    });
     setIsSaved(true);
     if (soundManager?.playSound) soundManager.playSound('coinsfalling');
     if (onClose) onClose();
@@ -54,6 +61,28 @@ const CPUSettings = ({ soundManager, onClose }) => {
 
   return (
     <Container>
+      <ToggleGroup style={{ marginBottom: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <Label>🦾 Serious CPU</Label>
+          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
+            No animations or overlays on surrender
+          </span>
+        </div>
+        <Button 
+          variant={pendingSerious ? "primary" : "secondary"}
+          size="sm"
+          onClick={() => {
+            setPendingSerious(!pendingSerious);
+            if (soundManager?.playClickSound) soundManager.playClickSound();
+          }}
+          soundManager={soundManager}
+        >
+          {pendingSerious ? 'On' : 'Off'}
+        </Button>
+      </ToggleGroup>
+
+      <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.1)', margin: '10px 0' }} />
+
       <DifficultyCard active={pendingDifficulty === "Novice"} onClick={() => handleSelect("Novice")}>
         <Title>Novice</Title>
         <Description>Makes occasional mistakes. Perfect for learning.</Description>
@@ -74,7 +103,7 @@ const CPUSettings = ({ soundManager, onClose }) => {
           variant="primary" 
           fullWidth 
           onClick={handleSave} 
-          disabled={pendingDifficulty === difficulty && isSaved}
+          disabled={pendingDifficulty === difficulty && pendingSerious === seriousCPU && isSaved}
           soundManager={soundManager}
         >
           {isSaved ? "Saved!" : "Save"}

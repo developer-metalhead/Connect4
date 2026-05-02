@@ -41,6 +41,15 @@ export const useGameSettings = () => {
     }
   });
 
+  const [alternateAudioEnabled, setAlternateAudioEnabled] = useState(() => {
+    try {
+      const saved = localStorage.getItem('game_alternateAudioEnabled');
+      return saved !== null ? JSON.parse(saved) : true;
+    } catch {
+      return true;
+    }
+  });
+
   const saveGameSettings = (newSettings) => {
     if (newSettings.enableBoardShake !== undefined) {
       setEnableBoardShake(newSettings.enableBoardShake);
@@ -54,12 +63,17 @@ export const useGameSettings = () => {
       setMonkeyAnimationEnabled(newSettings.monkeyAnimationEnabled);
       localStorage.setItem('game_monkeyAnimationEnabled', JSON.stringify(newSettings.monkeyAnimationEnabled));
     }
+    if (newSettings.alternateAudioEnabled !== undefined) {
+      setAlternateAudioEnabled(newSettings.alternateAudioEnabled);
+      localStorage.setItem('game_alternateAudioEnabled', JSON.stringify(newSettings.alternateAudioEnabled));
+    }
   };
 
   return { 
     enableBoardShake, 
     shakeIntensity, 
     monkeyAnimationEnabled,
+    alternateAudioEnabled,
     saveGameSettings
   };
 };
