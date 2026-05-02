@@ -28,7 +28,7 @@ const FunModeSettings = ({ soundManager, onClose }) => {
       monkeyModeEnabled: pendingMonkey,
       chaosChickenEnabled: pendingChicken
     });
-    if (soundManager?.playSound) soundManager.playSound('coinsfalling');
+    if (soundManager?.playClickSound) soundManager.playClickSound();
     onClose();
   };
 

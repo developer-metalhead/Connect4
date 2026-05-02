@@ -124,7 +124,10 @@ export const MatchResultOverlay = ({
               variant="outline" 
               size="lg" 
               fullWidth
-              onClick={onSecondaryAction}
+              onClick={() => {
+                soundManager?.stopAllSounds();
+                onSecondaryAction();
+              }}
               soundManager={soundManager}
             >
               {secondaryActionLabel}

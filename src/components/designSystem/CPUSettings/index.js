@@ -55,7 +55,7 @@ const CPUSettings = ({ soundManager, onClose }) => {
       seriousCPU: pendingSerious
     });
     setIsSaved(true);
-    if (soundManager?.playSound) soundManager.playSound('coinsfalling');
+    if (soundManager?.playClickSound) soundManager.playClickSound();
     if (onClose) onClose();
   };
 

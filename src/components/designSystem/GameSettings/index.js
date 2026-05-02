@@ -32,7 +32,7 @@ const GameSettings = ({ soundManager, onClose }) => {
       monkeyAnimationEnabled: pendingMonkey,
       alternateAudioEnabled: pendingAlternateAudio
     });
-    if (soundManager?.playSound) soundManager.playSound('coinsfalling');
+    if (soundManager?.playClickSound) soundManager.playClickSound();
     onClose();
   };
 

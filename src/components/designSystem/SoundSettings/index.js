@@ -33,7 +33,7 @@ const SoundSettings = ({ soundManager, onClose }) => {
       musicVolume: pendingMusicVolume,
       isMusicEnabled: pendingMusicEnabled
     });
-    if (soundManager?.playSound) soundManager.playSound('coinsfalling');
+    if (soundManager?.playClickSound) soundManager.playClickSound();
     onClose();
   };
 
