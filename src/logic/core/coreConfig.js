@@ -40,8 +40,9 @@ export const ANIMATION_CONFIG = {
   CPU_POST_DROP_DELAY: 150,
 };
 
-// Gameplay Patterns (For Phase 2)
+// Gameplay Patterns (The Names)
 export const PATTERNS = {
-  IN_A_ROW: "IN_A_ROW",
+  LINE: "LINE",
   SQUARE: "SQUARE",
+  CROSS: "CROSS",
 };
