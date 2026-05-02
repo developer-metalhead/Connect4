@@ -19,6 +19,7 @@ import FunModeSettings from "../../components/designSystem/FunModeSettings";
 import OnlineSettings from "../../components/designSystem/OnlineSettings";
 import SoundSettings from "../../components/designSystem/SoundSettings";
 import BoardSettings from "../../components/designSystem/BoardSettings";
+import GameSettings from "../../components/designSystem/GameSettings";
 import { useState } from "react";
 
 const OfflineV2 = () => {
@@ -39,6 +40,7 @@ const OfflineV2 = () => {
           { id: 'fun', label: 'Fun Mode Settings', icon: <span>🔥</span> },
           { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
           { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
+          { id: 'game', label: 'Game Settings', icon: <span>🎮</span> },
           { id: 'board', label: 'Board Settings', icon: <span>⚙️</span> },
         ]}
       />
@@ -50,14 +52,16 @@ const OfflineV2 = () => {
           activePanel === 'cpu' ? 'CPU Settings' :
           activePanel === 'fun' ? 'Fun Mode Settings' :
           activePanel === 'online' ? 'Online Settings' :
+          activePanel === 'game' ? 'Game Settings' :
           activePanel === 'board' ? 'Board Settings' :
           'Sound Settings'
         }
       >
-        {activePanel === 'cpu' && <CPUSettings soundManager={soundManager} />}
+        {activePanel === 'cpu' && <CPUSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'fun' && <FunModeSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
-        {activePanel === 'online' && <OnlineSettings soundManager={soundManager} />}
+        {activePanel === 'online' && <OnlineSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'sound' && <SoundSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'game' && <GameSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'board' && <BoardSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
       </SidePanel>
       <MainContent style={{ justifyContent: 'center' }}>

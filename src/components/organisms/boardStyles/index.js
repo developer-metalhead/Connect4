@@ -12,7 +12,7 @@ import {
   ImpactRipple,
 } from "./index.style";
 import PoopBlockIndicator from "../../features/ChaosChicken/PoopBlockIndicator";
-import { useBoardSettings } from "../../../hooks/core/useBoardSettings";
+import { useGameSettings } from "../../../hooks/core/useGameSettings";
 
 const Board = ({
   board,
@@ -39,7 +39,7 @@ const Board = ({
   const [touchCol, setTouchCol] = useState(null);
   const [touchTimeout, setTouchTimeout] = useState(null);
   const [jigglingCols, setJigglingCols] = useState({});
-  const { enableBoardShake, shakeIntensity } = useBoardSettings();
+  const { enableBoardShake, shakeIntensity } = useGameSettings();
 
   // Build a quick mask to hide source cells during mass-fall overlays
   const maskedKeys =

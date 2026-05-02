@@ -12,6 +12,7 @@ import SidePanel from "../../components/designSystem/SidePanel";
 import OnlineSettings from "../../components/designSystem/OnlineSettings";
 import SoundSettings from "../../components/designSystem/SoundSettings";
 import BoardSettings from "../../components/designSystem/BoardSettings";
+import GameSettings from "../../components/designSystem/GameSettings";
 import Scoreboard from "../../components/designSystem/Scoreboard";
 import { GameStatus, MatchResultOverlay } from "../../components/designSystem/Status";
 import Modal from "../../components/designSystem/Modal";
@@ -142,6 +143,7 @@ const OnlineV2 = () => {
           options={[
             { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
             { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
+            { id: 'game', label: 'Game Settings', icon: <span>🎮</span> },
             { id: 'board', label: 'Board Settings', icon: <span>⚙️</span> },
           ]}
         />
@@ -162,10 +164,16 @@ const OnlineV2 = () => {
       <SidePanel 
         isOpen={activePanel !== null} 
         onClose={() => setActivePanel(null)}
-        title={activePanel === 'online' ? 'Online Settings' : activePanel === 'board' ? 'Board Settings' : 'Sound Settings'}
+        title={
+          activePanel === 'online' ? 'Online Settings' :
+          activePanel === 'game' ? 'Game Settings' :
+          activePanel === 'board' ? 'Board Settings' :
+          'Sound Settings'
+        }
       >
-        {activePanel === 'online' && <OnlineSettings soundManager={soundManager} />}
+        {activePanel === 'online' && <OnlineSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'sound' && <SoundSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'game' && <GameSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'board' && <BoardSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
       </SidePanel>
 

@@ -17,10 +17,8 @@ const FunModeSettings = ({ soundManager, onClose }) => {
   const { 
     monkeyModeEnabled, 
     chaosChickenEnabled, 
-    monkeyAnimationEnabled,
     toggleMonkeyMode, 
     toggleChaosChicken,
-    toggleMonkeyAnimation
   } = useFunModeSettings();
 
   const handleToggle = (handler) => {
@@ -66,25 +64,6 @@ const FunModeSettings = ({ soundManager, onClose }) => {
               onChange={() => handleToggle(toggleChaosChicken)} 
             />
             <SwitchSlider active={chaosChickenEnabled} />
-          </SwitchWrapper>
-        </CardHeader>
-      </FeatureCard>
-
-      <FeatureCard active={monkeyAnimationEnabled}>
-        <CardHeader>
-          <TitleGroup>
-            <FeatureTitle>🎥 Monkey Animation</FeatureTitle>
-            <FeatureDescription>
-              Play a cinematic animation when you give up.
-            </FeatureDescription>
-          </TitleGroup>
-          <SwitchWrapper>
-            <SwitchInput 
-              type="checkbox" 
-              checked={monkeyAnimationEnabled} 
-              onChange={() => handleToggle(toggleMonkeyAnimation)} 
-            />
-            <SwitchSlider active={monkeyAnimationEnabled} />
           </SwitchWrapper>
         </CardHeader>
       </FeatureCard>
