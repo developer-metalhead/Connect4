@@ -26,7 +26,7 @@ export const MONKEY_CONFIG = {
   NAME: "MONKEY",
   ACTOR: "🐒",
   PROJECTILE: "🍌",
-  PATTERN: { type: PATTERNS.LINE, length: 2 },
+  PATTERN: { type: PATTERNS.LINE, length: 3 },
   
   // BASE ACTIONS (Triggers normally)
   ACTIONS: [
@@ -34,18 +34,18 @@ export const MONKEY_CONFIG = {
       type: ACTIONS.GRAVITY_FLIP, 
       MAYHEM_DURATION: 4 
     },
-    // { 
-    //   type: ACTIONS.REMOVE_DISC, 
-    //   STEAL_PROBABILITY: 0.75 
-    // }
     { 
-      type: ACTIONS.BLOCK_COLUMN, 
-      POOP_NON_EMPTY_PROBABILITY: 0.70, 
-      POOP_BLOCK_DURATION: 3 
+      type: ACTIONS.REMOVE_DISC, 
+      STEAL_PROBABILITY: 0.75 
     }
+    // { 
+    //   type: ACTIONS.BLOCK_COLUMN, 
+    //   POOP_NON_EMPTY_PROBABILITY: 0.70, 
+    //   POOP_BLOCK_DURATION: 3 
+    // }
   ],
   
-  TRIGGER_THRESHOLD: 1,
+  TRIGGER_THRESHOLD: 2,
   MAX_ACTIVATIONS_PER_MATCH: 1,
   
   VOICE_LINES: [

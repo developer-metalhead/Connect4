@@ -103,7 +103,11 @@ class FeatureManager {
         };
 
       case ACTIONS.BLOCK_COLUMN:
-        const { targetCol, blockedColumns: newBlocked } = executeBlockColumn(board, blockedColumns, actionObj);
+        // Pass the projectile from params so the state knows what emoji to use!
+        const { targetCol, blockedColumns: newBlocked } = executeBlockColumn(board, blockedColumns, {
+          ...actionObj,
+          projectile: params.projectile
+        });
         return { 
           type: ACTIONS.BLOCK_COLUMN, 
           targetCol, 

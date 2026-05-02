@@ -148,7 +148,7 @@ const Board = ({
   }, [board]);
 
   // CHANGE: Check if column is blocked by poop
-  const isColumnBlockedByPoop = (col) => {
+  const isColumnBlocked = (col) => {
     return (blockedColumns || []).some(block => block.columnIndex === col && block.turnsLeft > 0);
   };
 
@@ -156,7 +156,7 @@ const Board = ({
     if (winner || isDraw || !canInteract || droppingCol !== null) return;
 
     // CHANGE: Handle blocked columns
-    if (isColumnBlockedByPoop(col)) {
+    if (isColumnBlocked(col)) {
       const clickedCol = col;
       // Force animation restart by briefly removing the state
       setJigglingCols(prev => ({ ...prev, [clickedCol]: false }));
@@ -258,7 +258,7 @@ const Board = ({
   const handleMouseEnter = (col) => {
     if (canInteract && !winner && !isDraw && droppingCol === null) {
       // CHANGE: Show different hover state for blocked columns
-      if (isColumnBlockedByPoop(col)) {
+      if (isColumnBlocked(col)) {
         setHoverCol(null); // Don't highlight blocked columns
         return;
       }
@@ -281,7 +281,7 @@ const Board = ({
       clearTouchTimeout();
       
       // CHANGE: Don't highlight blocked columns on touch
-      if (isColumnBlockedByPoop(col)) {
+      if (isColumnBlocked(col)) {
         setTouchCol(null);
         return;
       }
@@ -303,7 +303,7 @@ const Board = ({
         clearTouchTimeout();
         
         // CHANGE: Don't highlight blocked columns
-        if (isColumnBlockedByPoop(newCol)) {
+        if (isColumnBlocked(newCol)) {
           setTouchCol(null);
           return;
         }
@@ -417,7 +417,7 @@ const Board = ({
                 !isDraw &&
                 droppingCol === null &&
                 activeCol === col &&
-                !isColumnBlockedByPoop(col) && (
+                !isColumnBlocked(col) && (
                   <span className="preview-piece">{currentPlayer}</span>
                 )}
             </div>
@@ -561,11 +561,11 @@ const Board = ({
                 style={{
                   cursor:
                     canInteract && !winner && !isDraw && droppingCol === null
-                      ? isColumnBlockedByPoop(c) ? "not-allowed" : "pointer"
+                      ? isColumnBlocked(c) ? "not-allowed" : "pointer"
                       : "default",
                   opacity: droppingCol !== null && droppingCol !== c ? 0.7 : 1,
                   // CHANGE: Visual indication for blocked columns
-                  filter: isColumnBlockedByPoop(c) ? "grayscale(0.5) brightness(0.8)" : "none",
+                  filter: isColumnBlocked(c) ? "grayscale(0.5) brightness(0.8)" : "none",
                   "--target-glow-color": currentPlayer === "🔴" ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)",
                 }}
               >
@@ -714,7 +714,7 @@ const Board = ({
                 !isDraw &&
                 droppingCol === null &&
                 activeCol === col &&
-                !isColumnBlockedByPoop(col) && (
+                !isColumnBlocked(col) && (
                   <span className="preview-piece">{currentPlayer}</span>
                 )}
             </div>
