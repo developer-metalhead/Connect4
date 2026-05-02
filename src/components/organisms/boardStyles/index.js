@@ -20,7 +20,7 @@ import {  returnToNormalGravity,
 import PoopBlockIndicator from "../../designSystem/Features/chaosChicken/PoopBlockIndicator";
 import { useGameSettings } from "../../../hooks/core/useGameSettings";
 
-import { ANIMATION_CONFIG } from "../../../logic/constants";
+import { ANIMATION_CONFIG } from "../../../logic/core/constants";
 
 const Board = ({
   board,

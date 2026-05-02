@@ -14,7 +14,7 @@ import {
   applyInvertedGravity,
   planInvertedGravityAnimation,
 } from "../../helperFunction/funMode/monkeyModeFeatures";
-import { MONKEY_CONFIG } from "../../logic/funMode";
+import { MONKEY_CONFIG } from "../../logic/funMode/funMode";
 import { isValidMove,dropPiece } from "../../helperFunction/helperFunction";
 
 // CHANGE: Unified monkey mode hook (no more separate "mayhem" terminology)

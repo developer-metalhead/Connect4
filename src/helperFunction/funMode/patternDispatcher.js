@@ -1,5 +1,5 @@
 import { countSeparateInARows, detectNewSquares, countSeparateSquares } from "./patternDetectors";
-import { PATTERNS } from "../../logic/constants";
+import { PATTERNS } from "../../logic/core/constants";
 
 /**
  * PATTERN DISPATCHER

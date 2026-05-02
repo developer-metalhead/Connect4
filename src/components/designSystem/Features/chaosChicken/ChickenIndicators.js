@@ -1,7 +1,7 @@
 import React from "react";
 import { styled, keyframes } from "@mui/material/styles";
 import { tokens } from "../../tokens";
-import { CHICKEN_CONFIG } from "../../../../logic/funMode";
+import { CHICKEN_CONFIG } from "../../../../logic/funMode/funMode";
 
 
 const IndicatorsContainer = styled("div")({
