@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useNavigate } from "react-router-dom";
-import { useEffect, useMemo,useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useSoundManager from "../../../hooks/core/useSoundManager";
 import useConnect4CPU from "../../../hooks/core/useConnect4CPU";
 import { useGameSettings } from "../../../hooks/core/useGameSettings";
@@ -12,7 +12,7 @@ import { PageWrapper, Header, HeaderContent, AppLogo, MainContent } from "../../
 import Button from "../../../components/designSystem/Button";
 import Scoreboard from "../../../components/designSystem/Scoreboard";
 import { GameStatus, MatchResultOverlay } from "../../../components/designSystem/Status";
-import { GameLayout, ControlGroup } from "./index.style";
+import { GameLayout, ControlGroup, DifficultyContainer, DifficultyButton, SlidingPill } from "./index.style";
 
 // Original Logic Components
 import Board from "../../../components/organisms/boardStyles";
@@ -27,15 +27,20 @@ const PlayCPUV2 = () => {
   const navigate = useNavigate();
   const soundManager = useSoundManager();
   const { monkeyAnimationEnabled } = useGameSettings();
-  const { difficulty, seriousCPU } = useCPUSettings();
+  const { difficulty, seriousCPU, saveDifficulty } = useCPUSettings();
   const [activePanel, setActivePanel] = useState(null); // 'cpu', 'fun', 'sound' or null
   const [surrendered, setSurrendered] = useState(false);
+
+  const levels = ['Novice', 'Skilled', 'Expert'];
+  const activeIndex = levels.indexOf(difficulty);
 
   const { 
     gameState, 
     makeHumanMove, 
     reset, 
     isCpuTurn, 
+    isCpuThinking,
+    cpuPreviewCol,
     isCpuDropping, 
     cpuDroppingCol,
     shouldShowPostVideoOverlay,
@@ -83,6 +88,12 @@ const PlayCPUV2 = () => {
     reset();
   };
 
+  const handleDifficultyChange = (newDifficulty) => {
+    soundManager?.playClickSound();
+    saveDifficulty(newDifficulty);
+    handleReset();
+  };
+
   // Scoreboard data
   const p1Data = useMemo(() => ({
     name: "Player",
@@ -111,7 +122,6 @@ const PlayCPUV2 = () => {
             soundManager.playSurrenderSound();
           } else {
             setShouldShowPostVideoOverlay(true);
-            // Result card will show after PostVideoOverlay closes (see handleClosePostVideoOverlay)
           }
         }} 
         soundManager={soundManager} 
@@ -131,14 +141,29 @@ const PlayCPUV2 = () => {
         <GameLayout>
           <Scoreboard p1={p1Data} p2={p2Data} />
 
+          <DifficultyContainer>
+            <SlidingPill activeIndex={activeIndex} />
+            {levels.map((level) => (
+              <DifficultyButton 
+                key={level}
+                active={difficulty === level}
+                onClick={() => handleDifficultyChange(level)}
+              >
+                {level}
+              </DifficultyButton>
+            ))}
+          </DifficultyContainer>
+
           <Board
             board={board}
-            currentPlayer={PLAYER1}
+            currentPlayer={currentPlayer}
             winner={winner}
             isDraw={isDraw}
             onDrop={makeHumanMove}
-            canInteract={!isCpuTurn}
+            canInteract={!isCpuTurn && !isCpuThinking}
             soundManager={soundManager}
+            isCpuThinking={isCpuThinking}
+            cpuPreviewCol={cpuPreviewCol}
             isCpuDropping={isCpuDropping}
             cpuDroppingCol={cpuDroppingCol}
             winningLine={gameState.winningLine}
@@ -166,7 +191,6 @@ const PlayCPUV2 = () => {
         </GameLayout>
       </MainContent>
 
-      {/* Human Win/Draw/CPU Win/Surrender Overlay */}
       {(winner || isDraw || surrendered) && (
         <MatchResultOverlay 
           title={
@@ -191,7 +215,6 @@ const PlayCPUV2 = () => {
         />
       )}
 
-      {/* CPU Win special overlay */}
       <PostVideoOverlay
         isVisible={shouldShowPostVideoOverlay}
         onClose={handleClosePostVideoOverlay}

@@ -31,9 +31,10 @@ export const ScoreboardCard = styled("div")({
   boxShadow: tokens.shadows.xl,
 
   "@media (max-width: 768px)": {
-    padding: "8px 16px",
-    gap: "8px",
+    padding: "6px 12px", // Tighter padding
+    gap: "4px",
     borderRadius: tokens.radius.md,
+    maxWidth: "400px", // Limit width on mobile
   }
 });
 
@@ -43,7 +44,7 @@ export const PlayerInfo = styled("div", {
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  gap: "8px",
+  gap: "4px", // Reduced gap
   flex: 1,
   opacity: active ? 1 : 0.6,
   transition: tokens.transition,
@@ -54,40 +55,28 @@ export const PlayerInfo = styled("div", {
     "&::after": {
       content: '""',
       position: "absolute",
-      bottom: "-12px",
-      width: "30px",
-      height: "4px",
+      bottom: "-8px", // Closer to name
+      width: "20px",
+      height: "3px",
       backgroundColor: tokens.colors.primary,
       borderRadius: "2px",
-      boxShadow: "0 0 12px rgba(59, 130, 246, 0.8)",
+      boxShadow: "0 0 10px rgba(59, 130, 246, 0.6)",
     },
-    // "&::before": {
-    //   content: '""',
-    //   position: "absolute",
-    //   top: 0, left: 0, bottom: 0, right: 0,
-    //   background: "linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent)",
-    //   transform: "skewX(-20deg)",
-    //   animation: `${cardSheen} 2.5s infinite`,
-    //   pointerEvents: "none",
-    //   zIndex: 1,
-    //   borderRadius: tokens.radius.md,
-    //   overflow: "hidden"
-    // }
   })
 }));
 
 export const Avatar = styled("div", {
   shouldForwardProp: (prop) => prop !== "color" && prop !== "active",
 })(({ color, active }) => ({
-  width: "clamp(32px, 8vw, 48px)",
-  height: "clamp(32px, 8vw, 48px)",
+  width: "clamp(28px, 7vw, 40px)", // Slightly smaller
+  height: "clamp(28px, 7vw, 40px)",
   borderRadius: "50%",
   backgroundColor: color === "red" ? "rgba(239, 68, 68, 0.15)" : "rgba(255, 221, 0, 0.15)",
   border: `2px solid ${color === "red" ? "#ef4444" : "#ffdd00"}`,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  fontSize: "clamp(16px, 4vw, 24px)",
+  fontSize: "clamp(14px, 4vw, 20px)",
   animation: active 
     ? `${color === "red" ? avatarPulseRed : avatarPulseYellow} 1.5s infinite ease-in-out` 
     : "none",
@@ -96,11 +85,11 @@ export const Avatar = styled("div", {
 export const PlayerName = styled("div", {
   shouldForwardProp: (prop) => prop !== "active",
 })(({ active }) => ({
-  fontSize: "clamp(12px, 3vw, 16px)",
+  fontSize: "clamp(11px, 2.8vw, 14px)", // Smaller name
   fontWeight: active ? 700 : 600,
   color: active ? "#ffffff" : tokens.colors.text,
   textAlign: "center",
-  maxWidth: "120px",
+  maxWidth: "100px",
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
@@ -109,19 +98,23 @@ export const PlayerName = styled("div", {
 }));
 
 export const ScoreValue = styled("div")({
-  fontSize: "28px",
+  fontSize: "24px", // Smaller score
   fontWeight: 800,
   color: tokens.colors.text,
   fontFamily: "'Inter', sans-serif",
+  
+  "@media (max-width: 768px)": {
+    fontSize: "18px", // Even smaller for mobile
+  }
 });
 
 export const VersusLabel = styled("div")({
-  fontSize: "12px",
+  fontSize: "10px", // Smaller vs text
   fontWeight: 700,
   color: tokens.colors.textDim,
   textTransform: "uppercase",
-  letterSpacing: "2px",
-  padding: "4px 12px",
+  letterSpacing: "1px",
+  padding: "2px 8px", // Tighter padding
   borderRadius: tokens.radius.full,
   border: `1px solid ${tokens.colors.borderLight}`,
 });

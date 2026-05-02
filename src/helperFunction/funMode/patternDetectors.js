@@ -1,4 +1,4 @@
-import { ROWS, COLS } from "../../logic/constants";
+import { ROWS, COLS } from "../../logic/core/constants";
 
 /**
  * PATTERN DETECTORS

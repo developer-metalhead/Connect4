@@ -1,4 +1,11 @@
-import { ROWS, COLS, EMPTY, PLAYER1, PLAYER2 } from "./constants";
+import { ROWS, COLS, EMPTY, PLAYER1, PLAYER2, ANIMATION_CONFIG } from "./constants";
+
+/**
+ * Standardized drop duration calculation
+ */
+export const calculateDropDuration = (distance) => {
+  return ANIMATION_CONFIG.DROP_BASE_DURATION + (distance * ANIMATION_CONFIG.DROP_PER_ROW_ADDITION);
+};
 
 /**
  * Creates a fresh empty board array

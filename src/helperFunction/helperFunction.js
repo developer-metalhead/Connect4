@@ -4,8 +4,8 @@
  * so that legacy components and hooks continue to work correctly.
  */
 
-import { PLAYER1 } from "../logic/constants";
-import { createEmptyBoard, getTargetRow } from "../logic/engine";
+import { PLAYER1 } from "../logic/core/constants";
+import { createEmptyBoard, getTargetRow } from "../logic/core/engine";
 
 // Re-export constants
 export { 
@@ -15,7 +15,7 @@ export {
   PLAYER2, 
   EMPTY,
   ANIMATION_CONFIG 
-} from "../logic/constants";
+} from "../logic/core/constants";
 
 // Re-export core engine logic
 export {
@@ -25,8 +25,9 @@ export {
   isBoardFull,
   getNextPlayer,
   formatCoords,
-  getTargetRow
-} from "../logic/engine";
+  getTargetRow,
+  calculateDropDuration
+} from "../logic/core/engine";
 
 /**
  * Drop a piece into the board (Legacy wrapper)

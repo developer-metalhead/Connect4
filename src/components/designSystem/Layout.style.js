@@ -47,10 +47,9 @@ export const PageWrapper = styled("div")({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  overflow: "hidden !important", 
-  position: "fixed", // Hard lock
+  overflow: "hidden", 
+  position: "relative",
   inset: 0,
-  touchAction: "none !important",
 });
 
 export const Header = styled("header")({
@@ -104,14 +103,14 @@ export const MainContent = styled("main")({
   alignItems: "center",
   padding: "16px",
   gap: "16px",
-  overflowY: "auto", // Only internal scrolling allowed
+  overflowY: "auto",
   overflowX: "hidden",
   justifyContent: "flex-start",
+  WebkitOverflowScrolling: "touch", // Smooth scroll for iOS
 
-  "@media (min-width: 768px)": {
-    padding: "16px", 
-    gap: "16px",
-    justifyContent: "flex-start",
+  "@media (max-width: 768px)": {
+    padding: "8px", 
+    gap: "12px",
   }
 });
 

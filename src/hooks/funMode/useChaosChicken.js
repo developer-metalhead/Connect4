@@ -13,7 +13,7 @@ import {
   isRoosterOfRageActivation,
   findNearestAvailableColumn,
 } from "../../helperFunction/funMode/chaosChickenFeatures";
-import { CHICKEN_CONFIG } from "../../logic/funMode";
+import { CHICKEN_CONFIG } from "../../logic/funMode/funMode";
 
 export const useChaosChicken = (options = {}) => {
   const { chaosChickenEnabled = true } = options;
