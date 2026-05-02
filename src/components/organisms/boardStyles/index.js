@@ -20,7 +20,7 @@ import {  returnToNormalGravity,
 import FeatureBlockIndicator from "../../designSystem/Features/core/FeatureBlockIndicator";
 import { useGameSettings } from "../../../hooks/settings/useGameSettings";
 
-import { ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS } from "../../../logic/core/coreConfig";
+import { ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS, SOUNDS } from "../../../logic/core/coreConfig";
 
 const Board = ({
   board,
@@ -95,7 +95,7 @@ const Board = ({
       setEjectedPieces(newEjected);
       // Play a special sound if possible
       if (soundManager) {
-        soundManager.playSound('coinsfalling'); // Already added in previous turn
+        soundManager.playSound(SOUNDS.COINS); // Already added in previous turn
       }
       
       setTimeout(() => setEjectedPieces([]), 1500);

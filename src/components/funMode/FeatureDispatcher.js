@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { featureManager } from '../../logic/funMode/featureManager';
 import { ACTIONS } from '../../logic/funMode/actionEngine';
-import { FEATURES, EMOJIS } from '../../logic/core/coreConfig';
+import { FEATURES, EMOJIS, SOUNDS } from '../../logic/core/coreConfig';
 import FeatureAnimation from './FeatureAnimation';
 
 /**
@@ -72,8 +72,8 @@ const FeatureDispatcher = ({
     startAnimation(featureName, 2500);
     
     if (soundManager) {
-      if (isUltimate && featureName === FEATURES.CHICKEN) soundManager.playSound("rooster");
-      else soundManager.playSound(featureName === FEATURES.MONKEY ? "monkeylaugh" : "chickenbawk");
+      if (isUltimate && featureName === FEATURES.CHICKEN) soundManager.playSound(SOUNDS.ROOSTER_RAGE);
+      else soundManager.playSound(featureName === FEATURES.MONKEY ? SOUNDS.MONKEY_LAUGH : SOUNDS.CHICKEN_CLUCK);
     }
 
     // 4. ACTION SIDE EFFECTS
@@ -95,7 +95,7 @@ const FeatureDispatcher = ({
         break;
 
       case ACTIONS.EXPLODE:
-        if (soundManager) soundManager.playSound("bomb_explosion");
+        if (soundManager) soundManager.playSound(SOUNDS.BOMB_EXPLOSION);
         setGameState(prev => ({ ...prev, board: result.newBoard }));
         break;
         

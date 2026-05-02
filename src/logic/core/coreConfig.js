@@ -44,6 +44,23 @@ export const EMOJIS = {
   EMPTY_SLOT: "⚪"
 };
 
+// THE SOUND DICTIONARY (Universal Audio)
+export const SOUNDS = {
+  // UI & General
+  CLICK: "click",
+  COINS: "coinsfalling",
+  SURRENDER: "surrender",
+  WIN: "win",
+  LOSE: "lose",
+  DRAW: "draw",
+  
+  // Character Specific
+  MONKEY_LAUGH: "monkeylaugh",
+  CHICKEN_CLUCK: "chickenbawk",
+  ROOSTER_RAGE: "rooster",
+  BOMB_EXPLOSION: "bomb_explosion",
+};
+
 export const CORE_CONFIG = {
   ROWS: 6,
   COLS: 7,
