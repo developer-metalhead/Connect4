@@ -15,18 +15,47 @@ export const PATTERNS = {
   SQUARE: "SQUARE",
   CROSS: "CROSS",
 };
+
+// Character Feature IDs
+export const FEATURES = {
+  MONKEY: "MONKEY",
+  CHICKEN: "CHICKEN",
+  BOMB: "BOMB",
+};
+
+// THE EMOJI DICTIONARY (Universal Visuals)
+export const EMOJIS = {
+  // Characters
+  MONKEY: "🐒",
+  CHICKEN: "🐔",
+  ROOSTER: "🐓",
+  BOMB: "💣",
+  
+  // Projectiles & Effects
+  BANANA: "🍌",
+  POOP: "💩",
+  FIRE: "🔥",
+  EXPLOSION: "💥",
+  ULTIMATE_GLOW: "🌟",
+  
+  // Board Pieces
+  RED_DISC: "🔴",
+  YELLOW_DISC: "🟡",
+  EMPTY_SLOT: "⚪"
+};
+
 export const CORE_CONFIG = {
   ROWS: 6,
   COLS: 7,
   // PLUG & PLAY: Change this to ANY pattern to change the goal of the game!
   WIN_PATTERN: { type: PATTERNS.LINE, length: 4 }, 
-  DEFAULT_FIRST_PLAYER: "🔴",
+  DEFAULT_FIRST_PLAYER: EMOJIS.RED_DISC,
 };
 
 export const PLAYERS = {
-  P1: "🔴",
-  P2: "🟡",
-  EMPTY: "⚪"
+  P1: EMOJIS.RED_DISC,
+  P2: EMOJIS.YELLOW_DISC,
+  EMPTY: EMOJIS.EMPTY_SLOT
 };
 
 // Flat exports for easier destructuring across the app

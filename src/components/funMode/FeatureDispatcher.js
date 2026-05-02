@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { featureManager } from '../../logic/funMode/featureManager';
 import { ACTIONS } from '../../logic/funMode/actionEngine';
+import { FEATURES, EMOJIS } from '../../logic/core/coreConfig';
 import FeatureAnimation from './FeatureAnimation';
 
 /**
@@ -56,13 +57,13 @@ const FeatureDispatcher = ({
     if (!result) return;
 
     // 2. VISUAL SETUP
-    const actorEmoji = isUltimate ? (featureName === "CHICKEN" ? "🐓" : config.ACTOR) : config.ACTOR;
+    const actorEmoji = isUltimate ? (featureName === FEATURES.CHICKEN ? EMOJIS.ROOSTER : config.ACTOR) : config.ACTOR;
     const voiceLines = isUltimate ? (config.ROOSTER_VOICE_LINES || [""]) : (config.CHICKEN_VOICE_LINES || [""]);
     const randomVoice = voiceLines[Math.floor(Math.random() * voiceLines.length)];
     
     setActiveVisuals({
       actor: actorEmoji,
-      projectile: isUltimate ? "🔥" : config.PROJECTILE,
+      projectile: isUltimate ? EMOJIS.FIRE : config.PROJECTILE,
       voice: randomVoice,
       targetColumn: actionObj.type === ACTIONS.BLOCK_COLUMN ? result.targetCol : (actionObj.type === ACTIONS.REMOVE_DISC ? result.targetDisc?.c : null)
     });
@@ -71,8 +72,8 @@ const FeatureDispatcher = ({
     startAnimation(featureName, 2500);
     
     if (soundManager) {
-      if (isUltimate && featureName === "CHICKEN") soundManager.playSound("rooster_rage");
-      else soundManager.playSound(featureName === "MONKEY" ? "monkey_laugh" : "chicken_cluck");
+      if (isUltimate && featureName === FEATURES.CHICKEN) soundManager.playSound("rooster");
+      else soundManager.playSound(featureName === FEATURES.MONKEY ? "monkeylaugh" : "chickenbawk");
     }
 
     // 4. ACTION SIDE EFFECTS

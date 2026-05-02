@@ -1,6 +1,7 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
 import { tokens } from "../designSystem/tokens";
+import { FEATURES,EMOJIS } from "../../logic/core/coreConfig";
 
 const IndicatorsContainer = styled("div")({
   display: "flex",
@@ -69,8 +70,8 @@ const FeatureStatusIndicators = ({ config, stats, currentPlayer }) => {
   if (!config || !stats || !config.ULTIMATE_THRESHOLD) return null;
 
   const players = [
-    { id: "🔴", label: "P1" },
-    { id: "🟡", label: "P2" }
+    { id: EMOJIS.RED_DISC, label: "P1" },
+    { id: EMOJIS.YELLOW_DISC, label: "P2" }
   ];
 
   const getVisuals = (playerStats) => {
@@ -81,9 +82,9 @@ const FeatureStatusIndicators = ({ config, stats, currentPlayer }) => {
     // Choose emoji based on progress
     let emoji = config.ACTOR;
     if (isReady) {
-      if (config.NAME === "CHICKEN") emoji = "🐓";
-      else if (config.NAME === "MONKEY") emoji = "🐒🔥";
-      else emoji = "🌟"; // Default ultimate emoji
+      if (config.NAME === FEATURES.CHICKEN) emoji = EMOJIS.ROOSTER;
+      else if (config.NAME === FEATURES.MONKEY) emoji = `${EMOJIS.MONKEY}${EMOJIS.FIRE}`;
+      else emoji = EMOJIS.ULTIMATE_GLOW; // Default ultimate emoji
     }
 
     return { count, threshold, isReady, emoji };

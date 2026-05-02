@@ -19,13 +19,13 @@
  * TRIGGER_THRESHOLD: Matches needed to trigger BASE actions.
  * ULTIMATE_THRESHOLD: Matches needed to escalate to ULTIMATE actions.
  */
-import { PATTERNS } from "../core/coreConfig";
+import { PATTERNS, FEATURES, EMOJIS } from "../core/coreConfig";
 import { ACTIONS } from "./actionEngine";
 
 export const MONKEY_CONFIG = {
-  NAME: "MONKEY",
-  ACTOR: "🐒",
-  PROJECTILE: "🍌",
+  NAME: FEATURES.MONKEY,
+  ACTOR: EMOJIS.MONKEY,
+  PROJECTILE: EMOJIS.BANANA,
   PATTERN: { type: PATTERNS.LINE, length: 3 },
   
   // BASE ACTIONS (Triggers normally)
@@ -38,7 +38,7 @@ export const MONKEY_CONFIG = {
       type: ACTIONS.REMOVE_DISC, 
       STEAL_PROBABILITY: 0.75 
     },
-     // { 
+       // { 
     //   type: ACTIONS.BLOCK_COLUMN, 
     //   POOP_NON_EMPTY_PROBABILITY: 0.70, 
     //   POOP_BLOCK_DURATION: 3 
@@ -58,9 +58,9 @@ export const MONKEY_CONFIG = {
 };
 
 export const CHICKEN_CONFIG = {
-  NAME: "CHICKEN",
-  ACTOR: "🐔",
-  PROJECTILE: "💩",
+  NAME: FEATURES.CHICKEN,
+  ACTOR: EMOJIS.CHICKEN,
+  PROJECTILE: EMOJIS.POOP,
   PATTERN: { type: PATTERNS.SQUARE, size: 2 },
   
   // BASE ACTIONS (Chaos Chicken - Pooping)
@@ -81,7 +81,7 @@ export const CHICKEN_CONFIG = {
   ],
   
   TRIGGER_THRESHOLD: 1,
-  ULTIMATE_THRESHOLD: 2, // Renamed from ROOSTER_THRESHOLD
+  ULTIMATE_THRESHOLD: 2, 
  
   MAX_ROOSTER_PER_PLAYER: 1,
   RESET_AFTER_ROOSTER: false,
@@ -104,9 +104,9 @@ export const CHICKEN_CONFIG = {
 };
 
 export const BOMB_CONFIG = {
-  NAME: "BOMB",
-  ACTOR: "💣",
-  PROJECTILE: "💥",
+  NAME: FEATURES.BOMB,
+  ACTOR: EMOJIS.BOMB,
+  PROJECTILE: EMOJIS.EXPLOSION,
   PATTERN: { type: PATTERNS.CROSS, armLength: 1 },
   ACTIONS: [
     { type: ACTIONS.EXPLODE, EXPLOSION_RADIUS: 2 }
@@ -115,7 +115,7 @@ export const BOMB_CONFIG = {
 };
 
 export const FUN_MODE_CONFIG = {
-  MONKEY: MONKEY_CONFIG,
-  CHICKEN: CHICKEN_CONFIG,
-  BOMB: BOMB_CONFIG,
+  [FEATURES.MONKEY]: MONKEY_CONFIG,
+  [FEATURES.CHICKEN]: CHICKEN_CONFIG,
+  [FEATURES.BOMB]: BOMB_CONFIG,
 };

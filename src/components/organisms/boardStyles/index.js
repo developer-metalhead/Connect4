@@ -20,7 +20,7 @@ import {  returnToNormalGravity,
 import FeatureBlockIndicator from "../../designSystem/Features/chaosChicken/FeatureBlockIndicator";
 import { useGameSettings } from "../../../hooks/settings/useGameSettings";
 
-import { ANIMATION_CONFIG, CORE_CONFIG, PATTERNS } from "../../../logic/core/coreConfig";
+import { ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS } from "../../../logic/core/coreConfig";
 
 const Board = ({
   board,
@@ -66,14 +66,14 @@ const Board = ({
 
   // CHANGE: Physics-based reset animation detection
   useEffect(() => {
-    const isNowEmpty = board.every(row => row.every(cell => cell === "⚪"));
-    const wasNotEmpty = prevBoardRef.current && prevBoardRef.current.some(row => row.some(cell => cell !== "⚪"));
+    const isNowEmpty = board.every(row => row.every(cell => cell === EMOJIS.EMPTY_SLOT));
+    const wasNotEmpty = prevBoardRef.current && prevBoardRef.current.some(row => row.some(cell => cell !== EMOJIS.EMPTY_SLOT));
 
     if (isNowEmpty && wasNotEmpty) {
       const newEjected = [];
       prevBoardRef.current.forEach((row, r) => {
         row.forEach((cell, c) => {
-          if (cell !== "⚪") {
+          if (cell !== EMOJIS.EMPTY_SLOT) {
             // Random physics trajectories
             const vx = (Math.random() - 0.5) * 1200; // Wider horizontal spread
             const vy = -(Math.random() * 600 + 400); // Stronger upward pop
@@ -194,14 +194,14 @@ const Board = ({
     let targetRow = -1;
     if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
-        if (board[row][col] === "⚪") {
+        if (board[row][col] === EMOJIS.EMPTY_SLOT) {
           targetRow = row;
           break;
         }
       }
     } else {
       for (let row = board.length - 1; row >= 0; row--) {
-        if (board[row][col] === "⚪") {
+        if (board[row][col] === EMOJIS.EMPTY_SLOT) {
           targetRow = row;
           break;
         }
@@ -540,7 +540,7 @@ const Board = ({
             {row.map((cell, c) => {
               // Calculate win state classes
               const isWinningPiece = winner && winningLine && winningLine.some(loc => loc.row === r && loc.col === c);
-              const isLosingPiece = winner && !isWinningPiece && cell !== "⚪";
+              const isLosingPiece = winner && !isWinningPiece && cell !== EMOJIS.EMPTY_SLOT;
 
               return (
                 <Cell
@@ -566,11 +566,11 @@ const Board = ({
                   opacity: droppingCol !== null && droppingCol !== c ? 0.7 : 1,
                   // CHANGE: Visual indication for blocked columns
                   filter: isColumnBlocked(c) ? "grayscale(0.5) brightness(0.8)" : "none",
-                  "--target-glow-color": currentPlayer === "🔴" ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)",
+                  "--target-glow-color": currentPlayer === EMOJIS.RED_DISC ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)",
                 }}
               >
                 {/* Hide original from-cells while overlay is animating */}
-                {maskedKeys && maskedKeys.has(`${r},${c}`) ? "⚪" : cell}
+                {maskedKeys && maskedKeys.has(`${r},${c}`) ? EMOJIS.EMPTY_SLOT : cell}
 
                 {/* Ghost Preview Disc */}
                 {previewRow === r && activeCol === c && (
@@ -581,7 +581,7 @@ const Board = ({
                 {rippleCell && rippleCell.row === r && rippleCell.col === c && (
                   <ImpactRipple 
                     style={{ 
-                      "--ripple-color": rippleCell.player === "🔴" ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)" 
+                      "--ripple-color": rippleCell.player === EMOJIS.RED_DISC ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)" 
                     }} 
                   />
                   )}

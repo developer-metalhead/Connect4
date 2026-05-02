@@ -2,6 +2,8 @@
  * THE ACTION ENGINE (PHASE 3: SMART SEMANTICS)
  */
 
+import { EMOJIS } from "../core/coreConfig";
+
 export const ACTIONS = {
   GRAVITY_FLIP: "GRAVITY_FLIP",
   REMOVE_DISC: "REMOVE_DISC",
@@ -27,7 +29,7 @@ export const executeRemoveDisc = (board, options = {}) => {
   const occupiedCells = [];
   board.forEach((row, r) => {
     row.forEach((cell, c) => {
-      if (cell !== "⚪") occupiedCells.push({ r, c });
+      if (cell !== EMOJIS.EMPTY_SLOT) occupiedCells.push({ r, c });
     });
   });
 
@@ -35,7 +37,7 @@ export const executeRemoveDisc = (board, options = {}) => {
 
   const target = occupiedCells[Math.floor(Math.random() * occupiedCells.length)];
   const newBoard = board.map(row => [...row]);
-  newBoard[target.r][target.c] = "⚪";
+  newBoard[target.r][target.c] = EMOJIS.EMPTY_SLOT;
 
   return { newBoard, removed: target };
 };
@@ -47,13 +49,13 @@ export const executeRemoveDisc = (board, options = {}) => {
 export const executeBlockColumn = (board, currentBlocks, options = {}) => {
   const prob = resolve(options, ["probability", "POOP_NON_EMPTY_PROBABILITY"], 0.5);
   const duration = resolve(options, ["duration", "POOP_BLOCK_DURATION"], 3);
-  const projectile = options.projectile || "💩"; // Default to poop
+  const projectile = options.projectile || EMOJIS.POOP; 
   
   const nonEmptyCols = [];
   const emptyCols = [];
   
   for (let c = 0; c < board[0].length; c++) {
-    const hasDiscs = board.some(row => row[c] !== "⚪");
+    const hasDiscs = board.some(row => row[c] !== EMOJIS.EMPTY_SLOT);
     if (hasDiscs) nonEmptyCols.push(c);
     else emptyCols.push(c);
   }
@@ -86,9 +88,9 @@ export const executeExplosion = (board, centerRow, centerCol, options = {}) => {
   for (let r = centerRow - radius; r <= centerRow + radius; r++) {
     for (let c = centerCol - radius; c <= centerCol + radius; c++) {
       if (r >= 0 && r < board.length && c >= 0 && c < board[0].length) {
-        if (newBoard[r][c] !== "⚪") {
+        if (newBoard[r][c] !== EMOJIS.EMPTY_SLOT) {
           removed.push({ r, c, player: newBoard[r][c] });
-          newBoard[r][c] = "⚪";
+          newBoard[r][c] = EMOJIS.EMPTY_SLOT;
         }
       }
     }
