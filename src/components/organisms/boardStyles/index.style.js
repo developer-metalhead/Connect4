@@ -14,7 +14,9 @@ export const BoardContainer = styled("div")({
   flexDirection: "column",
   gap: "var(--gap)",
   maxWidth: "100%",
-  position: "relative", // For absolute positioning of highlights and falling discs
+  position: "relative",
+  // Layout isolation for mobile perf
+  contain: "layout style",
   // CHANGE: Disable text selection and touch callouts for game board
   userSelect: "none",
   WebkitUserSelect: "none",
@@ -43,8 +45,11 @@ export const Cell = styled("div")({
   alignItems: "center",
   justifyContent: "center",
   fontSize: "calc(var(--cell) * 0.72)",
-  transition: "transform 0.15s ease, background 0.15s ease, opacity 0.15s ease",
+  // GPU-composited transitions only (transform + opacity)
+  transition: "transform 0.12s ease, opacity 0.12s ease",
   boxShadow: "inset 0 6px 12px rgba(0,0,0,0.4)",
+  // Hint GPU to prepare this layer
+  willChange: "transform, opacity",
   // CHANGE: Disable text selection and touch callouts for game cells
   userSelect: "none",
   WebkitUserSelect: "none",
@@ -52,9 +57,9 @@ export const Cell = styled("div")({
   msUserSelect: "none",
   WebkitTouchCallout: "none",
   WebkitTapHighlightColor: "transparent",
+  position: "relative",
 
   "&:hover": {
-    background: "#4fc3f7",
     transform: "scale(1.06)",
   },
 });
@@ -79,7 +84,6 @@ export const PreviewRow = styled("div")({
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
-    // CHANGE: Disable text selection and touch callouts for preview cells
     userSelect: "none",
     WebkitUserSelect: "none",
     WebkitTouchCallout: "none",
@@ -89,28 +93,28 @@ export const PreviewRow = styled("div")({
   "& .preview-piece": {
     fontSize: "clamp(34px, 9vmin, 40px)",
     opacity: 0.6,
-    transition: "all 0.2s",
-    // CHANGE: Disable text selection for preview pieces
+    // GPU-composited transitions for smooth sliding
+    transition: "transform 0.12s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.12s ease",
+    willChange: "transform, opacity",
     userSelect: "none",
     WebkitUserSelect: "none",
   },
 
   // CHANGE: Mobile optimization for 1080x2400 screens
-"@media (max-width: 480px) and (max-height: 2400px)": {
-  height: "clamp(35px, 8vmin, 55px)",
-  marginBottom: "0px",
- 
-  gridTemplateColumns: "repeat(7, 32px)",
+  "@media (max-width: 480px) and (max-height: 2400px)": {
+    height: "clamp(35px, 8vmin, 55px)",
+    marginBottom: "0px",
+    gridTemplateColumns: "repeat(7, 32px)",
 
-  "& .preview-piece": {
-    fontSize: "clamp(20px, 6vmin, 28px)",
-  },
+    "& .preview-piece": {
+      fontSize: "clamp(20px, 6vmin, 28px)",
+    },
 
-  "& .preview-cell": {
-    width: "clamp(20px, 6vmin, 28px)",
-    height: "clamp(20px, 6vmin, 28px)",
+    "& .preview-cell": {
+      width: "clamp(20px, 6vmin, 28px)",
+      height: "clamp(20px, 6vmin, 28px)",
+    },
   },
-},
 });
 
 
@@ -119,10 +123,10 @@ export const ColumnHighlight = styled("div")({
   width: "calc(var(--cell) + 6px)",
   borderRadius: "999px",
   pointerEvents: "none",
-  // CHANGE: Faster and smoother transition for column highlight sliding
-  transition: "left 0.15s cubic-bezier(0.4, 0, 0.2, 1), height 0.15s cubic-bezier(0.4, 0, 0.2, 1), top 0.15s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
+  // GPU-composited transition: use transform for horizontal movement
+  transition: "transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), height 0.1s cubic-bezier(0.4, 0, 0.2, 1), top 0.1s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.1s cubic-bezier(0.4, 0, 0.2, 1), left 0.1s cubic-bezier(0.4, 0, 0.2, 1)",
+  willChange: "transform, height, left",
   zIndex: 1,
-  // CHANGE: Disable text selection for column highlights
   userSelect: "none",
   WebkitUserSelect: "none",
 });
@@ -140,8 +144,9 @@ export const FallingDisc = styled("div")({
   pointerEvents: "none",
   zIndex: 10,
   animation: "discFall ease-in forwards",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-  // CHANGE: Disable text selection for falling discs
+  // GPU layer promotion for smooth animation
+  willChange: "transform, opacity",
+  backfaceVisibility: "hidden",
   userSelect: "none",
   WebkitUserSelect: "none",
 });
@@ -231,5 +236,10 @@ export const GlobalStyles = `
       transform: scale(1.08);
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
     }
+  }
+
+  @keyframes ghostPulse {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.05); opacity: 0.6; }
   }
 `;
