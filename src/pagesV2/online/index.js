@@ -73,6 +73,15 @@ const OnlineV2 = () => {
     declineRematch,
     playerId
   } = useOnlineConnect4();
+  
+  // Auto-exit if rematch expires
+  useEffect(() => {
+    if (rematchState.isExpired) {
+      console.log("⏰ Rematch expired. Pushing to Main Menu.");
+      leaveRoom();
+      navigate("/home");
+    }
+  }, [rematchState.isExpired, leaveRoom, navigate]);
 
   const handleCopyRoomId = () => {
     if (!roomId) return;

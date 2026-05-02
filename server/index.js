@@ -167,6 +167,24 @@ io.on("connection", (socket) => {
       state.currentPlayer = nextPlayer(state.currentPlayer);
     }
 
+    if (state.winner || state.isDraw) {
+      // Auto-start rematch timer
+      if (!room.rematch) {
+        const duration = 5000;
+        const expiresAt = Date.now() + duration;
+        room.rematch = { requested: new Set(), timer: null };
+        io.to(rid).emit("rematch_timer_started", { expiresAt });
+        
+        room.rematch.timer = setTimeout(() => {
+          if (rooms.has(rid) && room.rematch && room.rematch.requested.size < 2) {
+            console.log(`⏰ Rematch expired for room ${rid}`);
+            io.to(rid).emit("rematch_expired");
+            room.rematch = null;
+          }
+        }, duration);
+      }
+    }
+
     broadcastState(rid);
   });
 
@@ -206,21 +224,6 @@ io.on("connection", (socket) => {
     
     // Broadcast who requested
     io.to(rid).emit("rematch_requested", { playerId: pid });
-
-    // If first player to request, start timer
-    if (room.rematch.requested.size === 1) {
-      const expiresAt = Date.now() + 10000; // 10 second window
-      console.log(`⏲️ Timer started for room ${rid}, expires at ${expiresAt}`);
-      io.to(rid).emit("rematch_timer_started", { expiresAt });
-      
-      room.rematch.timer = setTimeout(() => {
-        if (rooms.has(rid) && room.rematch && room.rematch.requested.size < 2) {
-          console.log(`⏰ Rematch expired for room ${rid}`);
-          io.to(rid).emit("rematch_expired");
-          room.rematch = null;
-        }
-      }, 10000);
-    }
 
     // If both players accepted, start new game
     if (room.rematch.requested.size >= 2) {

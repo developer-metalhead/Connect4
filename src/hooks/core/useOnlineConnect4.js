@@ -49,6 +49,7 @@ const useOnlineConnect4 = () => {
     expiresAt: null,
     isAccepted: false,
     isDeclined: false,
+    isExpired: false,
     declineReason: null
   });
 
@@ -65,6 +66,7 @@ const useOnlineConnect4 = () => {
       expiresAt: null,
       isAccepted: false,
       isDeclined: false,
+      isExpired: false,
       declineReason: null
     });
   }, []);
@@ -295,7 +297,14 @@ const useOnlineConnect4 = () => {
 
     socket.on("rematch_expired", () => {
       console.log("⏰ Rematch request expired.");
-      resetRematchState();
+      setRematchState({
+        requestedBy: [],
+        expiresAt: null,
+        isAccepted: false,
+        isDeclined: false,
+        isExpired: true,
+        declineReason: "Time expired"
+      });
     });
 
     socket.on("error_msg", ({ message }) => {

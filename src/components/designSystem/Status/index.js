@@ -75,8 +75,15 @@ export const MatchResultOverlay = ({
   let dynamicPrimaryLabel = primaryActionLabel;
   let isPrimaryDisabled = false;
 
-  if (hasRequested) {
-    dynamicPrimaryLabel = `Waiting... ${timeLeft > 0 ? `(${timeLeft})` : ""}`;
+  if (rematchState?.expiresAt) {
+    if (hasRequested) {
+      dynamicPrimaryLabel = `Waiting (${timeLeft})`;
+      isPrimaryDisabled = true;
+    } else {
+      dynamicPrimaryLabel = `Rematch (${timeLeft})`;
+    }
+  } else if (hasRequested) {
+    dynamicPrimaryLabel = "Waiting...";
     isPrimaryDisabled = true;
   }
   
