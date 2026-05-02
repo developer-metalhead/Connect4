@@ -4,7 +4,13 @@
  */
 
 export const MONKEY_CONFIG = {
-  // Number of 3-in-a-row matches required to trigger the Monkey Mayhem button
+  // Pattern type: "IN_A_ROW"
+  REQUIRED_PATTERN: "IN_A_ROW",
+  
+  // Size of the pattern
+  PATTERN_SIZE: 3,
+
+  // Number of matches required to trigger the Monkey Mayhem button
   TRIGGER_THRESHOLD: 2,
   
   // Chance that the monkey will steal a disc after it appears
@@ -27,10 +33,16 @@ export const MONKEY_CONFIG = {
 };
 
 export const CHICKEN_CONFIG = {
-  // Number of 2x2 squares required to trigger a Chaos Chicken event
+  // Pattern type: "SQUARE"
+  REQUIRED_PATTERN: "SQUARE",
+
+  // Size of the square (e.g. 2 means 2x2)
+  PATTERN_SIZE: 2,
+
+  // Number of squares required to trigger a Chaos Chicken event
   TRIGGER_THRESHOLD: 1,
   
-  // Number of 2x2 squares required to trigger a Rooster of Rage event (replaces chicken)
+  // Number of squares required to trigger a Rooster of Rage event (replaces chicken)
   ROOSTER_THRESHOLD: 2,
 
   // Max times a player can use the Rooster of Rage in one match

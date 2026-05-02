@@ -65,22 +65,25 @@ export const useChaosChicken = (options = {}) => {
 
       // Update state
       setChaosChickenState((prev) => {
+        const playerActivations = prev?.chickenActivations?.[playerKey] || 0;
+        const playerRoosterCount = prev?.roosterCount?.[playerKey] || 0;
+
         const nextActivations = willBeRooster && CHICKEN_CONFIG.RESET_AFTER_ROOSTER
           ? 0 
-          : prev.chickenActivations[playerKey] + 1;
+          : playerActivations + 1;
         
         const nextRoosterCount = willBeRooster 
-          ? prev.roosterCount[playerKey] + 1 
-          : prev.roosterCount[playerKey];
+          ? playerRoosterCount + 1 
+          : playerRoosterCount;
 
         return {
           ...prev,
           chickenActivations: {
-            ...prev.chickenActivations,
+            ...(prev?.chickenActivations || { player1: 0, player2: 0 }),
             [playerKey]: nextActivations,
           },
           roosterCount: {
-            ...prev.roosterCount,
+            ...(prev?.roosterCount || { player1: 0, player2: 0 }),
             [playerKey]: nextRoosterCount
           }
         };

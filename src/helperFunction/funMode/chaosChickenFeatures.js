@@ -1,9 +1,9 @@
 import { ROWS, COLS, EMPTY } from "../helperFunction";
 import { CHICKEN_CONFIG } from "../../logic/funMode";
 
-// Improved 2x2 Detection Function (Strict)
-export const detectNew2x2Squares = (board, player, lastRow, lastCol) => {
-  console.log(`🔍 Checking 2x2 immediately after placement at [${lastRow}][${lastCol}]`);
+// Improved Square Detection Function (Decoupled size)
+export const detectNewSquares = (board, player, lastRow, lastCol, size) => {
+  console.log(`🔍 Checking ${size}x${size} squares immediately after placement at [${lastRow}][${lastCol}]`);
   
   if (lastRow === -1 || lastCol === -1) return { count: 0, squares: [] };
   
@@ -11,35 +11,34 @@ export const detectNew2x2Squares = (board, player, lastRow, lastCol) => {
   const ROWS = board.length;
   const COLS = board[0].length;
   
-  // Check the maximum 4 possible 2x2 positions that can contain the newly placed disc:
-  // Top-left, Top-right, Bottom-left, Bottom-right
-  const possibleCorners = [
-    { r: lastRow, c: lastCol },         // Square is to the bottom-right
-    { r: lastRow, c: lastCol - 1 },     // Square is to the bottom-left
-    { r: lastRow - 1, c: lastCol },     // Square is to the top-right
-    { r: lastRow - 1, c: lastCol - 1 }  // Square is to the top-left
-  ];
-  
-  for (const corner of possibleCorners) {
-    const { r, c } = corner;
-    
-    // Bounds check
-    if (r >= 0 && r < ROWS - 1 && c >= 0 && c < COLS - 1) {
-      if (
-        board[r][c] === player &&
-        board[r][c + 1] === player &&
-        board[r + 1][c] === player &&
-        board[r + 1][c + 1] === player
-      ) {
-        squares.push({ startRow: r, startCol: c });
-        console.log(`✅ Found new 2x2 at [${r}][${c}] including placed cell`);
+  // A square of size 'size' can be in 'size * size' relative positions to the new piece.
+  // We iterate through all possible top-left corners that could include [lastRow, lastCol].
+  for (let rOffset = -(size - 1); rOffset <= 0; rOffset++) {
+    for (let cOffset = -(size - 1); cOffset <= 0; cOffset++) {
+      const r = lastRow + rOffset;
+      const c = lastCol + cOffset;
+
+      // Bounds check for the whole square
+      if (r >= 0 && r + size <= ROWS && c >= 0 && c + size <= COLS) {
+        let isSquare = true;
+        
+        // Check all cells in the square
+        for (let i = 0; i < size; i++) {
+          for (let j = 0; j < size; j++) {
+            if (board[r + i][c + j] !== player) {
+              isSquare = false;
+              break;
+            }
+          }
+          if (!isSquare) break;
+        }
+
+        if (isSquare) {
+          squares.push({ startRow: r, startCol: c });
+          console.log(`✅ Found new ${size}x${size} at [${r}][${c}]`);
+        }
       }
     }
-  }
-  
-  console.log(`📊 TOTAL NEW 2x2 SQUARES: ${squares.length}`);
-  if (squares.length > 0) {
-    console.log(`🚀 Triggering Chaos Chicken instantly for player ${player}`);
   }
   
   return { count: squares.length, squares };
@@ -231,6 +230,8 @@ export const getRandomRoosterVoiceLine = () => {
 
 // Check if player should trigger Chaos Chicken
 export const shouldTriggerChaosChicken = (board, lastRow, lastCol, player, chaosChickenState) => {
+  if (!chaosChickenState) return false;
+
   // Check if player has reached their Rooster limit
   const playerKey = player === "🔴" ? "player1" : "player2";
   const roosterCount = chaosChickenState.roosterCount?.[playerKey] || 0;
@@ -240,17 +241,19 @@ export const shouldTriggerChaosChicken = (board, lastRow, lastCol, player, chaos
     return false;
   }
   
-  // Check if new 2x2 square was formed
-  const { count } = detectNew2x2Squares(board, player, lastRow, lastCol);
-  const hasNew2x2 = count > 0;
+  // Check if new square was formed based on configuration
+  const { count } = detectNewSquares(board, player, lastRow, lastCol, CHICKEN_CONFIG.PATTERN_SIZE);
+  const hasNewPattern = count > 0;
   
-  return hasNew2x2;
+  return hasNewPattern;
 };
 
 // Check if this will be a Rooster of Rage activation
 export const isRoosterOfRageActivation = (chaosChickenState, player) => {
+  if (!chaosChickenState || !chaosChickenState.chickenActivations) return false;
+
   const playerKey = player === "🔴" ? "player1" : "player2";
-  const currentActivations = chaosChickenState.chickenActivations[playerKey];
+  const currentActivations = chaosChickenState.chickenActivations[playerKey] || 0;
   
   // Triggers if it's the (ROOSTER_THRESHOLD)-th activation
   return currentActivations === (CHICKEN_CONFIG.ROOSTER_THRESHOLD - 1);

@@ -1,14 +1,10 @@
 import { ROWS, COLS, EMPTY } from "../helperFunction";
 import { MONKEY_CONFIG } from "../../logic/funMode";
 
-// CHANGE: Updated to count overlapping 3-in-a-rows by removing usedCells tracking
-export const countSeparateThreeInARows = (board, player) => {
-  console.log("🔍 COUNTING 3-IN-A-ROWS FOR PLAYER:", player);
-  console.log(
-    "📋 CURRENT BOARD:",
-    board.map((row) => row.join("")),
-  );
-
+// General pattern counting function (decoupled from "3-in-a-row")
+export const countSeparateInARows = (board, player, size) => {
+  console.log(`🔍 COUNTING ${size}-IN-A-ROWS FOR PLAYER:`, player);
+  
   let count = 0;
 
   const directions = [
@@ -18,25 +14,14 @@ export const countSeparateThreeInARows = (board, player) => {
     [1, -1], // diagonal up-right
   ];
 
-  const directionNames = [
-    "horizontal",
-    "vertical",
-    "diagonal-down-right",
-    "diagonal-up-right",
-  ];
-
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
       if (board[row][col] !== player) continue;
 
-      for (let dirIndex = 0; dirIndex < directions.length; dirIndex++) {
-        const [dr, dc] = directions[dirIndex];
-        const dirName = directionNames[dirIndex];
-
-        const cells = [];
+      for (let [dr, dc] of directions) {
         let valid = true;
 
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < size; i++) {
           const r = row + i * dr;
           const c = col + i * dc;
 
@@ -50,26 +35,16 @@ export const countSeparateThreeInARows = (board, player) => {
             valid = false;
             break;
           }
-
-          const cellKey = `${r},${c}`;
-          cells.push(cellKey);
         }
 
         if (valid) {
           count++;
-
-          console.log("✅ FOUND 3-IN-A-ROW:", {
-            direction: dirName,
-            startPos: `${row},${col}`,
-            cells: cells,
-            totalCount: count,
-          });
         }
       }
     }
   }
 
-  console.log("📊 FINAL 3-IN-A-ROW COUNT:", {
+  console.log(`📊 FINAL ${size}-IN-A-ROW COUNT:`, {
     player,
     count,
   });
@@ -84,10 +59,10 @@ export const shouldTriggerMonkeyMayhem = (board, player, monkeyState) => {
     return false;
   }
 
-  const threeInARowCount = countSeparateThreeInARows(board, player);
-  const shouldTrigger = threeInARowCount >= MONKEY_CONFIG.TRIGGER_THRESHOLD;
+  const patternCount = countSeparateInARows(board, player, MONKEY_CONFIG.PATTERN_SIZE);
+  const shouldTrigger = patternCount >= MONKEY_CONFIG.TRIGGER_THRESHOLD;
   
-  console.log(`📊 MONKEY MAYHEM DECISION: ${shouldTrigger} (Found ${threeInARowCount}/${MONKEY_CONFIG.TRIGGER_THRESHOLD})`);
+  console.log(`📊 MONKEY MAYHEM DECISION: ${shouldTrigger} (Found ${patternCount}/${MONKEY_CONFIG.TRIGGER_THRESHOLD} of size ${MONKEY_CONFIG.PATTERN_SIZE})`);
 
   return shouldTrigger;
 };
