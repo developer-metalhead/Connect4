@@ -83,52 +83,20 @@ export const useMonkeyMode = (options = {}) => {
           setTimeout(() => {
             setIsGravityFalling(true);
             
-            // Calculate final logical board and animations
-            // If board is 180deg, normal gravity means falling to Row 0
             const currentBoard = newState.board;
-            const targetLogicUpsideDown = isUpsideDown; // If board is 180deg, normal gravity = Row 0
-            
-            const fallAnimations = [];
-            
-            // If board is 180deg, normal gravity (screen bottom) is Row 0.
-            // During monkey mode, gravity was inverted (screen top = Row 5).
-            // So pieces fall from 5 -> 0.
-            currentBoard.forEach((row, r) => {
-              row.forEach((cell, c) => {
-                if (cell !== "⚪") {
-                  fallAnimations.push({
-                    col: c,
-                    fromRow: r,      // Start from where they are (Row 5 range)
-                    toRow: isUpsideDown ? 0 : 5, // Fall to visual bottom
-                    player: cell
-                  });
-                }
-              });
-            });
 
-            // We need a more realistic final board calculation
-            const normalizedBoard = isUpsideDown ? flipBoardUpsideDown(currentBoard) : applyNormalGravity(currentBoard);
-            
-            // Recalculate animations based on the actual target rows in normalizedBoard
-            const finalAnimations = [];
-            normalizedBoard.forEach((row, r) => {
-              row.forEach((cell, c) => {
-                if (cell !== "⚪") {
-                  // Find where this piece was in the currentBoard (column-wise)
-                  // For simplicity in a single turn restoration, we can just map them
-                  // but returnToNormalGravity already does this logic.
-                }
-              });
-            });
-
-            // Let's use the helper but pass the correct target orientation
-            const { finalBoard, animations, durationMs } = returnToNormalGravity(
+            // Use the helper for the animation plan (visual fall while wrapper still at 180deg)
+            const { animations, durationMs } = returnToNormalGravity(
               currentBoard,
               { 
                 isUpsideDown: true, 
-                isVisualRotation: isUpsideDown 
+                isVisualRotation: isUpsideDown // drives which animation plan to use
               }
             );
+            
+            // CHANGE: Always commit applyNormalGravity as final board.
+            // After setIsUpsideDown(false) un-rotates the wrapper, bottom rows = visual bottom. ✓
+            const finalBoard = applyNormalGravity(currentBoard);
 
             setGravityAnimation(animations);
             setGravity("normal");
@@ -141,8 +109,10 @@ export const useMonkeyMode = (options = {}) => {
               funModeHook.updateBoard(finalBoard);
               setGravityAnimation(null);
               setIsGravityFalling(false);
-              funModeHook.updateExtensionData('isUpsideDown', isUpsideDown);
-              funModeHook.updateExtensionData('isLogicUpsideDown', isUpsideDown); // normal gravity in 180deg
+              setIsUpsideDown(false);
+              setGravity("normal");
+              funModeHook.updateExtensionData('isUpsideDown', false);
+              funModeHook.updateExtensionData('isLogicUpsideDown', false);
             }, Math.max(durationMs, 1200));
           }, 2500);
         }, 500);

@@ -17,7 +17,7 @@ import {
 import {  returnToNormalGravity,
   applyInvertedGravity,
   planInvertedGravityAnimation, } from "../../../helperFunction/funMode/monkeyModeFeatures";
-import PoopBlockIndicator from "../../features/ChaosChicken/PoopBlockIndicator";
+import PoopBlockIndicator from "../../designSystem/Features/chaosChicken/PoopBlockIndicator";
 import { useGameSettings } from "../../../hooks/core/useGameSettings";
 
 const Board = ({
