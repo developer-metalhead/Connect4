@@ -52,7 +52,7 @@ const SOUND_CONFIG = {
   },
   bgMusic: {
     files: ["bg2cut.mp3"],
-    volume: 0.3,
+    volume: 0.4,
     loop: true,
   },
   matchMusic: {
@@ -318,6 +318,33 @@ export const SoundProvider = ({ children }) => {
       }
     }, 150);
   }, [playSound, isMuted]);
+  // Handle real-time settings changes for music
+  useEffect(() => {
+    const bg = audioInstancesRef.current.bgMusic;
+    const match = audioInstancesRef.current.matchMusic;
+
+    if (isMuted) {
+      if (bg) bg.pause();
+      if (match) match.pause();
+      return;
+    }
+
+    // Handle BG Music resume
+    if (bg && isMusicEnabled && bg.paused && bg.volume > 0) {
+      bg.play().catch(() => {});
+    }
+
+    // Handle Match Music resume
+    if (match && isMatchMusicEnabled && match.paused && match.volume > 0) {
+      match.play().catch(() => {});
+    }
+
+    // Handle individual toggle off
+    if (bg && !isMusicEnabled) bg.pause();
+    if (match && !isMatchMusicEnabled) match.pause();
+
+  }, [isMuted, isMusicEnabled, isMatchMusicEnabled]);
+
   // Handle music reliability and autoplay policy
   useEffect(() => {
     const startMusic = () => {
