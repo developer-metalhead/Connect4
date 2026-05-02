@@ -24,6 +24,10 @@ export const BoardContainer = styled("div")({
   msUserSelect: "none",
   WebkitTouchCallout: "none",
   WebkitTapHighlightColor: "transparent",
+
+  // "&.board-shake": {
+  //   animation: "boardShake 0.15s ease-out",
+  // },
 });
 
 export const Row = styled("div")({
@@ -61,6 +65,10 @@ export const Cell = styled("div")({
 
   "&:hover": {
     transform: "scale(1.06)",
+  },
+
+  "&.target-glow": {
+    boxShadow: "inset 0 0 20px rgba(255, 255, 255, 0.4), inset 0 6px 12px rgba(0,0,0,0.4)",
   },
 });
 
@@ -185,6 +193,18 @@ export const GhostDisc = styled("span")({
   height: "100%",
 });
 
+export const ImpactRipple = styled("div")({
+  position: "absolute",
+  width: "100%",
+  height: "100%",
+  borderRadius: "50%",
+  boxSizing: "border-box",
+  border: "4px solid var(--ripple-color, #ffffff)",
+  animation: "rippleOut 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards",
+  pointerEvents: "none",
+  zIndex: 15,
+});
+
 
 // CHANGE: Updated keyframes to handle both normal and upside-down falling
 export const GlobalStyles = `
@@ -284,5 +304,25 @@ export const GlobalStyles = `
   @keyframes ghostPulse {
     0%, 100% { transform: scale(1); opacity: 0.4; }
     50% { transform: scale(1.05); opacity: 0.6; }
+  }
+
+  @keyframes rippleOut {
+    0% { 
+      transform: scale(0.8); 
+      opacity: 0.8; 
+      border-width: 6px; 
+    }
+    100% { 
+      transform: scale(2); 
+      opacity: 0; 
+      border-width: 0px; 
+    }
+  }
+
+  @keyframes boardShake {
+    0% { transform: translateY(0); }
+    25% { transform: translateY(2px); }
+    75% { transform: translateY(-1px); }
+    100% { transform: translateY(0); }
   }
 `;

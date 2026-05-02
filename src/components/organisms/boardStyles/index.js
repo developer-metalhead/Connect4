@@ -9,6 +9,7 @@ import {
   WinningLineWrapper,
   WinningLine,
   GhostDisc,
+  ImpactRipple,
 } from "./index.style";
 import PoopBlockIndicator from "../../features/ChaosChicken/PoopBlockIndicator";
 
@@ -32,6 +33,8 @@ const Board = ({
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
   const [fallingDisc, setFallingDisc] = useState(null);
+  const [rippleCell, setRippleCell] = useState(null);
+  const [isShaking, setIsShaking] = useState(false);
   const [touchCol, setTouchCol] = useState(null);
   const [touchTimeout, setTouchTimeout] = useState(null);
 
@@ -126,6 +129,8 @@ const Board = ({
     // Impact 1 (50%)
     setTimeout(() => {
       if (soundManager) soundManager.playSound("drop");
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 150);
     }, animationDuration * 0.5);
 
     // Impact 2 (82%)
@@ -136,6 +141,8 @@ const Board = ({
     // Impact 3 (97% - settle)
     setTimeout(() => {
       if (soundManager) soundManager.playSound("drop");
+      setRippleCell({ row: targetRow, col, player: currentPlayer });
+      setTimeout(() => setRippleCell(null), 500); // 500ms duration matches CSS
     }, animationDuration * 0.97);
 
     setTimeout(() => {
@@ -317,7 +324,7 @@ const Board = ({
         </PreviewRow>
       )}
 
-      <BoardContainer data-board-container>
+      <BoardContainer data-board-container className={isShaking ? "board-shake" : ""}>
         {/* CHANGE: Add poop block indicators */}
         {(blockedColumns || []).map((block) => (
           <PoopBlockIndicatorComponent
@@ -414,7 +421,7 @@ const Board = ({
                 onTouchStart={() => handleTouchStart(c)}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-                className={droppingCol === c ? "dropping" : ""}
+                className={`${droppingCol === c ? "dropping" : ""} ${activeCol === c && activeTargetRow === r && droppingCol === null ? "target-glow" : ""}`}
                 style={{
                   cursor:
                     canInteract && !winner && !isDraw && droppingCol === null && !isColumnBlockedByPoop(c)
@@ -431,6 +438,15 @@ const Board = ({
                 {/* Ghost Preview Disc */}
                 {previewRow === r && activeCol === c && (
                   <GhostDisc>{currentPlayer}</GhostDisc>
+                )}
+
+                {/* Impact Ripple Burst */}
+                {rippleCell && rippleCell.row === r && rippleCell.col === c && (
+                  <ImpactRipple 
+                    style={{ 
+                      "--ripple-color": rippleCell.player === "🔴" ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)" 
+                    }} 
+                  />
                 )}
               </Cell>
             ))}
