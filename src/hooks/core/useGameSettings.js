@@ -21,7 +21,11 @@ export const useGameSettings = () => {
 
   const [monkeyAnimationEnabled, setMonkeyAnimationEnabled] = useState(() => {
     try {
-      // Look for the old fun mode settings first, otherwise default to true
+      // 1. Try new dedicated key first
+      const saved = localStorage.getItem('game_monkeyAnimationEnabled');
+      if (saved !== null) return JSON.parse(saved);
+
+      // 2. Fallback to old fun mode settings if new key is missing (migration)
       const rawFunMode = localStorage.getItem('c4_fun_mode_settings_v1');
       if (rawFunMode) {
         const parsed = JSON.parse(rawFunMode);
@@ -29,8 +33,9 @@ export const useGameSettings = () => {
           return parsed.monkeyAnimationEnabled;
         }
       }
-      const saved = localStorage.getItem('game_monkeyAnimationEnabled');
-      return saved !== null ? JSON.parse(saved) : true;
+      
+      // 3. Final default
+      return true;
     } catch {
       return true;
     }
