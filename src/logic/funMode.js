@@ -6,6 +6,9 @@
  * without touching the core logic.
  */
 
+
+  // Pattern Size is The dimension of the pattern (e.g. 3 for 3-in-a-row, 2 for 2x2 square)
+
 import { PATTERNS } from "./constants";
 
 export const MONKEY_CONFIG = {

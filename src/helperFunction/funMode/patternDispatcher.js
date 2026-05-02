@@ -1,4 +1,4 @@
-import { countSeparateInARows, detectNewSquares } from "./patternDetectors";
+import { countSeparateInARows, detectNewSquares, countSeparateSquares } from "./patternDetectors";
 import { PATTERNS } from "../../logic/constants";
 
 /**
@@ -19,13 +19,14 @@ export const detectPattern = (board, player, config, lastMove = null) => {
       };
 
     case PATTERNS.SQUARE:
-      // Detects squares of a certain dimension (requires last move for instant trigger)
+      // If we have a last move, use the fast local detector (perfect for Chaos Chicken)
       if (lastMove) {
         return detectNewSquares(board, player, lastMove.row, lastMove.col, PATTERN_SIZE);
       }
-      // If no last move provided (rare for chicken), we'd need a full board square scanner
-      // For now, we return 0 as the chicken always triggers on placement
-      return { count: 0, squares: [] };
+      // If no last move (like the Monkey check), scan the whole board
+      return { 
+        count: countSeparateSquares(board, player, PATTERN_SIZE) 
+      };
 
     default:
       console.warn(`⚠️ Unknown pattern type: ${REQUIRED_PATTERN}`);

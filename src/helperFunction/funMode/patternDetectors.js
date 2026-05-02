@@ -65,3 +65,33 @@ export const detectNewSquares = (board, player, lastRow, lastCol, size) => {
   }
   return { count: squares.length, squares };
 };
+
+// Full Board Square Detection (Finds all squares of a certain size)
+export const countSeparateSquares = (board, player, size) => {
+  let count = 0;
+  const ROWS = board.length;
+  const COLS = board[0].length;
+
+  // Scan every possible top-left corner
+  for (let r = 0; r <= ROWS - size; r++) {
+    for (let c = 0; c <= COLS - size; c++) {
+      let isSquare = true;
+      
+      // Check all cells in the potential square
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          if (board[r + i][c + j] !== player) {
+            isSquare = false;
+            break;
+          }
+        }
+        if (!isSquare) break;
+      }
+
+      if (isSquare) {
+        count++;
+      }
+    }
+  }
+  return count;
+};
