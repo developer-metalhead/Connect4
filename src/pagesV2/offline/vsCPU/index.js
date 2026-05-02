@@ -5,7 +5,7 @@ import useSoundManager from "../../../hooks/core/useSoundManager";
 import useConnect4CPU from "../../../hooks/core/useConnect4CPU";
 import { useGameSettings } from "../../../hooks/core/useGameSettings";
 import { useCPUSettings } from "../../../hooks/core/useCPUSettings";
-import { PLAYERS } from "../../../logic/coreConfig";
+import { PLAYER1, PLAYER2 } from "../../../logic/core/coreConfig";
 
 // New UI Components
 import { PageWrapper, Header, HeaderContent, AppLogo, MainContent } from "../../../components/designSystem/Layout.style";
@@ -19,6 +19,7 @@ import Board from "../../../components/organisms/boardStyles";
 import PostVideoOverlay from "../../../components/designSystem/PostVideoOverlay";
 import PoopBlockIndicator from "../../../components/designSystem/Features/chaosChicken/PoopBlockIndicator";
 import GiveUpButton from "../../../components/designSystem/GiveUpButton";
+import { PLAYERS } from "../../../logic/core/coreConfig";
 
 const PlayCPUV2 = () => {
   const navigate = useNavigate();

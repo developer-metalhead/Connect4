@@ -5,12 +5,11 @@ import {
   isBoardFull, 
   getNextPlayer,
   createEmptyBoard 
-} from "./core/engine";
-import { CORE_CONFIG } from "./coreConfig";
-
+} from "./engine";
+import { CORE_CONFIG,PLAYERS } from "./coreConfig";
 /**
  * Pure Game State Transition Logic
- * Focuses purely on taking a board and a move, and returning the next state.
+ * Now correctly importing from its new neighbors in the /core folder.
  */
 export const processMove = (gameState, col) => {
   const { board, currentPlayer, winner, isDraw } = gameState;

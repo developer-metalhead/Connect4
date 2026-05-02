@@ -5,7 +5,7 @@
  */
 
 import { createEmptyBoard } from "../logic/core/engine";
-import { CORE_CONFIG } from "../logic/coreConfig";
+import { CORE_CONFIG } from "../logic/core/coreConfig";
 
 // Re-export constants
 export { 

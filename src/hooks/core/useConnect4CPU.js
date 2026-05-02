@@ -4,10 +4,10 @@ import {
   calculateDropDuration, 
   getTargetRow 
 } from "../../logic/core/engine";
-import { CORE_CONFIG, ANIMATION_CONFIG, PLAYERS } from "../../logic/coreConfig";
+import { CORE_CONFIG, ANIMATION_CONFIG, PLAYERS } from "../../logic/core/coreConfig";
 import { pickCpuMoveSmart, getBoardKey } from "../../logic/cpu/cpuEngine";
 import { updateMemoryOnGameEnd } from "../../logic/cpu/cpuMemory";
-import { createInitialState, processMove } from "../../logic/gameEngine";
+import { createInitialState, processMove } from "../../logic/core/gameEngine";
 
 const HUMAN = PLAYERS.P1;
 const CPU = PLAYERS.P2;

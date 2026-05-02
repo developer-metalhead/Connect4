@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { createInitialState, processMove } from "../../logic/gameEngine";
+import { createInitialState, processMove } from "../../logic/core/gameEngine";
 
 /**
  * Hook for a standard 2-Player Local Connect 4 game.

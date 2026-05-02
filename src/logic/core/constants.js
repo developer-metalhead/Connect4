@@ -1,4 +1,4 @@
-import { CORE_CONFIG, PLAYERS, ANIMATION_CONFIG as CORE_ANIM } from "../coreConfig";
+import { CORE_CONFIG, PLAYERS, ANIMATION_CONFIG as CORE_ANIM } from "./coreConfig";
 
 export const ROWS = CORE_CONFIG.ROWS;
 export const COLS = CORE_CONFIG.COLS;

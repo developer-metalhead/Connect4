@@ -3,7 +3,7 @@ import {
   checkWin, 
   isValidMove 
 } from "../../logic/core/engine";
-import { PLAYERS, CORE_CONFIG } from "../../logic/coreConfig";
+import { PLAYERS, CORE_CONFIG } from "../../logic/core/coreConfig";
 import { loadMemory } from "../../logic/cpu/cpuMemory";
 
 const HUMAN = PLAYERS.P1;

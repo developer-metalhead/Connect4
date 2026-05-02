@@ -1,4 +1,4 @@
-import { CORE_CONFIG, PLAYERS, ANIMATION_CONFIG } from "../coreConfig";
+import { CORE_CONFIG, PLAYERS, ANIMATION_CONFIG } from "./coreConfig";
 
 const { EMPTY } = PLAYERS;
 

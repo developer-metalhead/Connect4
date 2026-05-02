@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useSoundManager from "../../../hooks/core/useSoundManager";
 import { useConnect4 } from "../../../hooks/core/useConnect4";
-import { PLAYERS } from "../../../logic/coreConfig";
+import { PLAYERS } from "../../../logic/core/coreConfig";
 
 // New UI Components
 import { PageWrapper, Header, HeaderContent, AppLogo, MainContent } from "../../../components/designSystem/Layout.style";
