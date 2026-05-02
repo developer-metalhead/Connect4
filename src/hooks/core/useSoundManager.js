@@ -23,6 +23,11 @@ const SOUND_CONFIG = {
     volume: 0.6,
     pitchVariation: false,
   },
+  error: {
+    files: ["error.mp3", "error.ogg"], // Using click as a subtle thud
+    volume: 0.5,
+    pitchVariation: false,
+  },
   coinsfalling: {
     files: ["coinsfalling.mp3", "coinsfalling.ogg"],
     volume: 0.8,
@@ -31,6 +36,16 @@ const SOUND_CONFIG = {
   // CHANGE: Add monkey laugh sound for post-video overlay
   monkeylaugh: {
     files: ["monkeylaugh.mp3", "monkeylaugh.ogg"],
+    volume: 0.8,
+    pitchVariation: false,
+  },
+  chickenbawk: {
+    files: ["chickenbawk.mp3", "chickenbawk.ogg"],
+    volume: 0.8,
+    pitchVariation: false,
+  },
+  rooster: {
+    files: ["rooster.mp3", "rooster.ogg"],
     volume: 0.8,
     pitchVariation: false,
   },

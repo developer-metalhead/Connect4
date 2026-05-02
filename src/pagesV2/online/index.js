@@ -11,6 +11,8 @@ import SettingsMenu from "../../components/designSystem/SettingsMenu";
 import SidePanel from "../../components/designSystem/SidePanel";
 import OnlineSettings from "../../components/designSystem/OnlineSettings";
 import SoundSettings from "../../components/designSystem/SoundSettings";
+import BoardSettings from "../../components/designSystem/BoardSettings";
+import GameSettings from "../../components/designSystem/GameSettings";
 import Scoreboard from "../../components/designSystem/Scoreboard";
 import { GameStatus, MatchResultOverlay } from "../../components/designSystem/Status";
 import Modal from "../../components/designSystem/Modal";
@@ -118,7 +120,10 @@ const OnlineV2 = () => {
   return (
     <PageWrapper>
       <RefreshIconButton 
-        onClick={() => window.location.reload()} 
+        onClick={() => {
+          soundManager?.playClickSound();
+          window.location.reload();
+        }} 
         style={{ position: 'fixed', top: '12px', right: '12px', zIndex: 1001 }}
       >
         <svg viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -139,13 +144,18 @@ const OnlineV2 = () => {
           activeOption={activePanel}
           onOptionClick={(id) => setActivePanel(activePanel === id ? null : id)}
           options={[
-            { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
+            { id: 'game', label: 'Game Settings', icon: <span>🎮</span> },
             { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
+            { id: 'board', label: 'Board Settings', icon: <span>⚙️</span> },
+            { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
           ]}
         />
       ) : (
         <RefreshIconButton 
-          onClick={() => window.location.reload()} 
+          onClick={() => {
+            soundManager?.playClickSound();
+            window.location.reload();
+          }} 
           style={{ position: 'fixed', top: '10px', right: '12px', zIndex: 1001 }}
         >
           <svg viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -153,6 +163,7 @@ const OnlineV2 = () => {
       )}
 
       <Header/>
+      
         
    
       <BackButton soundManager={soundManager} />
@@ -160,10 +171,17 @@ const OnlineV2 = () => {
       <SidePanel 
         isOpen={activePanel !== null} 
         onClose={() => setActivePanel(null)}
-        title={activePanel === 'online' ? 'Online Settings' : 'Sound Settings'}
+        title={
+          activePanel === 'online' ? 'Online Settings' :
+          activePanel === 'game' ? 'Game Settings' :
+          activePanel === 'board' ? 'Board Settings' :
+          'Sound Settings'
+        }
       >
-        {activePanel === 'online' && <OnlineSettings soundManager={soundManager} />}
+        {activePanel === 'online' && <OnlineSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'sound' && <SoundSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'game' && <GameSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'board' && <BoardSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
       </SidePanel>
 
       <MainContent>
@@ -279,7 +297,7 @@ const OnlineV2 = () => {
                     onFocus={(e) => e.target.select()}
                     style={{ flex: 1 }}
                   />
-                  <Button variant="secondary" size="sm" onClick={() => navigator.clipboard.writeText(inviteLink)}>
+                  <Button variant="secondary" size="sm" onClick={() => navigator.clipboard.writeText(inviteLink)} soundManager={soundManager}>
                     Copy
                   </Button>
                 </div>
@@ -296,10 +314,14 @@ const OnlineV2 = () => {
           title={gameState.winner ? (gameState.winner === myDisc ? "VICTORY" : "DEFEAT") : "DRAW"}
           subtitle={gameState.winner ? (gameState.winner === myDisc ? "You dominated the board!" : "Better luck next time.") : "A perfect stalemate."}
           variant={gameState.winner ? (gameState.winner === myDisc ? "win" : "loss") : "draw"}
-          onPrimaryAction={resetRoom}
+          onPrimaryAction={() => {
+            soundManager?.playSound('coinsfalling');
+            resetRoom();
+          }}
           primaryActionLabel="Rematch"
           onSecondaryAction={() => navigate("/home")}
           soundManager={soundManager}
+          isNaturalEnding={true}
         />
       )}
     </PageWrapper>

@@ -18,15 +18,15 @@ const Scoreboard = ({ p1, p2 }) => {
   return (
     <ScoreboardCard>
       <PlayerInfo active={p1.active}>
-        <Avatar color="red">{p1.emoji || "🔴"}</Avatar>
-        <PlayerName>{p1.name}</PlayerName>
+        <Avatar color="red" active={p1.active}>{p1.emoji || "🔴"}</Avatar>
+        <PlayerName active={p1.active}>{p1.name}</PlayerName>
       </PlayerInfo>
 
       <VersusLabel>VS</VersusLabel>
 
       <PlayerInfo active={p2.active}>
-        <Avatar color="yellow">{p2.emoji || "🟡"}</Avatar>
-        <PlayerName>{p2.name}</PlayerName>
+        <Avatar color="yellow" active={p2.active}>{p2.emoji || "🟡"}</Avatar>
+        <PlayerName active={p2.active}>{p2.name}</PlayerName>
       </PlayerInfo>
     </ScoreboardCard>
   );

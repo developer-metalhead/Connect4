@@ -19,7 +19,9 @@ const glow = keyframes`
   50% { filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8)); }
 `;
 
-const PoopContainer = styled("div")(({ columnIndex }) => ({
+const PoopContainer = styled("div", {
+  shouldForwardProp: (prop) => prop !== "isUpsideDown" && prop !== "columnIndex",
+})(({ columnIndex }) => ({
   position: "absolute",
   top: "-70px",
   left: `calc(var(--board-padding) + ${columnIndex} * (var(--cell) + var(--gap)))`,
@@ -33,7 +35,7 @@ const PoopContainer = styled("div")(({ columnIndex }) => ({
   pointerEvents: "none",
 
   "@media (max-width: 768px)": {
-    top: "-40px", // Closer to board on mobile
+    top: "-40px",
   },
 }));
 
@@ -69,14 +71,18 @@ const StinkCloud = styled("div")(({ delay }) => ({
   opacity: 0,
 }));
 
-const PoopBlockIndicator = ({ columnIndex, turnsLeft }) => {
+const PoopBlockIndicator = ({ columnIndex, turnsLeft, isUpsideDown = false }) => {
   const stinkClouds = Array.from({ length: 3 }, (_, i) => ({
     id: i,
     delay: i * 0.6,
   }));
 
   return (
-    <PoopContainer columnIndex={columnIndex}>
+    <PoopContainer
+      columnIndex={columnIndex}
+      isUpsideDown={isUpsideDown}
+      style={{ transform: isUpsideDown ? "rotate(180deg)" : "none" }}
+    >
       <PoopEmoji>💩</PoopEmoji>
       <BlockedLabel>
         Blocked ({turnsLeft})

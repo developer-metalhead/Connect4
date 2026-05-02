@@ -74,6 +74,8 @@ const FunModeV2 = () => {
     monkeyMayhemState,
     isGravityFalling,
     updateBoard,
+    gravity,
+    gravityAnimation,
   } = useMonkeyMode({ 
     monkeyModeEnabled,
     soundManager,
@@ -122,6 +124,7 @@ const FunModeV2 = () => {
   };
 
   const enhancedReset = () => {
+    soundManager?.playSound('coinsfalling');
     reset();
     if (chaosChickenEnabled) {
       resetChaosChicken();
@@ -148,7 +151,10 @@ const FunModeV2 = () => {
       <GiveUpButton onGiveUp={() => navigate("/play-offline")} soundManager={soundManager} />
       <Header>
         <HeaderContent>
-          <AppLogo onClick={() => navigate("/home")}>
+          <AppLogo onClick={() => {
+            soundManager?.playClickSound();
+            navigate("/home");
+          }}>
             Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>Fun Mode</span>
           </AppLogo>
         </HeaderContent>
@@ -207,13 +213,16 @@ const FunModeV2 = () => {
               winner={winner}
               isDraw={isDraw}
               onDrop={enhancedMakeMove}
-              canInteract={canInteract && !isChickenAnimating}
+              canInteract={canInteract && !isChickenAnimating && !isGravityFalling}
               soundManager={soundManager}
-              isUpsideDown={false}
+              isUpsideDown={isUpsideDown}
+              gravity={gravity}
+              gravityAnimation={gravityAnimation}
               blockedColumns={chaosChickenEnabled ? blockedColumns : []}
               onBlockedColumnAttempt={chaosChickenEnabled ? handleBlockedColumnDrop : undefined}
               winningLine={gameState.winningLine}
               PoopBlockIndicatorComponent={PoopBlockIndicator}
+              useRotation={true}
             />
           </FunModeBoardWrapper>
 
@@ -223,7 +232,7 @@ const FunModeV2 = () => {
                 ? `${playerNames[winner]} Wins!` 
                 : isDraw 
                 ? "It's a Draw!" 
-                : isUpsideDown 
+                : (isUpsideDown && upsideDownTurnsLeft > 0)
                 ? `Gravity Inverted! (${upsideDownTurnsLeft} turns)` 
                 : `${playerNames[currentPlayer]}'s Turn`
             }
@@ -267,6 +276,7 @@ const FunModeV2 = () => {
           primaryActionLabel="Rematch"
           onSecondaryAction={() => navigate("/home")}
           soundManager={soundManager}
+          isNaturalEnding={true}
         />
       )}
     </PageWrapper>

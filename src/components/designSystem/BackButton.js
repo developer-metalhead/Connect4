@@ -56,7 +56,7 @@ const BackButton = ({ onClick, soundManager }) => {
 
   const handleClick = () => {
     if (soundManager) {
-      soundManager.playHoverSound(); // Using hover sound for button feedback
+      soundManager.playClickSound();
     }
     
     if (onClick) {

@@ -14,7 +14,9 @@ export const BoardContainer = styled("div")({
   flexDirection: "column",
   gap: "var(--gap)",
   maxWidth: "100%",
-  position: "relative", // For absolute positioning of highlights and falling discs
+  position: "relative",
+  // Layout isolation for mobile perf
+  contain: "layout style",
   // CHANGE: Disable text selection and touch callouts for game board
   userSelect: "none",
   WebkitUserSelect: "none",
@@ -22,6 +24,10 @@ export const BoardContainer = styled("div")({
   msUserSelect: "none",
   WebkitTouchCallout: "none",
   WebkitTapHighlightColor: "transparent",
+
+  "&.board-shake": {
+    animation: "boardShake 0.15s ease-out",
+  },
 });
 
 export const Row = styled("div")({
@@ -43,8 +49,11 @@ export const Cell = styled("div")({
   alignItems: "center",
   justifyContent: "center",
   fontSize: "calc(var(--cell) * 0.72)",
-  transition: "transform 0.15s ease, background 0.15s ease, opacity 0.15s ease",
+  // GPU-composited transitions only (transform + opacity)
+  transition: "transform 0.12s ease, opacity 0.12s ease",
   boxShadow: "inset 0 6px 12px rgba(0,0,0,0.4)",
+  // Hint GPU to prepare this layer
+  willChange: "transform, opacity",
   // CHANGE: Disable text selection and touch callouts for game cells
   userSelect: "none",
   WebkitUserSelect: "none",
@@ -52,10 +61,41 @@ export const Cell = styled("div")({
   msUserSelect: "none",
   WebkitTouchCallout: "none",
   WebkitTapHighlightColor: "transparent",
+  position: "relative",
 
   "&:hover": {
-    background: "#4fc3f7",
     transform: "scale(1.06)",
+  },
+  
+  "&.jiggle": {
+    animation: "nopeJiggle 0.4s cubic-bezier(.36,.07,.19,.97) both",
+  },
+
+  "&.winning-piece": {
+    animation: "winHeartbeat 1.5s infinite ease-in-out",
+    zIndex: 20,
+    position: "relative",
+  },
+
+  "&.losing-piece": {
+    opacity: 0.4,
+    transition: "opacity 0.8s ease-in-out",
+    filter: "grayscale(0.6)",
+  },
+
+  "&.target-glow::after": {
+    content: '""',
+    position: "absolute",
+    top: "10%",
+    left: "10%",
+    right: "10%",
+    bottom: "10%",
+    borderRadius: "50%",
+    backgroundColor: "var(--target-glow-color)",
+    boxShadow: "0 0 15px var(--target-glow-color), inset 0 0 15px rgba(255, 255, 255, 0.6)",
+    pointerEvents: "none",
+    zIndex: 10,
+    animation: "targetPulse 0.8s infinite alternate ease-in-out",
   },
 });
 
@@ -79,7 +119,6 @@ export const PreviewRow = styled("div")({
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
-    // CHANGE: Disable text selection and touch callouts for preview cells
     userSelect: "none",
     WebkitUserSelect: "none",
     WebkitTouchCallout: "none",
@@ -89,28 +128,28 @@ export const PreviewRow = styled("div")({
   "& .preview-piece": {
     fontSize: "clamp(34px, 9vmin, 40px)",
     opacity: 0.6,
-    transition: "all 0.2s",
-    // CHANGE: Disable text selection for preview pieces
+    // GPU-composited transitions for smooth sliding
+    transition: "transform 0.12s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.12s ease",
+    willChange: "transform, opacity",
     userSelect: "none",
     WebkitUserSelect: "none",
   },
 
   // CHANGE: Mobile optimization for 1080x2400 screens
-"@media (max-width: 480px) and (max-height: 2400px)": {
-  height: "clamp(35px, 8vmin, 55px)",
-  marginBottom: "0px",
- 
-  gridTemplateColumns: "repeat(7, 32px)",
+  "@media (max-width: 480px) and (max-height: 2400px)": {
+    height: "clamp(35px, 8vmin, 55px)",
+    marginBottom: "0px",
+    gridTemplateColumns: "repeat(7, 32px)",
 
-  "& .preview-piece": {
-    fontSize: "clamp(20px, 6vmin, 28px)",
-  },
+    "& .preview-piece": {
+      fontSize: "clamp(20px, 6vmin, 28px)",
+    },
 
-  "& .preview-cell": {
-    width: "clamp(20px, 6vmin, 28px)",
-    height: "clamp(20px, 6vmin, 28px)",
+    "& .preview-cell": {
+      width: "clamp(20px, 6vmin, 28px)",
+      height: "clamp(20px, 6vmin, 28px)",
+    },
   },
-},
 });
 
 
@@ -119,10 +158,10 @@ export const ColumnHighlight = styled("div")({
   width: "calc(var(--cell) + 6px)",
   borderRadius: "999px",
   pointerEvents: "none",
-  // CHANGE: Faster and smoother transition for column highlight sliding
-  transition: "left 0.15s cubic-bezier(0.4, 0, 0.2, 1), height 0.15s cubic-bezier(0.4, 0, 0.2, 1), top 0.15s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
+  // GPU-composited transition: use transform for horizontal movement
+  transition: "transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), height 0.1s cubic-bezier(0.4, 0, 0.2, 1), top 0.1s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.1s cubic-bezier(0.4, 0, 0.2, 1), left 0.1s cubic-bezier(0.4, 0, 0.2, 1)",
+  willChange: "transform, height, left",
   zIndex: 1,
-  // CHANGE: Disable text selection for column highlights
   userSelect: "none",
   WebkitUserSelect: "none",
 });
@@ -140,10 +179,27 @@ export const FallingDisc = styled("div")({
   pointerEvents: "none",
   zIndex: 10,
   animation: "discFall ease-in forwards",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-  // CHANGE: Disable text selection for falling discs
+  // GPU layer promotion for smooth animation
+  willChange: "transform, opacity",
+  backfaceVisibility: "hidden",
   userSelect: "none",
   WebkitUserSelect: "none",
+});
+
+export const EjectedPiece = styled("div")({
+  position: "absolute",
+  width: "var(--cell)",
+  height: "var(--cell)",
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "calc(var(--cell) * 0.72)",
+  pointerEvents: "none",
+  zIndex: 200,
+  animation: "ejectPiece 1.2s cubic-bezier(0.1, 0.2, 0.3, 1) forwards",
+  willChange: "transform, opacity",
+  backfaceVisibility: "hidden",
 });
 
 export const WinningLineWrapper = styled("div")({
@@ -180,19 +236,55 @@ export const GhostDisc = styled("span")({
   height: "100%",
 });
 
+export const ImpactRipple = styled("div")({
+  position: "absolute",
+  width: "100%",
+  height: "100%",
+  borderRadius: "50%",
+  boxSizing: "border-box",
+  border: "4px solid var(--ripple-color, #ffffff)",
+  animation: "rippleOut 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards",
+  pointerEvents: "none",
+  zIndex: 15,
+});
+
 
 // CHANGE: Updated keyframes to handle both normal and upside-down falling
 export const GlobalStyles = `
   @keyframes discFall {
     0% {
-      transform: translateY(calc(var(--start-row, -1) * (var(--cell) + var(--gap)) + 80px * (var(--is-upside-down, 0) * 2 - 1)));
+      transform: translateY(calc(var(--start-row, -1) * (var(--cell) + var(--gap)) - 80px * (1 - var(--is-upside-down, 0) * 2)));
       opacity: 1;
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* ease-in (accelerating fall) */
     }
-    85% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) + 10px * (var(--is-upside-down, 0) * 2 - 1)));
+    50% {
+      /* First impact */
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* ease-out (decelerating upward bounce) */
     }
-    95% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 5px * (var(--is-upside-down, 0) * 2 - 1)));
+    68% {
+      /* Peak of 1st bounce (highest) */
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 48px * (1 - var(--is-upside-down, 0) * 2)));
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* ease-in (accelerating fall) */
+    }
+    82% {
+      /* Second impact */
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* ease-out (decelerating upward bounce) */
+    }
+    91% {
+      /* Peak of 2nd bounce (smaller) */
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 22px * (1 - var(--is-upside-down, 0) * 2)));
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* ease-in (accelerating fall) */
+    }
+    97% {
+      /* Third impact (settle) */
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* ease-out (very tiny bounce) */
+    }
+    98.5% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 5px * (1 - var(--is-upside-down, 0) * 2)));
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* ease-in down */
     }
     100% {
       transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
@@ -205,12 +297,31 @@ export const GlobalStyles = `
     0% {
       transform: translateY(calc(var(--start-row) * (var(--cell) + var(--gap))));
       opacity: 1;
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
     }
-    85% {
-      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) + 10px));
+    50% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
-    95% {
+    68% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 48px));
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+    }
+    82% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    91% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 22px));
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+    }
+    97% {
+      transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    98.5% {
       transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap)) - 5px));
+      animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
     }
     100% {
       transform: translateY(calc(var(--target-row) * (var(--cell) + var(--gap))));
@@ -230,6 +341,80 @@ export const GlobalStyles = `
     100% {
       transform: scale(1.08);
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    }
+  }
+
+  @keyframes ghostPulse {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.05); opacity: 0.6; }
+  }
+
+  @keyframes targetPulse {
+    0% { transform: scale(0.85); opacity: 0.7; }
+    100% { transform: scale(1.1); opacity: 1; }
+  }
+
+  @keyframes nopeJiggle {
+    0% { transform: translateX(0); }
+    15% { transform: translateX(-6px) rotate(-4deg); }
+    30% { transform: translateX(5px) rotate(3deg); }
+    45% { transform: translateX(-4px) rotate(-3deg); }
+    60% { transform: translateX(3px) rotate(2deg); }
+    75% { transform: translateX(-2px) rotate(-1deg); }
+    100% { transform: translateX(0); }
+  }
+
+  @keyframes winHeartbeat {
+    0% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    15% { transform: scale(1.15); box-shadow: 0 15px 25px rgba(0,0,0,0.5); }
+    30% { transform: scale(1.05); box-shadow: 0 8px 18px rgba(0,0,0,0.3); }
+    45% { transform: scale(1.15); box-shadow: 0 15px 25px rgba(0,0,0,0.5); }
+    70% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+  }
+
+  @keyframes rippleOut {
+    0% { 
+      transform: scale(0.8); 
+      opacity: 0.8; 
+      border-width: 6px; 
+    }
+    100% { 
+      transform: scale(2); 
+      opacity: 0; 
+      border-width: 0px; 
+    }
+  }
+
+  @keyframes boardShake {
+    0% { transform: translateY(0); }
+    25% { transform: translateY(var(--shake-amount, 2px)); }
+    75% { transform: translateY(calc(var(--shake-amount, 2px) * -0.5)); }
+    100% { transform: translateY(0); }
+  }
+
+  @keyframes ejectPiece {
+    0% {
+      transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+      opacity: 1;
+    }
+    20% {
+      /* Initial "pop" up - adjusted for orientation */
+      transform: translate3d(
+        calc(var(--vx) * 0.2), 
+        calc((var(--vy) * 0.2 - 40px) * (1 - var(--is-upside-down, 0) * 2)), 
+        0
+      ) rotate(calc(var(--vr) * 0.2)) scale(1.1);
+      opacity: 1;
+    }
+    100% {
+      /* Fly off with gravity effect - adjusted for orientation */
+      transform: translate3d(
+        var(--vx), 
+        calc((var(--vy) + 1000px) * (1 - var(--is-upside-down, 0) * 2)), 
+        0
+      ) rotate(var(--vr)) scale(0.8);
+      opacity: 0;
     }
   }
 `;

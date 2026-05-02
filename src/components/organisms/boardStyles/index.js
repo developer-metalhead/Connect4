@@ -1,4 +1,4 @@
-import { useState,useMemo } from "react";
+import { useState,useMemo,useEffect,useRef } from "react";
 import {
   BoardContainer,
   Row,
@@ -9,8 +9,16 @@ import {
   WinningLineWrapper,
   WinningLine,
   GhostDisc,
+  ImpactRipple,
+  EjectedPiece,
 } from "./index.style";
-import PoopBlockIndicator from "../../features/ChaosChicken/PoopBlockIndicator";
+
+
+import {  returnToNormalGravity,
+  applyInvertedGravity,
+  planInvertedGravityAnimation, } from "../../../helperFunction/funMode/monkeyModeFeatures";
+import PoopBlockIndicator from "../../designSystem/Features/chaosChicken/PoopBlockIndicator";
+import { useGameSettings } from "../../../hooks/core/useGameSettings";
 
 const Board = ({
   board,
@@ -20,7 +28,8 @@ const Board = ({
   onDrop,
   canInteract = true,
   soundManager,
-  isUpsideDown = false,
+  isUpsideDown = false, // Visual rotation (true = 180deg)
+  gravity = "normal",   // Gravity direction ('normal' = to screen bottom, 'inverted' = to screen top)
   gravityAnimation = null,
   isCpuDropping = false,
   cpuDroppingCol = null,
@@ -32,14 +41,69 @@ const Board = ({
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
   const [fallingDisc, setFallingDisc] = useState(null);
+  const [rippleCell, setRippleCell] = useState(null);
+  const [isShaking, setIsShaking] = useState(false);
   const [touchCol, setTouchCol] = useState(null);
   const [touchTimeout, setTouchTimeout] = useState(null);
+  const [jigglingCols, setJigglingCols] = useState({});
+  const [ejectedPieces, setEjectedPieces] = useState([]);
+  const { enableBoardShake, shakeIntensity } = useGameSettings();
+
+  // CHANGE: Decouple visual orientation from logical gravity
+  // isLogicUpsideDown is true if gravity pulls towards logical Row 0
+  const isLogicUpsideDown = isUpsideDown ? (gravity === "normal") : (gravity === "inverted");
+  
+  const prevBoardRef = useRef(board);
+
+  // CHANGE: Physics-based reset animation detection
+  useEffect(() => {
+    const isNowEmpty = board.every(row => row.every(cell => cell === "⚪"));
+    const wasNotEmpty = prevBoardRef.current && prevBoardRef.current.some(row => row.some(cell => cell !== "⚪"));
+
+    if (isNowEmpty && wasNotEmpty) {
+      const newEjected = [];
+      prevBoardRef.current.forEach((row, r) => {
+        row.forEach((cell, c) => {
+          if (cell !== "⚪") {
+            // Random physics trajectories
+            const vx = (Math.random() - 0.5) * 1200; // Wider horizontal spread
+            const vy = -(Math.random() * 600 + 400); // Stronger upward pop
+            const vr = (Math.random() - 0.5) * 1080; // More rotation for chaos
+            
+            newEjected.push({
+              id: `eject-${r}-${c}-${Math.random()}`,
+              row: r,
+              col: c,
+              player: cell,
+              vx,
+              vy,
+              vr
+            });
+          }
+        });
+      });
+      
+      setEjectedPieces(newEjected);
+      // Play a special sound if possible
+      if (soundManager) {
+        soundManager.playSound('coinsfalling'); // Already added in previous turn
+      }
+      
+      setTimeout(() => setEjectedPieces([]), 1500);
+    }
+    prevBoardRef.current = board;
+  }, [board, soundManager]);
 
   // Build a quick mask to hide source cells during mass-fall overlays
-  const maskedKeys =
-    Array.isArray(gravityAnimation) && gravityAnimation.length > 0
-      ? new Set(gravityAnimation.map((a) => `${a.fromRow},${a.col}`))
-      : null;
+  const maskedKeys = useMemo(() => {
+    if (!Array.isArray(gravityAnimation) || gravityAnimation.length === 0) return null;
+    const keys = new Set();
+    gravityAnimation.forEach(a => {
+      keys.add(`${a.fromRow},${a.col}`);
+      keys.add(`${a.toRow},${a.col}`);
+    });
+    return keys;
+  }, [gravityAnimation]);
 
   const clearTouchTimeout = () => {
     if (touchTimeout) {
@@ -60,6 +124,20 @@ const Board = ({
     return col >= 0 && col < 7 ? col : null;
   };
 
+  useEffect(() => {
+    return () => clearTouchTimeout();
+  }, []);
+
+  // CHANGE: Reset dropping state if the board is completely cleared (game reset)
+  useEffect(() => {
+    if (board.every(row => row.every(cell => cell === "⚪"))) {
+      setDroppingCol(null);
+      setFallingDisc(null);
+      setHoverCol(null);
+      setJigglingCols({});
+    }
+  }, [board]);
+
   // CHANGE: Check if column is blocked by poop
   const isColumnBlockedByPoop = (col) => {
     return (blockedColumns || []).some(block => block.columnIndex === col && block.turnsLeft > 0);
@@ -70,6 +148,19 @@ const Board = ({
 
     // CHANGE: Handle blocked columns
     if (isColumnBlockedByPoop(col)) {
+      const clickedCol = col;
+      // Force animation restart by briefly removing the state
+      setJigglingCols(prev => ({ ...prev, [clickedCol]: false }));
+      
+      setTimeout(() => {
+        setJigglingCols(prev => ({ ...prev, [clickedCol]: true }));
+        if (soundManager) soundManager.playSound("error"); // Will fallback to click or ignore if error.mp3 not found
+        
+        setTimeout(() => {
+          setJigglingCols(prev => ({ ...prev, [clickedCol]: false }));
+        }, 400);
+      }, 30);
+
       console.log("💩 ATTEMPTED DROP ON BLOCKED COLUMN:", col);
       if (onBlockedColumnAttempt) {
         const redirectCol = onBlockedColumnAttempt(col);
@@ -89,11 +180,10 @@ const Board = ({
     setHoverCol(null);
     setTouchCol(null);
     clearTouchTimeout();
-    setDroppingCol(col);
 
-    // Find target row based on board orientation
+    // Find target row based on logical gravity
     let targetRow = -1;
-    if (isUpsideDown) {
+    if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
         if (board[row][col] === "⚪") {
           targetRow = row;
@@ -111,7 +201,9 @@ const Board = ({
 
     if (targetRow === -1) return;
 
-    const startRow = isUpsideDown ? board.length : -1;
+    setDroppingCol(col);
+
+    const startRow = isLogicUpsideDown ? board.length : -1;
 
     setFallingDisc({
       col,
@@ -120,14 +212,32 @@ const Board = ({
       player: currentPlayer,
     });
 
-    const distance = isUpsideDown ? targetRow + 1 : board.length - targetRow;
-    const animationDuration = 300 + distance * 50;
+    const distance = isLogicUpsideDown ? targetRow + 1 : board.length - targetRow;
+    const animationDuration = 550 + distance * 25; // Slightly longer for juicier bounces
 
+    // Impact 1 (50%)
     setTimeout(() => {
-      if (soundManager) {
-        soundManager.playDropSound();
+      if (soundManager) soundManager.playSound("drop");
+      if (enableBoardShake) {
+        // Delay shake by 60ms to feel like a reaction
+        setTimeout(() => {
+          setIsShaking(true);
+          setTimeout(() => setIsShaking(false), 150);
+        }, 60);
       }
-    }, animationDuration * 0.1);
+      setRippleCell({ row: targetRow, col, player: currentPlayer });
+      setTimeout(() => setRippleCell(null), 500); // 500ms duration matches CSS
+    }, animationDuration * 0.5);
+
+    // Impact 2 (82%)
+    setTimeout(() => {
+      if (soundManager) soundManager.playSound("drop");
+    }, animationDuration * 0.82);
+
+    // Impact 3 (97% - settle)
+    setTimeout(() => {
+      if (soundManager) soundManager.playSound("drop");
+    }, animationDuration * 0.97);
 
     setTimeout(() => {
       setFallingDisc(null);
@@ -208,7 +318,7 @@ const Board = ({
   // Calculate target row for the active column highlight
   let activeTargetRow = -1;
   if (activeCol !== null) {
-    if (isUpsideDown) {
+    if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
         if (board[row][activeCol] === "⚪") {
           activeTargetRow = row;
@@ -229,7 +339,7 @@ const Board = ({
   const cpuFallingDisc = isCpuDropping && cpuDroppingCol !== null ? (() => {
     // Find target row for CPU drop
     let targetRow = -1;
-    if (isUpsideDown) {
+    if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
         if (board[row][cpuDroppingCol] === "⚪") {
           targetRow = row;
@@ -247,8 +357,8 @@ const Board = ({
     
     if (targetRow === -1) return null;
     
-    const startRow = isUpsideDown ? board.length : -1;
-    const distance = isUpsideDown ? targetRow + 1 : board.length - targetRow;
+    const startRow = isLogicUpsideDown ? board.length : -1;
+    const distance = isLogicUpsideDown ? targetRow + 1 : board.length - targetRow;
     
     return {
       col: cpuDroppingCol,
@@ -265,7 +375,7 @@ const Board = ({
   const previewRow = useMemo(() => {
     if (activeCol === null || winner || isDraw || !canInteract) return null;
 
-    if (isUpsideDown) {
+    if (isLogicUpsideDown) {
       // Find top-most empty cell
       for (let r = 0; r < 6; r++) {
         if (board[r][activeCol] === "⚪") return r;
@@ -277,12 +387,12 @@ const Board = ({
       }
     }
     return null;
-  }, [activeCol, board, winner, isDraw, canInteract, isUpsideDown]);
+  }, [activeCol, board, winner, isDraw, canInteract, isLogicUpsideDown]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      {/* CHANGE: Conditionally render preview row based on board orientation */}
-      {!isUpsideDown && (
+      {/* CHANGE: Preview row position depends on gravity direction AND visual rotation */}
+      {((!isUpsideDown && gravity === "normal") || (isUpsideDown && gravity === "inverted")) && (
         <PreviewRow>
           {Array.from({ length: 7 }).map((_, col) => (
             <div
@@ -308,7 +418,11 @@ const Board = ({
         </PreviewRow>
       )}
 
-      <BoardContainer data-board-container>
+      <BoardContainer 
+        data-board-container 
+        className={isShaking ? "board-shake" : ""}
+        style={{ "--shake-amount": `${shakeIntensity * 0.4}px` }}
+      >
         {/* CHANGE: Add poop block indicators */}
         {(blockedColumns || []).map((block) => (
           <PoopBlockIndicatorComponent
@@ -323,7 +437,7 @@ const Board = ({
           <ColumnHighlight
             style={{
               left: `calc(var(--board-padding) + ${activeCol} * (var(--cell) + var(--gap)) - 3px)`,
-              ...(isUpsideDown
+              ...(isLogicUpsideDown
                 ? {
                     top: "auto",
                     bottom: "calc(var(--board-padding) - 3px)",
@@ -349,7 +463,7 @@ const Board = ({
               animationDuration: `${400 + Math.abs(fallingDisc.targetRow - fallingDisc.currentRow) * 50}ms`,
               "--target-row": fallingDisc.targetRow,
               "--start-row": fallingDisc.currentRow,
-              "--is-upside-down": isUpsideDown ? 1 : 0,
+              "--is-upside-down": isLogicUpsideDown ? 1 : 0,
             }}
           >
             {fallingDisc.player}
@@ -365,7 +479,7 @@ const Board = ({
               animationDuration: `${cpuFallingDisc.animationDuration}ms`,
               "--target-row": cpuFallingDisc.targetRow,
               "--start-row": cpuFallingDisc.currentRow,
-              "--is-upside-down": isUpsideDown ? 1 : 0,
+              "--is-upside-down": isLogicUpsideDown ? 1 : 0,
             }}
           >
             {cpuFallingDisc.player}
@@ -376,8 +490,8 @@ const Board = ({
         {Array.isArray(gravityAnimation) &&
           gravityAnimation.length > 0 &&
           gravityAnimation.map((d, i) => {
-            const distance = Math.max(0, d.toRow - d.fromRow);
-            const duration = 300 + distance * 70;
+            const distance = Math.abs(d.toRow - d.fromRow);
+            const duration = 400 + distance * 120; // Slower, more premium fall
             return (
               <FallingDisc
                 key={`grav-${i}`}
@@ -387,6 +501,7 @@ const Board = ({
                   animationName: "gravityDrop",
                   "--target-row": d.toRow,
                   "--start-row": d.fromRow,
+                  "--is-upside-down": isLogicUpsideDown ? 1 : 0,
                 }}
               >
                 {d.player}
@@ -394,26 +509,55 @@ const Board = ({
             );
           })}
 
+        {/* Physics-based ejection pieces */}
+        {ejectedPieces.map((p) => (
+          <EjectedPiece
+            key={p.id}
+            style={{
+              left: `calc(var(--board-padding) + ${p.col} * (var(--cell) + var(--gap)))`,
+              top: `calc(var(--board-padding) + ${p.row} * (var(--cell) + var(--gap)))`,
+              "--vx": `${p.vx}px`,
+              "--vy": `${p.vy}px`,
+              "--vr": `${p.vr}deg`,
+              "--is-upside-down": isUpsideDown ? 1 : 0,
+            }}
+          >
+            {p.player}
+          </EjectedPiece>
+        ))}
+
         {board.map((row, r) => (
           <Row key={r}>
-            {row.map((cell, c) => (
-              <Cell
-                key={c}
+            {row.map((cell, c) => {
+              // Calculate win state classes
+              const isWinningPiece = winner && winningLine && winningLine.some(loc => loc.row === r && loc.col === c);
+              const isLosingPiece = winner && !isWinningPiece && cell !== "⚪";
+
+              return (
+                <Cell
+                  key={c}
                 onClick={() => canInteract && handleClick(c)}
                 onMouseEnter={() => handleMouseEnter(c)}
                 onMouseLeave={handleMouseLeave}
                 onTouchStart={() => handleTouchStart(c)}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-                className={droppingCol === c ? "dropping" : ""}
+                className={`
+                  ${droppingCol === c ? "dropping" : ""} 
+                  ${activeCol === c && activeTargetRow === r && droppingCol === null ? "target-glow" : ""} 
+                  ${jigglingCols[c] ? "jiggle" : ""}
+                  ${isWinningPiece ? "winning-piece" : ""}
+                  ${isLosingPiece ? "losing-piece" : ""}
+                `}
                 style={{
                   cursor:
-                    canInteract && !winner && !isDraw && droppingCol === null && !isColumnBlockedByPoop(c)
-                      ? "pointer"
+                    canInteract && !winner && !isDraw && droppingCol === null
+                      ? isColumnBlockedByPoop(c) ? "not-allowed" : "pointer"
                       : "default",
                   opacity: droppingCol !== null && droppingCol !== c ? 0.7 : 1,
                   // CHANGE: Visual indication for blocked columns
                   filter: isColumnBlockedByPoop(c) ? "grayscale(0.5) brightness(0.8)" : "none",
+                  "--target-glow-color": currentPlayer === "🔴" ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)",
                 }}
               >
                 {/* Hide original from-cells while overlay is animating */}
@@ -423,8 +567,18 @@ const Board = ({
                 {previewRow === r && activeCol === c && (
                   <GhostDisc>{currentPlayer}</GhostDisc>
                 )}
-              </Cell>
-            ))}
+
+                {/* Impact Ripple Burst */}
+                {rippleCell && rippleCell.row === r && rippleCell.col === c && (
+                  <ImpactRipple 
+                    style={{ 
+                      "--ripple-color": rippleCell.player === "🔴" ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)" 
+                    }} 
+                  />
+                  )}
+                </Cell>
+              );
+            })}
           </Row>
         ))}
 
@@ -466,8 +620,8 @@ const Board = ({
 
       </BoardContainer>
 
-      {/* CHANGE: Add preview row at bottom for upside-down mode */}
-      {isUpsideDown && (
+      {/* CHANGE: Bottom preview row condition accounts for rotation */}
+      {((!isUpsideDown && gravity === "inverted") || (isUpsideDown && gravity === "normal")) && (
         <PreviewRow style={{ marginTop: "0px", marginBottom: "0px" }}>
           {Array.from({ length: 7 }).map((_, col) => (
             <div
@@ -478,7 +632,7 @@ const Board = ({
               onTouchStart={() => handleTouchStart(col)}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              onClick={() => canInteract && handleClick(col)}
+              onClick={() => handleClick(col)}
             >
               {activeCol === col &&
                 canInteract &&

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { styled } from "@mui/material/styles";
 import { tokens } from "./tokens";
 import { useVideoManager } from "../../hooks/core/useVideoManager";
-import useFunModeSettings from "../../hooks/funMode/useFunModeSettings";
+import { useGameSettings } from "../../hooks/core/useGameSettings";
 import ConfirmationModal from "./ConfirmationModal";
 
 const IconButton = styled("button")({
@@ -122,7 +122,7 @@ const GiveUpButton = ({ onGiveUp, soundManager }) => {
     showPostVideoOverlay,
     closePostVideoOverlay
   } = useVideoManager();
-  const { monkeyAnimationEnabled } = useFunModeSettings();
+  const { monkeyAnimationEnabled } = useGameSettings();
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [shouldNavigate, setShouldNavigate] = useState(false);

@@ -13,6 +13,8 @@ import CPUSettings from "../../components/designSystem/CPUSettings";
 import FunModeSettings from "../../components/designSystem/FunModeSettings";
 import OnlineSettings from "../../components/designSystem/OnlineSettings";
 import SoundSettings from "../../components/designSystem/SoundSettings";
+import BoardSettings from "../../components/designSystem/BoardSettings";
+import GameSettings from "../../components/designSystem/GameSettings";
 import Modal from "../../components/designSystem/Modal";
 import { 
   HomeHeader, 
@@ -40,10 +42,12 @@ const HomeV2 = () => {
         activeOption={activePanel}
         onOptionClick={(id) => setActivePanel(activePanel === id ? null : id)}
         options={[
-          { id: 'cpu', label: 'CPU Settings', icon: <span>🤖</span> },
-          { id: 'fun', label: 'Fun Mode Settings', icon: <span>🔥</span> },
-          { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
+          { id: 'game', label: 'Game Settings', icon: <span>🎮</span> },
           { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
+          { id: 'board', label: 'Board Settings', icon: <span>⚙️</span> },
+          { id: 'cpu', label: 'CPU Settings', icon: <span>🤖</span> },
+          { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
+          { id: 'fun', label: 'Fun Mode Settings', icon: <span>🔥</span> },
         ]}
       />
 
@@ -51,16 +55,20 @@ const HomeV2 = () => {
         isOpen={activePanel !== null} 
         onClose={() => setActivePanel(null)}
         title={
+          activePanel === 'game' ? 'Game Settings' :
+          activePanel === 'sound' ? 'Sound Settings' :
+          activePanel === 'board' ? 'Board Settings' :
           activePanel === 'cpu' ? 'CPU Settings' :
-          activePanel === 'fun' ? 'Fun Mode Settings' :
           activePanel === 'online' ? 'Online Settings' :
-          'Sound Settings'
+          'Fun Mode Settings'
         }
       >
-        {activePanel === 'cpu' && <CPUSettings soundManager={soundManager} />}
-        {activePanel === 'fun' && <FunModeSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
-        {activePanel === 'online' && <OnlineSettings soundManager={soundManager} />}
+        {activePanel === 'game' && <GameSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'sound' && <SoundSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'board' && <BoardSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'cpu' && <CPUSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'online' && <OnlineSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'fun' && <FunModeSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
       </SidePanel>
 
       <Decoration style={{ top: '20%', left: '10%' }} />

@@ -68,6 +68,7 @@ const PlayCPUV2 = () => {
   };
 
   const handleReset = () => {
+    soundManager?.playSound('coinsfalling');
     setSurrendered(false);
     reset();
   };
@@ -103,7 +104,10 @@ const PlayCPUV2 = () => {
       />
       <Header>
         <HeaderContent>
-          <AppLogo onClick={() => navigate("/home")}>
+          <AppLogo onClick={() => {
+            soundManager?.playClickSound();
+            navigate("/home");
+          }}>
             Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>vs CPU</span>
           </AppLogo>
         </HeaderContent>
@@ -163,16 +167,13 @@ const PlayCPUV2 = () => {
             winner === PLAYER2 ? "The CPU has claimed this victory." :
             "A tactical stalemate."
           }
-          variant={
-            (winner === PLAYER1) ? "win" : 
-            (winner === PLAYER2 || surrendered) ? "loss" :
-            "draw"
-          }
-          icon={surrendered ? "🏳️" : (winner === PLAYER1 ? "🏆" : (winner === PLAYER2 ? "🤖" : "🤝"))}
+          variant={isDraw ? "draw" : winner === PLAYER1 ? "win" : "loss"}
+          icon={surrendered ? "🏳️" : winner === PLAYER1 ? "🏆" : winner === PLAYER2 ? "😔" : "🤝"}
           onPrimaryAction={handleReset}
           primaryActionLabel="Rematch"
           onSecondaryAction={() => navigate("/play-offline")}
           soundManager={soundManager}
+          isNaturalEnding={!surrendered}
         />
       )}
 

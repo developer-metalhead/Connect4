@@ -1,5 +1,20 @@
-import { styled } from "@mui/material/styles";
+import { styled, keyframes } from "@mui/material/styles";
 import { tokens } from "../tokens";
+
+const cardSheen = keyframes`
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  100% { transform: translateX(300%) skewX(-20deg); }
+`;
+
+const avatarPulseRed = keyframes`
+  0%, 100% { box-shadow: 0 0 10px 2px rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 0 20px 6px rgba(239, 68, 68, 0.8); }
+`;
+
+const avatarPulseYellow = keyframes`
+  0%, 100% { box-shadow: 0 0 10px 2px rgba(255, 221, 0, 0.4); }
+  50% { box-shadow: 0 0 20px 6px rgba(255, 221, 0, 0.8); }
+`;
 
 export const ScoreboardCard = styled("div")({
   display: "flex",
@@ -40,18 +55,30 @@ export const PlayerInfo = styled("div", {
       content: '""',
       position: "absolute",
       bottom: "-12px",
-      width: "20px",
-      height: "3px",
+      width: "30px",
+      height: "4px",
       backgroundColor: tokens.colors.primary,
       borderRadius: "2px",
-      boxShadow: "0 0 10px rgba(59, 130, 246, 0.6)",
-    }
+      boxShadow: "0 0 12px rgba(59, 130, 246, 0.8)",
+    },
+    // "&::before": {
+    //   content: '""',
+    //   position: "absolute",
+    //   top: 0, left: 0, bottom: 0, right: 0,
+    //   background: "linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent)",
+    //   transform: "skewX(-20deg)",
+    //   animation: `${cardSheen} 2.5s infinite`,
+    //   pointerEvents: "none",
+    //   zIndex: 1,
+    //   borderRadius: tokens.radius.md,
+    //   overflow: "hidden"
+    // }
   })
 }));
 
 export const Avatar = styled("div", {
-  shouldForwardProp: (prop) => prop !== "color",
-})(({ color }) => ({
+  shouldForwardProp: (prop) => prop !== "color" && prop !== "active",
+})(({ color, active }) => ({
   width: "clamp(32px, 8vw, 48px)",
   height: "clamp(32px, 8vw, 48px)",
   borderRadius: "50%",
@@ -60,20 +87,26 @@ export const Avatar = styled("div", {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  fontSize: "clamp(18px, 5vw, 24px)",
-  boxShadow: `0 0 20px ${color === "red" ? "rgba(239, 68, 68, 0.2)" : "rgba(255, 221, 0, 0.2)"}`,
+  fontSize: "clamp(16px, 4vw, 24px)",
+  animation: active 
+    ? `${color === "red" ? avatarPulseRed : avatarPulseYellow} 1.5s infinite ease-in-out` 
+    : "none",
 }));
 
-export const PlayerName = styled("div")({
-  fontSize: "14px",
-  fontWeight: 600,
-  color: tokens.colors.text,
+export const PlayerName = styled("div", {
+  shouldForwardProp: (prop) => prop !== "active",
+})(({ active }) => ({
+  fontSize: "clamp(12px, 3vw, 16px)",
+  fontWeight: active ? 700 : 600,
+  color: active ? "#ffffff" : tokens.colors.text,
   textAlign: "center",
   maxWidth: "120px",
+  whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-});
+  transition: tokens.transition,
+  textShadow: active ? "0 0 8px rgba(255,255,255,0.4)" : "none",
+}));
 
 export const ScoreValue = styled("div")({
   fontSize: "28px",

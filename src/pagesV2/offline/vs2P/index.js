@@ -28,6 +28,7 @@ const Game2PV2 = () => {
   const { board, currentPlayer, winner, isDraw } = gameState;
 
   const reset = () => {
+    soundManager?.playSound('coinsfalling');
     setSurrendered(null);
     baseReset();
   };
@@ -65,8 +66,11 @@ const Game2PV2 = () => {
       <GiveUpButton onGiveUp={handleSurrender} soundManager={soundManager} />
       <Header>
         <HeaderContent>
-          <AppLogo onClick={() => navigate("/home")}>
-            Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', marginfontWeight: 400 }}>2 Players</span>
+          <AppLogo onClick={() => {
+            soundManager?.playClickSound();
+            navigate("/home");
+          }}>
+            Connect 4 <span style={{ opacity: 0.5, fontSize: '14px', fontWeight: 400 }}>2 Players</span>
           </AppLogo>
         </HeaderContent>
       </Header>
@@ -123,6 +127,7 @@ const Game2PV2 = () => {
           primaryActionLabel="Rematch"
           onSecondaryAction={() => navigate("/play-offline")}
           soundManager={soundManager}
+          isNaturalEnding={!surrendered}
         />
       )}
 
