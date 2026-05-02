@@ -74,6 +74,8 @@ const FunModeV2 = () => {
     monkeyMayhemState,
     isGravityFalling,
     updateBoard,
+    gravity,
+    gravityAnimation,
   } = useMonkeyMode({ 
     monkeyModeEnabled,
     soundManager,
@@ -211,13 +213,16 @@ const FunModeV2 = () => {
               winner={winner}
               isDraw={isDraw}
               onDrop={enhancedMakeMove}
-              canInteract={canInteract && !isChickenAnimating}
+              canInteract={canInteract && !isChickenAnimating && !isGravityFalling}
               soundManager={soundManager}
-              isUpsideDown={false}
+              isUpsideDown={isUpsideDown}
+              gravity={gravity}
+              gravityAnimation={gravityAnimation}
               blockedColumns={chaosChickenEnabled ? blockedColumns : []}
               onBlockedColumnAttempt={chaosChickenEnabled ? handleBlockedColumnDrop : undefined}
               winningLine={gameState.winningLine}
               PoopBlockIndicatorComponent={PoopBlockIndicator}
+              useRotation={true}
             />
           </FunModeBoardWrapper>
 
@@ -227,7 +232,7 @@ const FunModeV2 = () => {
                 ? `${playerNames[winner]} Wins!` 
                 : isDraw 
                 ? "It's a Draw!" 
-                : isUpsideDown 
+                : (isUpsideDown && upsideDownTurnsLeft > 0)
                 ? `Gravity Inverted! (${upsideDownTurnsLeft} turns)` 
                 : `${playerNames[currentPlayer]}'s Turn`
             }

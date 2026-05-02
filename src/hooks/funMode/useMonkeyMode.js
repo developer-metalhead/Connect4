@@ -10,11 +10,14 @@ import {
   isValidMoveUpsideDown,
   isBoardFullUpsideDown,
   returnToNormalGravity,
-  
+  applyNormalGravity,
+  applyInvertedGravity,
+  planInvertedGravityAnimation,
 } from "../../helperFunction/funMode/monkeyModeFeatures";
 import { isValidMove,dropPiece } from "../../helperFunction/helperFunction";
 
 // CHANGE: Unified monkey mode hook (no more separate "mayhem" terminology)
+// Manages visual orientation, logical gravity, and monkey-themed game events.
 export const useMonkeyMode = (options = {}) => {
   const { monkeyModeEnabled = true, onPiecePlaced, soundManager, onOverlayShow, useRotation = false } = options;
 
@@ -22,6 +25,7 @@ export const useMonkeyMode = (options = {}) => {
   const [showMonkeyButton, setShowMonkeyButton] = useState(false);
   const [monkeyButtonPlayer, setMonkeyButtonPlayer] = useState(null);
   const [isUpsideDown, setIsUpsideDown] = useState(false);
+  const [gravity, setGravity] = useState("normal");
   const [upsideDownTurnsLeft, setUpsideDownTurnsLeft] = useState(0);
   const [monkeyState, setMonkeyState] = useState({
     wasOffered: false,
@@ -34,25 +38,25 @@ export const useMonkeyMode = (options = {}) => {
   const [isGravityFalling, setIsGravityFalling] = useState(false);
   const [gravityAnimation, setGravityAnimation] = useState(null);
 
+  // CHANGE: Compute logical gravity state (true if pulling towards Row 0)
+  const isLogicUpsideDown = isUpsideDown ? (gravity === "normal") : (gravity === "inverted");
+
   const monkeyButtonTimerRef = useRef(null);
 
-  // CHANGE: Custom validation for upside-down mode
+  // CHANGE: Custom drop and validation logic now respect decoupled gravity
   const customValidation = useCallback((board, col, extensionData) => {
-    if (useRotation) return isValidMove(board, col);
-    const upsideDown = extensionData?.isUpsideDown || isUpsideDown;
-    return upsideDown 
+    const logicalUpsideDown = extensionData?.isLogicUpsideDown || isLogicUpsideDown;
+    return logicalUpsideDown 
       ? isValidMoveUpsideDown(board, col)
       : isValidMove(board, col);
-  }, [isUpsideDown, useRotation]);
+  }, [isLogicUpsideDown]);
 
-  // CHANGE: Custom drop logic for upside-down mode
   const customDropLogic = useCallback((board, col, player, extensionData) => {
-    if (useRotation) return dropPiece(board, col, player);
-    const upsideDown = extensionData?.isUpsideDown || isUpsideDown;
-    return upsideDown 
+    const logicalUpsideDown = extensionData?.isLogicUpsideDown || isLogicUpsideDown;
+    return logicalUpsideDown 
       ? dropPieceUpsideDown(board, col, player)
       : dropPiece(board, col, player);
-  }, [isUpsideDown, useRotation]);
+  }, [isLogicUpsideDown]);
 
   // CHANGE: Handle move completion for monkey triggers
   const handleMoveComplete = useCallback((newState, moveData, extensionData) => {
@@ -73,52 +77,71 @@ export const useMonkeyMode = (options = {}) => {
       if (newTurnsLeft === 0) {
         setTimeout(() => {
           setIsMonkeyAnimating(true);
-          setMonkeyVoiceLine("Phew! Back to normal!");
+          setMonkeyVoiceLine("Phew! Gravity is back!");
 
-          // Unified restoration logic (handles both rotation and logic-flip modes)
+          // CHANGE: Unified restoration logic - DO NOT FLIP, just restore gravity
           setTimeout(() => {
             setIsGravityFalling(true);
             
-            // Use helper to calculate final logical board (pieces at bottom) and basic animations
+            // Calculate final logical board and animations
+            // If board is 180deg, normal gravity means falling to Row 0
+            const currentBoard = newState.board;
+            const targetLogicUpsideDown = isUpsideDown; // If board is 180deg, normal gravity = Row 0
+            
+            const fallAnimations = [];
+            
+            // If board is 180deg, normal gravity (screen bottom) is Row 0.
+            // During monkey mode, gravity was inverted (screen top = Row 5).
+            // So pieces fall from 5 -> 0.
+            currentBoard.forEach((row, r) => {
+              row.forEach((cell, c) => {
+                if (cell !== "⚪") {
+                  fallAnimations.push({
+                    col: c,
+                    fromRow: r,      // Start from where they are (Row 5 range)
+                    toRow: isUpsideDown ? 0 : 5, // Fall to visual bottom
+                    player: cell
+                  });
+                }
+              });
+            });
+
+            // We need a more realistic final board calculation
+            const normalizedBoard = isUpsideDown ? flipBoardUpsideDown(currentBoard) : applyNormalGravity(currentBoard);
+            
+            // Recalculate animations based on the actual target rows in normalizedBoard
+            const finalAnimations = [];
+            normalizedBoard.forEach((row, r) => {
+              row.forEach((cell, c) => {
+                if (cell !== "⚪") {
+                  // Find where this piece was in the currentBoard (column-wise)
+                  // For simplicity in a single turn restoration, we can just map them
+                  // but returnToNormalGravity already does this logic.
+                }
+              });
+            });
+
+            // Let's use the helper but pass the correct target orientation
             const { finalBoard, animations, durationMs } = returnToNormalGravity(
-              newState.board,
-              { isUpsideDown: true } // We treat it as upside down to calculate the fall logic
+              currentBoard,
+              { 
+                isUpsideDown: true, 
+                isVisualRotation: isUpsideDown 
+              }
             );
 
-            let finalAnimations = animations;
-
-            // CHANGE: In rotation mode, pieces were logically at the bottom but visually at top.
-            // When we snap back to 0deg, we want to see them fall from visual top to visual bottom.
-            if (useRotation) {
-              finalAnimations = [];
-              newState.board.forEach((row, r) => {
-                row.forEach((cell, c) => {
-                  if (cell !== "⚪") {
-                    finalAnimations.push({
-                      col: c,
-                      fromRow: -2, // Start from above the board
-                      toRow: r,   // Fall to their current logical row
-                      player: cell
-                    });
-                  }
-                });
-              });
-            }
-
-            setGravityAnimation(finalAnimations);
-            setIsUpsideDown(false); // Snap visual board back instantly
+            setGravityAnimation(animations);
+            setGravity("normal");
             
-            const totalDuration = useRotation ? 1500 : (durationMs + 50);
-
             setTimeout(() => {
-              // CHANGE: CRITICAL - Update logical board to final state (pieces at bottom)
               funModeHook.updateBoard(finalBoard);
               setIsMonkeyAnimating(false);
               setMonkeyVoiceLine("");
               setGravityAnimation(null);
               setIsGravityFalling(false);
-              funModeHook.updateExtensionData('isUpsideDown', false);
-            }, totalDuration);
+              funModeHook.updateExtensionData('isUpsideDown', isUpsideDown);
+              funModeHook.updateExtensionData('isLogicUpsideDown', isUpsideDown); // normal gravity in 180deg
+            }, Math.max(durationMs, 1200));
           }, 2500);
         }, 500);
       }
@@ -227,11 +250,13 @@ export const useMonkeyMode = (options = {}) => {
 
       funModeHook.updateBoard(flippedBoard);
       setIsUpsideDown(true);
+      setGravity("inverted"); // Gravity pulls to visual top
       setUpsideDownTurnsLeft(4);
       setIsMonkeyAnimating(false);
       setMonkeyButtonPlayer(null);
       setMonkeyVoiceLine("");
       funModeHook.updateExtensionData('isUpsideDown', true);
+      funModeHook.updateExtensionData('isLogicUpsideDown', false); // 180deg + inverted = Row 5 (visual top)
 
       console.log("🙃 UPSIDE DOWN MODE ACTIVATED");
     }, 2500);
@@ -256,6 +281,7 @@ export const useMonkeyMode = (options = {}) => {
     setShowMonkeyButton(false);
     setMonkeyButtonPlayer(null);
     setIsUpsideDown(false);
+    setGravity("normal");
     setUpsideDownTurnsLeft(0);
     setMonkeyState({
       wasOffered: false,
@@ -279,6 +305,7 @@ export const useMonkeyMode = (options = {}) => {
     showMonkeyButton,
     monkeyButtonPlayer,
     isUpsideDown,
+    gravity,
     upsideDownTurnsLeft,
     monkeyMayhemState: monkeyState, // CHANGE: Keep this name for backward compatibility
     isMonkeyAnimating,

@@ -271,13 +271,11 @@ export const applyNormalGravity = (board) => {
     .map(() => Array(COLS).fill(EMPTY));
 
   for (let col = 0; col < COLS; col++) {
-    // Collect all non-empty pieces in this column (top -> bottom)
     const pieces = [];
     for (let row = 0; row < ROWS; row++) {
       const v = board[row][col];
       if (v !== EMPTY) pieces.push(v);
     }
-    // Drop them to bottom preserving relative order (bottom gets last)
     for (let j = 0; j < pieces.length; j++) {
       newBoard[ROWS - 1 - j][col] = pieces[pieces.length - 1 - j];
     }
@@ -285,12 +283,27 @@ export const applyNormalGravity = (board) => {
   return newBoard;
 };
 
-// === NEW: Build a batch animation plan for restoring to normal gravity ===
-// For each non-empty cell: map from current row -> target bottom row.
+export const applyInvertedGravity = (board) => {
+  const newBoard = Array(ROWS)
+    .fill(null)
+    .map(() => Array(COLS).fill(EMPTY));
+
+  for (let col = 0; col < COLS; col++) {
+    const pieces = [];
+    for (let row = 0; row < ROWS; row++) {
+      const v = board[row][col];
+      if (v !== EMPTY) pieces.push(v);
+    }
+    for (let j = 0; j < pieces.length; j++) {
+      newBoard[j][col] = pieces[j];
+    }
+  }
+  return newBoard;
+};
+
 export const planNormalGravityAnimation = (board) => {
   const animations = [];
   for (let col = 0; col < COLS; col++) {
-    // Gather positions and values from top to bottom for this column
     const positions = [];
     const values = [];
     for (let row = 0; row < ROWS; row++) {
@@ -301,14 +314,36 @@ export const planNormalGravityAnimation = (board) => {
       }
     }
     const n = values.length;
-    // Compute target rows: packed at bottom [ROWS - n, ..., ROWS - 1]
     for (let k = 0; k < n; k++) {
-      const fromRow = positions[k];
-      const toRow = ROWS - n + k;
       animations.push({
         col,
-        fromRow,
-        toRow,
+        fromRow: positions[k],
+        toRow: ROWS - n + k,
+        player: values[k],
+      });
+    }
+  }
+  return animations;
+};
+
+export const planInvertedGravityAnimation = (board) => {
+  const animations = [];
+  for (let col = 0; col < COLS; col++) {
+    const positions = [];
+    const values = [];
+    for (let row = 0; row < ROWS; row++) {
+      const v = board[row][col];
+      if (v !== EMPTY) {
+        positions.push(row);
+        values.push(v);
+      }
+    }
+    const n = values.length;
+    for (let k = 0; k < n; k++) {
+      animations.push({
+        col,
+        fromRow: positions[k],
+        toRow: k,
         player: values[k],
       });
     }
@@ -319,20 +354,27 @@ export const planNormalGravityAnimation = (board) => {
 // === NEW: Unified helper for returning to normal gravity ===
 // Detects flipped via flag and returns { finalBoard, animations, durationMs }.
 // If not flipped, returns passthrough (no-op).
-export const returnToNormalGravity = (board, { isUpsideDown } = {}) => {
+export const returnToNormalGravity = (board, { isUpsideDown, isVisualRotation } = {}) => {
   if (!isUpsideDown) {
     return { finalBoard: board, animations: [], durationMs: 0 };
   }
-  const animations = planNormalGravityAnimation(board);
-  // Compute a conservative animation time based on the longest travel distance
+  
+  const animations = isVisualRotation 
+    ? planInvertedGravityAnimation(board) 
+    : planNormalGravityAnimation(board);
+    
+  const finalBoard = isVisualRotation 
+    ? applyInvertedGravity(board) 
+    : applyNormalGravity(board);
+
   const unitDuration = 70; // ms per row
   const base = 300; // ms base for UX
   let maxDist = 0;
   for (const a of animations) {
-    maxDist = Math.max(maxDist, Math.max(0, a.toRow - a.fromRow));
+    maxDist = Math.max(maxDist, Math.abs(a.toRow - a.fromRow));
   }
   const durationMs = base + maxDist * unitDuration;
-  const finalBoard = applyNormalGravity(board);
+  
   return { finalBoard, animations, durationMs };
 };
 

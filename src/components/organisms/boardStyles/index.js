@@ -12,6 +12,11 @@ import {
   ImpactRipple,
   EjectedPiece,
 } from "./index.style";
+
+
+import {  returnToNormalGravity,
+  applyInvertedGravity,
+  planInvertedGravityAnimation, } from "../../../helperFunction/funMode/monkeyModeFeatures";
 import PoopBlockIndicator from "../../features/ChaosChicken/PoopBlockIndicator";
 import { useGameSettings } from "../../../hooks/core/useGameSettings";
 
@@ -23,7 +28,8 @@ const Board = ({
   onDrop,
   canInteract = true,
   soundManager,
-  isUpsideDown = false,
+  isUpsideDown = false, // Visual rotation (true = 180deg)
+  gravity = "normal",   // Gravity direction ('normal' = to screen bottom, 'inverted' = to screen top)
   gravityAnimation = null,
   isCpuDropping = false,
   cpuDroppingCol = null,
@@ -42,6 +48,10 @@ const Board = ({
   const [jigglingCols, setJigglingCols] = useState({});
   const [ejectedPieces, setEjectedPieces] = useState([]);
   const { enableBoardShake, shakeIntensity } = useGameSettings();
+
+  // CHANGE: Decouple visual orientation from logical gravity
+  // isLogicUpsideDown is true if gravity pulls towards logical Row 0
+  const isLogicUpsideDown = isUpsideDown ? (gravity === "normal") : (gravity === "inverted");
   
   const prevBoardRef = useRef(board);
 
@@ -171,9 +181,9 @@ const Board = ({
     setTouchCol(null);
     clearTouchTimeout();
 
-    // Find target row based on board orientation
+    // Find target row based on logical gravity
     let targetRow = -1;
-    if (isUpsideDown) {
+    if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
         if (board[row][col] === "⚪") {
           targetRow = row;
@@ -193,7 +203,7 @@ const Board = ({
 
     setDroppingCol(col);
 
-    const startRow = isUpsideDown ? board.length : -1;
+    const startRow = isLogicUpsideDown ? board.length : -1;
 
     setFallingDisc({
       col,
@@ -202,7 +212,7 @@ const Board = ({
       player: currentPlayer,
     });
 
-    const distance = isUpsideDown ? targetRow + 1 : board.length - targetRow;
+    const distance = isLogicUpsideDown ? targetRow + 1 : board.length - targetRow;
     const animationDuration = 550 + distance * 25; // Slightly longer for juicier bounces
 
     // Impact 1 (50%)
@@ -308,7 +318,7 @@ const Board = ({
   // Calculate target row for the active column highlight
   let activeTargetRow = -1;
   if (activeCol !== null) {
-    if (isUpsideDown) {
+    if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
         if (board[row][activeCol] === "⚪") {
           activeTargetRow = row;
@@ -329,7 +339,7 @@ const Board = ({
   const cpuFallingDisc = isCpuDropping && cpuDroppingCol !== null ? (() => {
     // Find target row for CPU drop
     let targetRow = -1;
-    if (isUpsideDown) {
+    if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
         if (board[row][cpuDroppingCol] === "⚪") {
           targetRow = row;
@@ -347,8 +357,8 @@ const Board = ({
     
     if (targetRow === -1) return null;
     
-    const startRow = isUpsideDown ? board.length : -1;
-    const distance = isUpsideDown ? targetRow + 1 : board.length - targetRow;
+    const startRow = isLogicUpsideDown ? board.length : -1;
+    const distance = isLogicUpsideDown ? targetRow + 1 : board.length - targetRow;
     
     return {
       col: cpuDroppingCol,
@@ -365,7 +375,7 @@ const Board = ({
   const previewRow = useMemo(() => {
     if (activeCol === null || winner || isDraw || !canInteract) return null;
 
-    if (isUpsideDown) {
+    if (isLogicUpsideDown) {
       // Find top-most empty cell
       for (let r = 0; r < 6; r++) {
         if (board[r][activeCol] === "⚪") return r;
@@ -377,12 +387,12 @@ const Board = ({
       }
     }
     return null;
-  }, [activeCol, board, winner, isDraw, canInteract, isUpsideDown]);
+  }, [activeCol, board, winner, isDraw, canInteract, isLogicUpsideDown]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      {/* CHANGE: Conditionally render preview row based on board orientation */}
-      {!isUpsideDown && (
+      {/* CHANGE: Preview row position depends on gravity direction AND visual rotation */}
+      {((!isUpsideDown && gravity === "normal") || (isUpsideDown && gravity === "inverted")) && (
         <PreviewRow>
           {Array.from({ length: 7 }).map((_, col) => (
             <div
@@ -427,7 +437,7 @@ const Board = ({
           <ColumnHighlight
             style={{
               left: `calc(var(--board-padding) + ${activeCol} * (var(--cell) + var(--gap)) - 3px)`,
-              ...(isUpsideDown
+              ...(isLogicUpsideDown
                 ? {
                     top: "auto",
                     bottom: "calc(var(--board-padding) - 3px)",
@@ -453,7 +463,7 @@ const Board = ({
               animationDuration: `${400 + Math.abs(fallingDisc.targetRow - fallingDisc.currentRow) * 50}ms`,
               "--target-row": fallingDisc.targetRow,
               "--start-row": fallingDisc.currentRow,
-              "--is-upside-down": isUpsideDown ? 1 : 0,
+              "--is-upside-down": isLogicUpsideDown ? 1 : 0,
             }}
           >
             {fallingDisc.player}
@@ -469,7 +479,7 @@ const Board = ({
               animationDuration: `${cpuFallingDisc.animationDuration}ms`,
               "--target-row": cpuFallingDisc.targetRow,
               "--start-row": cpuFallingDisc.currentRow,
-              "--is-upside-down": isUpsideDown ? 1 : 0,
+              "--is-upside-down": isLogicUpsideDown ? 1 : 0,
             }}
           >
             {cpuFallingDisc.player}
@@ -491,6 +501,7 @@ const Board = ({
                   animationName: "gravityDrop",
                   "--target-row": d.toRow,
                   "--start-row": d.fromRow,
+                  "--is-upside-down": isLogicUpsideDown ? 1 : 0,
                 }}
               >
                 {d.player}
@@ -609,8 +620,8 @@ const Board = ({
 
       </BoardContainer>
 
-      {/* CHANGE: Add preview row at bottom for upside-down mode */}
-      {isUpsideDown && (
+      {/* CHANGE: Bottom preview row condition accounts for rotation */}
+      {((!isUpsideDown && gravity === "inverted") || (isUpsideDown && gravity === "normal")) && (
         <PreviewRow style={{ marginTop: "0px", marginBottom: "0px" }}>
           {Array.from({ length: 7 }).map((_, col) => (
             <div
@@ -621,7 +632,7 @@ const Board = ({
               onTouchStart={() => handleTouchStart(col)}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              onClick={() => canInteract && handleClick(col)}
+              onClick={() => handleClick(col)}
             >
               {activeCol === col &&
                 canInteract &&
