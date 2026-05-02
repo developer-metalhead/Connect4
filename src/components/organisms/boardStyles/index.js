@@ -421,7 +421,7 @@ const Board = ({
       <BoardContainer 
         data-board-container 
         className={isShaking ? "board-shake" : ""}
-        style={{ "--shake-amount": `${shakeIntensity * 0.4}px` }}
+        style={{ "--shake-amount": `${shakeIntensity * 0.8}px` }}
       >
         {/* CHANGE: Add poop block indicators */}
         {(blockedColumns || []).map((block) => (

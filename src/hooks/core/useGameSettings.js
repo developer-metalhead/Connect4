@@ -13,7 +13,9 @@ export const useGameSettings = () => {
   const [shakeIntensity, setShakeIntensity] = useState(() => {
     try {
       const saved = localStorage.getItem('game_shakeIntensity');
-      return saved !== null ? JSON.parse(saved) : 2;
+      const val = saved !== null ? JSON.parse(saved) : 2;
+      // Migration: Convert old 1-10 scale to new 1-5 scale
+      return val > 5 ? Math.round(val / 2) : val;
     } catch {
       return 2;
     }

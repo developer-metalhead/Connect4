@@ -214,6 +214,8 @@ export const SoundProvider = ({ children }) => {
     const bg = audioInstancesRef.current.bgMusic;
     const match = audioInstancesRef.current.matchMusic;
     
+    activeTrackRef.current = "match";
+
     // Fade out BG
     if (bg) {
       fadeAudio(bg, 0, "bgMusic", () => {
@@ -235,6 +237,8 @@ export const SoundProvider = ({ children }) => {
     const bg = audioInstancesRef.current.bgMusic;
     const match = audioInstancesRef.current.matchMusic;
     
+    activeTrackRef.current = "bg";
+
     // Fade out Match
     if (match) {
       fadeAudio(match, 0, "matchMusic", () => {
@@ -318,6 +322,8 @@ export const SoundProvider = ({ children }) => {
       }
     }, 150);
   }, [playSound, isMuted]);
+  const activeTrackRef = useRef("bg"); // "bg" or "match"
+
   // Handle real-time settings changes for music
   useEffect(() => {
     const bg = audioInstancesRef.current.bgMusic;
@@ -330,12 +336,12 @@ export const SoundProvider = ({ children }) => {
     }
 
     // Handle BG Music resume
-    if (bg && isMusicEnabled && bg.paused && bg.volume > 0) {
+    if (bg && isMusicEnabled && bg.paused && activeTrackRef.current === "bg") {
       bg.play().catch(() => {});
     }
 
     // Handle Match Music resume
-    if (match && isMatchMusicEnabled && match.paused && match.volume > 0) {
+    if (match && isMatchMusicEnabled && match.paused && activeTrackRef.current === "match") {
       match.play().catch(() => {});
     }
 
@@ -343,6 +349,32 @@ export const SoundProvider = ({ children }) => {
     if (bg && !isMusicEnabled) bg.pause();
     if (match && !isMatchMusicEnabled) match.pause();
 
+  }, [isMuted, isMusicEnabled, isMatchMusicEnabled]);
+
+  // Handle tab visibility changes (Auto-pause/resume)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const bg = audioInstancesRef.current.bgMusic;
+      const match = audioInstancesRef.current.matchMusic;
+
+      if (document.hidden) {
+        if (bg) bg.pause();
+        if (match) match.pause();
+      } else {
+        // Resume if not muted and enabled
+        if (!isMuted) {
+          if (bg && isMusicEnabled && activeTrackRef.current === "bg") {
+            bg.play().catch(() => {});
+          }
+          if (match && isMatchMusicEnabled && activeTrackRef.current === "match") {
+            match.play().catch(() => {});
+          }
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [isMuted, isMusicEnabled, isMatchMusicEnabled]);
 
   // Handle music reliability and autoplay policy

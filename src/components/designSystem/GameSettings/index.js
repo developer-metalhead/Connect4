@@ -72,7 +72,7 @@ const GameSettings = ({ soundManager, onClose }) => {
           <Slider
             type="range"
             min="1"
-            max="10"
+            max="5"
             step="1"
             value={pendingIntensity}
             onChange={(e) => setPendingIntensity(Number(e.target.value))}
