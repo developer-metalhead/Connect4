@@ -24,8 +24,9 @@ import FeatureDispatcher from "../../components/funMode/FeatureDispatcher";
 
 // --- CHARACTER VISUALS ---
 // MonkeyAnimation and ChickenAnimation are now handled by the Universal FeatureDispatcher!
-import ChickenIndicators from "../../components/designSystem/Features/chaosChicken/ChickenIndicators";
+import FeatureStatusIndicators from "../../components/funMode/FeatureStatusIndicators";
 import RemovalOverlay from "../../components/designSystem/Features/core/RemovalOverlay";
+import { MONKEY_CONFIG, CHICKEN_CONFIG } from "../../logic/funMode/funMode";
 import useFunModeSettings from "../../hooks/funMode/useFunModeSettings";
 import Board from "../../components/organisms/boardStyles";
 import GiveUpButton from "../../components/designSystem/GiveUpButton";
@@ -56,6 +57,7 @@ const FunModeV2 = () => {
     turnsLeft,
     makeMove,
     reset,
+    getStats,
     setGameState,
     setGravity,
     setBlockedColumns,
@@ -140,6 +142,24 @@ const FunModeV2 = () => {
           </FeatureRow>
 
           <Scoreboard p1={p1Data} p2={p2Data} />
+
+          {/* DYNAMIC PROGRESS INDICATORS */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
+            {monkeyModeEnabled && (
+              <FeatureStatusIndicators 
+                config={MONKEY_CONFIG} 
+                stats={getStats("MONKEY")} 
+                currentPlayer={currentPlayer}
+              />
+            )}
+            {chaosChickenEnabled && (
+              <FeatureStatusIndicators 
+                config={CHICKEN_CONFIG} 
+                stats={getStats("CHICKEN")} 
+                currentPlayer={currentPlayer}
+              />
+            )}
+          </div>
 
           <RemovalOverlay 
             data={removalOverlay} 

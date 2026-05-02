@@ -111,6 +111,10 @@ export const useFunMode = (options = {}) => {
     setTurnsLeft({ gravity: 0 });
   }, []);
 
+  const getStats = useCallback((featureName) => {
+    return featureManager.getFeatureStats(featureName);
+  }, []);
+
   return {
     gameState,
     isAnimating,
@@ -119,6 +123,7 @@ export const useFunMode = (options = {}) => {
     turnsLeft,
     makeMove,
     reset,
+    getStats,
     setGameState,
     setGravity,
     setBlockedColumns,

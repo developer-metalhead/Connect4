@@ -16,6 +16,10 @@ class FeatureManager {
     this.featureState = {};
   }
 
+  getFeatureStats(featureName) {
+    return this.featureState[featureName] || { '🔴': 0, '🟡': 0 };
+  }
+
   registerFeature(config) {
     if (!this.activeFeatures.find(f => f.NAME === config.NAME)) {
       this.activeFeatures.push(config);
@@ -53,7 +57,7 @@ class FeatureManager {
         let actionSet = feature.ACTIONS;
         let isUltimate = false;
 
-        if (feature.ULTIMATE_ACTIONS && playerCount >= (feature.ROOSTER_THRESHOLD || 2)) {
+        if (feature.ULTIMATE_ACTIONS && playerCount >= (feature.ULTIMATE_THRESHOLD || 2)) {
           actionSet = feature.ULTIMATE_ACTIONS;
           isUltimate = true;
           // Optionally reset if configured (Chaos Chicken style)

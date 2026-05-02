@@ -1,5 +1,5 @@
 /**
- * FUN MODE CONFIGURATION (PHASE 3: MASTER KEY LEGEND)
+ * FUN MODE CONFIGURATION (PHASE 3: UNIVERSAL ULTIMATES)
  * 
  * --- CHARACTER CORE ---
  * NAME: Unique ID for the character.
@@ -17,7 +17,7 @@
  * 
  * --- EVOLUTION KEYS ---
  * TRIGGER_THRESHOLD: Matches needed to trigger BASE actions.
- * ROOSTER_THRESHOLD: Matches needed to escalate to ULTIMATE actions.
+ * ULTIMATE_THRESHOLD: Matches needed to escalate to ULTIMATE actions.
  */
 import { PATTERNS } from "../core/coreConfig";
 import { ACTIONS } from "./actionEngine";
@@ -37,8 +37,8 @@ export const MONKEY_CONFIG = {
     { 
       type: ACTIONS.REMOVE_DISC, 
       STEAL_PROBABILITY: 0.75 
-    }
-    // { 
+    },
+     // { 
     //   type: ACTIONS.BLOCK_COLUMN, 
     //   POOP_NON_EMPTY_PROBABILITY: 0.70, 
     //   POOP_BLOCK_DURATION: 3 
@@ -81,7 +81,7 @@ export const CHICKEN_CONFIG = {
   ],
   
   TRIGGER_THRESHOLD: 1,
-  ROOSTER_THRESHOLD: 2, 
+  ULTIMATE_THRESHOLD: 2, // Renamed from ROOSTER_THRESHOLD
  
   MAX_ROOSTER_PER_PLAYER: 1,
   RESET_AFTER_ROOSTER: false,
