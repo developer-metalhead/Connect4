@@ -44,12 +44,30 @@ const useOnlineConnect4 = () => {
   const [players, setPlayers] = useState([]); // [{id, name, disc}]
   const [myDisc, setMyDisc] = useState(null);
   const [gameState, setGameState] = useState(initialState);
+  const [rematchState, setRematchState] = useState({
+    requestedBy: [],
+    expiresAt: null,
+    isAccepted: false,
+    isDeclined: false,
+    declineReason: null
+  });
 
   const playerIdRef = useRef(getOrCreatePlayerId());
   const nameRef = useRef(defaultName());
   const roomIdRef = useRef(null);
   const myDiscRef = useRef(null);
   const playersRef = useRef([]);
+
+  // Clear rematch state helper
+  const resetRematchState = useCallback(() => {
+    setRematchState({
+      requestedBy: [],
+      expiresAt: null,
+      isAccepted: false,
+      isDeclined: false,
+      declineReason: null
+    });
+  }, []);
 
   // Derived flags
   const myTurn = useMemo(
@@ -112,6 +130,7 @@ const useOnlineConnect4 = () => {
       playersRef.current = ps;
       setGameState(state);
       setStatus("room");
+      resetRematchState();
     });
 
     socket.on("joined", ({ roomId: rid, disc, players: ps, state }) => {
@@ -123,13 +142,23 @@ const useOnlineConnect4 = () => {
       playersRef.current = ps;
       setGameState(state);
       setStatus("room");
+      resetRematchState();
     });
 
     socket.on("room_state", ({ players: ps, state }) => {
+      console.log("📡 Room state update received:", { 
+        playerCount: ps?.length, 
+        hasWinner: !!state?.winner, 
+        isNatural: !!state?.winningLine 
+      });
+
       if (ps) {
-        // If we were in a match and now only 1 player is left, trigger forfeit
-        if (playersRef.current.length === 2 && ps.length === 1 && !gameState.winner) {
-          console.log("🏳️ Room state updated: Opponent gone. Triggering forfeit.");
+        // Only trigger forfeit if game was NOT already finished
+        const wasInMatch = playersRef.current.length === 2 && ps.length === 1;
+        const gameAlreadyFinished = gameState.winner || state?.winner;
+        
+        if (wasInMatch && !gameAlreadyFinished) {
+          console.log("🏳️ Match interrupted: Opponent left during play. Awarding forfeit.");
           setGameState(prev => ({
             ...prev,
             winner: myDiscRef.current || ps[0]?.disc || PLAYER2,
@@ -141,8 +170,13 @@ const useOnlineConnect4 = () => {
       }
       if (state) {
         setGameState(prev => {
-          // If we already have a forfeit winner, don't let the server overwrite it with null
-          if (prev.winner && !state.winner) {
+          // Sticky logic: Only protect the winner overlay if the opponent is STILL missing (forfeit)
+          // If both players are present (ps.length === 2), allow the game to reset/clear.
+          const isForfeit = prev.winner && !prev.winningLine;
+          const stillAlone = ps?.length === 1;
+          
+          if (isForfeit && stillAlone && !state.winner) {
+             console.log("🛡️ Protecting forfeit winner state from server reset.");
              return { ...state, winner: prev.winner, winningLine: prev.winningLine };
           }
 
@@ -167,11 +201,13 @@ const useOnlineConnect4 = () => {
     });
 
     socket.on("matched", ({ roomId: rid, disc }) => {
+      console.log("🤝 Matched in room:", rid);
       setRoomId(rid);
       roomIdRef.current = rid;
       setMyDisc(disc);
       myDiscRef.current = disc;
       setStatus("room");
+      resetRematchState();
     });
 
     socket.on("player_left", ({ playerId: leftId, name: leftName }) => {
@@ -226,6 +262,40 @@ const useOnlineConnect4 = () => {
           winningLine: null
         };
       });
+    });
+
+    socket.on("rematch_requested", ({ playerId: rid_pid }) => {
+      console.log(`🔄 Rematch requested by ${rid_pid}`);
+      setRematchState(prev => ({
+        ...prev,
+        requestedBy: [...new Set([...prev.requestedBy, rid_pid])]
+      }));
+    });
+
+    socket.on("rematch_timer_started", ({ expiresAt }) => {
+      console.log(`⏲️ Rematch timer started, expires at: ${expiresAt}`);
+      setRematchState(prev => ({ ...prev, expiresAt }));
+    });
+
+    socket.on("rematch_accepted", () => {
+      console.log("✅ Rematch accepted by both! Preparing new game...");
+      setRematchState(prev => ({ ...prev, isAccepted: true }));
+      // Clear game winner immediately so overlay disappears
+      setGameState(prev => ({ ...prev, winner: null, isDraw: false, winningLine: null }));
+    });
+
+    socket.on("rematch_declined", ({ playerId: d_pid, reason }) => {
+      console.log(`❌ Rematch declined by ${d_pid}, reason: ${reason || "none"}`);
+      setRematchState(prev => ({ 
+        ...prev, 
+        isDeclined: true, 
+        declineReason: reason || (d_pid !== playerIdRef.current ? "Opponent declined" : null)
+      }));
+    });
+
+    socket.on("rematch_expired", () => {
+      console.log("⏰ Rematch request expired.");
+      resetRematchState();
     });
 
     socket.on("error_msg", ({ message }) => {
@@ -322,7 +392,8 @@ const useOnlineConnect4 = () => {
     setMyDisc(null);
     setGameState(initialState());
     setStatus("lobby");
-  }, [connected, roomId]);
+    resetRematchState();
+  }, [connected, roomId, resetRematchState]);
 
   const resetRoom = useCallback(() => {
     if (!connected || !roomId) return;
@@ -378,6 +449,7 @@ const useOnlineConnect4 = () => {
     status,
     error,
     roomId,
+    playerId: playerIdRef.current,
     players,
     gameState,
     myDisc,
@@ -393,6 +465,19 @@ const useOnlineConnect4 = () => {
     resetRoom,
     surrender,
     makeMove,
+
+    // rematch
+    rematchState,
+    requestRematch: () => {
+      if (!roomId) return;
+      console.log("📤 Sending rematch request for room:", roomId);
+      socket.emit("request_rematch", { roomId, playerId: playerIdRef.current });
+    },
+    declineRematch: () => {
+      if (!roomId) return;
+      console.log("📤 Sending rematch decline for room:", roomId);
+      socket.emit("decline_rematch", { roomId, playerId: playerIdRef.current });
+    }
   };
 };
 

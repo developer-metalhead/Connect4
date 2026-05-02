@@ -68,6 +68,10 @@ const OnlineV2 = () => {
     resetRoom,
     surrender,
     makeMove,
+    rematchState,
+    requestRematch,
+    declineRematch,
+    playerId
   } = useOnlineConnect4();
 
   const handleCopyRoomId = () => {
@@ -439,19 +443,22 @@ const OnlineV2 = () => {
           
           /* Only allow Rematch for natural wins, not forfeits */
           onPrimaryAction={!!gameState.winningLine ? () => {
-            soundManager?.playSound('coinsfalling');
-            resetRoom();
+            soundManager?.playSound('click');
+            requestRematch();
           } : null}
           primaryActionLabel={!!gameState.winningLine ? "Rematch" : null}
           
           /* Unified Exit Logic: Both players use this to clear room and go home */
           onSecondaryAction={() => {
+            declineRematch();
             leaveRoom();
             navigate("/home");
           }}
           secondaryActionLabel="Main Menu"
           soundManager={soundManager}
           isNaturalEnding={!!gameState.winningLine}
+          rematchState={rematchState}
+          myPlayerId={playerId}
         />
       )}
 

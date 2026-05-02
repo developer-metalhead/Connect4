@@ -33,19 +33,57 @@ export const MatchResultOverlay = ({
   icon,
   soundManager,
   isNaturalEnding = false,
+  rematchState,
+  myPlayerId,
 }) => {
+  console.log("🎨 MatchResultOverlay Render:", { title, hasRematchState: !!rematchState, myPlayerId });
   const [isVisible, setIsVisible] = React.useState(!isNaturalEnding);
+  const [timeLeft, setTimeLeft] = React.useState(0);
 
   React.useEffect(() => {
     if (isNaturalEnding) {
-      const timer = setTimeout(() => setIsVisible(true), 1000); // 1.5s gap for natural win
+      const timer = setTimeout(() => setIsVisible(true), 1000);
       return () => clearTimeout(timer);
     } else {
       setIsVisible(true);
     }
   }, [isNaturalEnding]);
 
+  // Countdown timer logic
+  React.useEffect(() => {
+    if (!rematchState?.expiresAt) {
+      setTimeLeft(0);
+      return;
+    }
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const diff = Math.max(0, Math.ceil((rematchState.expiresAt - now) / 1000));
+      setTimeLeft(diff);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [rematchState?.expiresAt]);
+
   if (!isVisible) return null;
+
+  const hasRequested = rematchState?.requestedBy?.includes(myPlayerId);
+  const isDeclined = rematchState?.isDeclined;
+  
+  let dynamicPrimaryLabel = primaryActionLabel;
+  let isPrimaryDisabled = false;
+
+  if (hasRequested) {
+    dynamicPrimaryLabel = `Waiting... ${timeLeft > 0 ? `(${timeLeft})` : ""}`;
+    isPrimaryDisabled = true;
+  }
+  
+  if (isDeclined) {
+    dynamicPrimaryLabel = "Opponent Left";
+    isPrimaryDisabled = true;
+  }
 
   return (
     <OverlayBackdrop>
@@ -55,8 +93,10 @@ export const MatchResultOverlay = ({
         </ResultIcon>
         
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-          <OverlayTitle variant={variant}>{title}</OverlayTitle>
-          {subtitle && <OverlaySubtitle>{subtitle}</OverlaySubtitle>}
+          <OverlayTitle variant={variant}>{isDeclined ? "ROOM CLOSED" : title}</OverlayTitle>
+          <OverlaySubtitle>
+            {isDeclined ? (rematchState.declineReason || "The session has ended.") : subtitle}
+          </OverlaySubtitle>
         </div>
         
         <ActionGroup>
@@ -67,8 +107,9 @@ export const MatchResultOverlay = ({
               fullWidth
               onClick={onPrimaryAction}
               soundManager={soundManager}
+              disabled={isPrimaryDisabled}
             >
-              {primaryActionLabel}
+              {dynamicPrimaryLabel}
             </Button>
           )}
           {onSecondaryAction && (
