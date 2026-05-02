@@ -131,3 +131,15 @@ export const formatCoords = (row, col) => {
   const rowNumber = ROWS - row;
   return `${columnLetter}${rowNumber}`;
 };
+/**
+ * Executes a piece drop. Returns the new board and the row where it landed.
+ * Pure function: Does not mutate the board.
+ */
+export const dropPiece = (board, col, player, gravity = "normal") => {
+  const row = getTargetRow(board, col, gravity);
+  if (row === -1) return { newBoard: board, row: -1 };
+  
+  const newBoard = board.map((r) => [...r]);
+  newBoard[row][col] = player;
+  return { newBoard, row };
+};
