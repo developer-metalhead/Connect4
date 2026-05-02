@@ -13,6 +13,7 @@ import CPUSettings from "../../components/designSystem/CPUSettings";
 import FunModeSettings from "../../components/designSystem/FunModeSettings";
 import OnlineSettings from "../../components/designSystem/OnlineSettings";
 import SoundSettings from "../../components/designSystem/SoundSettings";
+import BoardSettings from "../../components/designSystem/BoardSettings";
 import Modal from "../../components/designSystem/Modal";
 import { 
   HomeHeader, 
@@ -44,6 +45,7 @@ const HomeV2 = () => {
           { id: 'fun', label: 'Fun Mode Settings', icon: <span>🔥</span> },
           { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
           { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
+          { id: 'board', label: 'Board Settings', icon: <span>⚙️</span> },
         ]}
       />
 
@@ -54,6 +56,7 @@ const HomeV2 = () => {
           activePanel === 'cpu' ? 'CPU Settings' :
           activePanel === 'fun' ? 'Fun Mode Settings' :
           activePanel === 'online' ? 'Online Settings' :
+          activePanel === 'board' ? 'Board Settings' :
           'Sound Settings'
         }
       >
@@ -61,6 +64,7 @@ const HomeV2 = () => {
         {activePanel === 'fun' && <FunModeSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'online' && <OnlineSettings soundManager={soundManager} />}
         {activePanel === 'sound' && <SoundSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'board' && <BoardSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
       </SidePanel>
 
       <Decoration style={{ top: '20%', left: '10%' }} />

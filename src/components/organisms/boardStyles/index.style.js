@@ -25,9 +25,9 @@ export const BoardContainer = styled("div")({
   WebkitTouchCallout: "none",
   WebkitTapHighlightColor: "transparent",
 
-  // "&.board-shake": {
-  //   animation: "boardShake 0.15s ease-out",
-  // },
+  "&.board-shake": {
+    animation: "boardShake 0.15s ease-out",
+  },
 });
 
 export const Row = styled("div")({
@@ -70,15 +70,16 @@ export const Cell = styled("div")({
   "&.target-glow::after": {
     content: '""',
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    top: "10%",
+    left: "10%",
+    right: "10%",
+    bottom: "10%",
     borderRadius: "50%",
-    backgroundColor: "var(--target-glow-color, rgba(255, 255, 255, 0.4))",
+    backgroundColor: "var(--target-glow-color)",
+    boxShadow: "0 0 15px var(--target-glow-color), inset 0 0 15px rgba(255, 255, 255, 0.6)",
     pointerEvents: "none",
     zIndex: 10,
-    animation: "ghostPulse 1.2s infinite alternate",
+    animation: "targetPulse 0.8s infinite alternate ease-in-out",
   },
 });
 
@@ -314,6 +315,11 @@ export const GlobalStyles = `
   @keyframes ghostPulse {
     0%, 100% { transform: scale(1); opacity: 0.4; }
     50% { transform: scale(1.05); opacity: 0.6; }
+  }
+
+  @keyframes targetPulse {
+    0% { transform: scale(0.85); opacity: 0.7; }
+    100% { transform: scale(1.1); opacity: 1; }
   }
 
   @keyframes rippleOut {

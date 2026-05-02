@@ -18,6 +18,7 @@ import CPUSettings from "../../components/designSystem/CPUSettings";
 import FunModeSettings from "../../components/designSystem/FunModeSettings";
 import OnlineSettings from "../../components/designSystem/OnlineSettings";
 import SoundSettings from "../../components/designSystem/SoundSettings";
+import BoardSettings from "../../components/designSystem/BoardSettings";
 import { useState } from "react";
 
 const OfflineV2 = () => {
@@ -38,6 +39,7 @@ const OfflineV2 = () => {
           { id: 'fun', label: 'Fun Mode Settings', icon: <span>🔥</span> },
           { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
           { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
+          { id: 'board', label: 'Board Settings', icon: <span>⚙️</span> },
         ]}
       />
 
@@ -48,6 +50,7 @@ const OfflineV2 = () => {
           activePanel === 'cpu' ? 'CPU Settings' :
           activePanel === 'fun' ? 'Fun Mode Settings' :
           activePanel === 'online' ? 'Online Settings' :
+          activePanel === 'board' ? 'Board Settings' :
           'Sound Settings'
         }
       >
@@ -55,6 +58,7 @@ const OfflineV2 = () => {
         {activePanel === 'fun' && <FunModeSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
         {activePanel === 'online' && <OnlineSettings soundManager={soundManager} />}
         {activePanel === 'sound' && <SoundSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
+        {activePanel === 'board' && <BoardSettings soundManager={soundManager} onClose={() => setActivePanel(null)} />}
       </SidePanel>
       <MainContent style={{ justifyContent: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

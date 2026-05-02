@@ -12,6 +12,7 @@ import {
   ImpactRipple,
 } from "./index.style";
 import PoopBlockIndicator from "../../features/ChaosChicken/PoopBlockIndicator";
+import { useBoardSettings } from "../../../hooks/core/useBoardSettings";
 
 const Board = ({
   board,
@@ -37,6 +38,7 @@ const Board = ({
   const [isShaking, setIsShaking] = useState(false);
   const [touchCol, setTouchCol] = useState(null);
   const [touchTimeout, setTouchTimeout] = useState(null);
+  const { enableBoardShake } = useBoardSettings();
 
   // Build a quick mask to hide source cells during mass-fall overlays
   const maskedKeys =
@@ -129,9 +131,11 @@ const Board = ({
     // Impact 1 (50%)
     setTimeout(() => {
       if (soundManager) soundManager.playSound("drop");
-      setIsShaking(true);
+      if (enableBoardShake) {
+        setIsShaking(true);
+        setTimeout(() => setIsShaking(false), 150);
+      }
       setRippleCell({ row: targetRow, col, player: currentPlayer });
-      setTimeout(() => setIsShaking(false), 150);
       setTimeout(() => setRippleCell(null), 500); // 500ms duration matches CSS
     }, animationDuration * 0.5);
 
@@ -430,7 +434,7 @@ const Board = ({
                   opacity: droppingCol !== null && droppingCol !== c ? 0.7 : 1,
                   // CHANGE: Visual indication for blocked columns
                   filter: isColumnBlockedByPoop(c) ? "grayscale(0.5) brightness(0.8)" : "none",
-                  "--target-glow-color": currentPlayer === "🔴" ? "rgba(255, 68, 68, 0.4)" : "rgba(255, 221, 0, 0.4)",
+                  "--target-glow-color": currentPlayer === "🔴" ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)",
                 }}
               >
                 {/* Hide original from-cells while overlay is animating */}
