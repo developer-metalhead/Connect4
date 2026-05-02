@@ -24,7 +24,7 @@ const SOUND_CONFIG = {
     pitchVariation: false,
   },
   error: {
-    files: ["click.mp3", "click.ogg"], // Using click as a subtle thud
+    files: ["error.mp3", "error.ogg"], // Using click as a subtle thud
     volume: 0.5,
     pitchVariation: false,
   },

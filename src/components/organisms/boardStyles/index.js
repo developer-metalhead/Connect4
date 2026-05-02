@@ -90,11 +90,18 @@ const Board = ({
 
     // CHANGE: Handle blocked columns
     if (isColumnBlockedByPoop(col)) {
-      setJigglingCols(prev => ({ ...prev, [col]: true }));
-      if (soundManager) soundManager.playSound("error"); // Will fallback to click or ignore if error.mp3 not found
+      const clickedCol = col;
+      // Force animation restart by briefly removing the state
+      setJigglingCols(prev => ({ ...prev, [clickedCol]: false }));
+      
       setTimeout(() => {
-        setJigglingCols(prev => ({ ...prev, [col]: false }));
-      }, 400);
+        setJigglingCols(prev => ({ ...prev, [clickedCol]: true }));
+        if (soundManager) soundManager.playSound("error"); // Will fallback to click or ignore if error.mp3 not found
+        
+        setTimeout(() => {
+          setJigglingCols(prev => ({ ...prev, [clickedCol]: false }));
+        }, 400);
+      }, 30);
 
       console.log("💩 ATTEMPTED DROP ON BLOCKED COLUMN:", col);
       if (onBlockedColumnAttempt) {
