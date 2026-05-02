@@ -139,7 +139,7 @@ const Board = ({
 
   // CHANGE: Reset dropping state if the board is completely cleared (game reset)
   useEffect(() => {
-    if (board.every(row => row.every(cell => cell === "⚪"))) {
+    if (board.every(row => row.every(cell => cell === EMOJIS.EMPTY_SLOT))) {
       setDroppingCol(null);
       setFallingDisc(null);
       setHoverCol(null);
@@ -329,14 +329,14 @@ const Board = ({
   if (activeCol !== null) {
     if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
-        if (board[row][activeCol] === "⚪") {
+        if (board[row][activeCol] === EMOJIS.EMPTY_SLOT) {
           activeTargetRow = row;
           break;
         }
       }
     } else {
       for (let row = board.length - 1; row >= 0; row--) {
-        if (board[row][activeCol] === "⚪") {
+        if (board[row][activeCol] === EMOJIS.EMPTY_SLOT) {
           activeTargetRow = row;
           break;
         }
@@ -350,14 +350,14 @@ const Board = ({
     let targetRow = -1;
     if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
-        if (board[row][cpuDroppingCol] === "⚪") {
+        if (board[row][cpuDroppingCol] === EMOJIS.EMPTY_SLOT) {
           targetRow = row;
           break;
         }
       }
     } else {
       for (let row = board.length - 1; row >= 0; row--) {
-        if (board[row][cpuDroppingCol] === "⚪") {
+        if (board[row][cpuDroppingCol] === EMOJIS.EMPTY_SLOT) {
           targetRow = row;
           break;
         }
@@ -373,7 +373,7 @@ const Board = ({
       col: cpuDroppingCol,
       targetRow,
       currentRow: startRow,
-      player: "🟡", // CPU player emoji
+      player: EMOJIS.YELLOW_DISC, // CPU player emoji
       animationDuration: calculateDropDuration(Math.abs(distance)),
     };
   })() : null;
@@ -385,12 +385,12 @@ const Board = ({
     if (isLogicUpsideDown) {
       // Find top-most empty cell
       for (let r = 0; r < 6; r++) {
-        if (board[r][activeCol] === "⚪") return r;
+        if (board[r][activeCol] === EMOJIS.EMPTY_SLOT) return r;
       }
     } else {
       // Find bottom-most empty cell
       for (let r = 5; r >= 0; r--) {
-        if (board[r][activeCol] === "⚪") return r;
+        if (board[r][activeCol] === EMOJIS.EMPTY_SLOT) return r;
       }
     }
     return null;

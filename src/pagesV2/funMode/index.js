@@ -17,6 +17,7 @@ import {
   FunModeBoardWrapper,
   ControlGroup
 } from "./index.style";
+import { FEATURES,EMOJIS,PLAYERS } from "../../logic/core/coreConfig";
 
 // --- MODULAR FEATURE ENGINE (Phase 3) ---
 import { useFunMode } from "../../hooks/funMode/useFunMode";
@@ -87,16 +88,16 @@ const FunModeV2 = () => {
 
   const p1Data = useMemo(() => ({
     name: "Player 1",
-    score: gameState.scores?.["🔴"] || 0,
-    active: currentPlayer === "🔴" && !winner && !isDraw,
-    emoji: "🔴"
+    score: gameState.scores?.[EMOJIS.RED_DISC] || 0,
+    active: currentPlayer === EMOJIS.RED_DISC && !winner && !isDraw,
+    emoji: EMOJIS.RED_DISC
   }), [gameState.scores, currentPlayer, winner, isDraw]);
 
   const p2Data = useMemo(() => ({
     name: "Player 2",
-    score: gameState.scores?.["🟡"] || 0,
-    active: currentPlayer === "🟡" && !winner && !isDraw,
-    emoji: "🟡"
+    score: gameState.scores?.[EMOJIS.YELLOW_DISC] || 0,
+    active: currentPlayer === EMOJIS.YELLOW_DISC && !winner && !isDraw,
+    emoji: EMOJIS.YELLOW_DISC
   }), [gameState.scores, currentPlayer, winner, isDraw]);
 
   return (
@@ -148,14 +149,14 @@ const FunModeV2 = () => {
             {monkeyModeEnabled && (
               <FeatureStatusIndicators 
                 config={MONKEY_CONFIG} 
-                stats={getStats("MONKEY")} 
+                stats={getStats(FEATURES.MONKEY)} 
                 currentPlayer={currentPlayer}
               />
             )}
             {chaosChickenEnabled && (
               <FeatureStatusIndicators 
                 config={CHICKEN_CONFIG} 
-                stats={getStats("CHICKEN")} 
+                stats={getStats(FEATURES.CHICKEN)} 
                 currentPlayer={currentPlayer}
               />
             )}
@@ -191,9 +192,9 @@ const FunModeV2 = () => {
                 ? "It's a Draw!" 
                 : (gravity === "inverted" && turnsLeft.gravity > 0)
                 ? `Gravity Inverted! (${turnsLeft.gravity} turns)` 
-                : `${currentPlayer}'s Turn`
+                : `${currentPlayer === PLAYERS.P1 ? "Player 1" : "Player 2"}'s Turn`
             }
-            currentPlayerColor={currentPlayer === "🔴" ? "red" : "yellow"}
+            currentPlayerColor={currentPlayer === EMOJIS.RED_DISC ? "red" : "yellow"}
           />
 
           <ControlGroup>
@@ -205,7 +206,7 @@ const FunModeV2 = () => {
           <InstructionCard>
             {monkeyModeEnabled && (
               <InstructionSection>
-                <div style={{ fontWeight: 800, color: '#fff', fontSize: '14px' }}>🐒 MONKEY MAYHEM</div>
+                <div style={{ fontWeight: 800, color: '#fff', fontSize: '14px' }}>{EMOJIS.MONKEY} MONKEY MAYHEM</div>
                 <div style={{ fontSize: '13px', color: '#94a3b8' }}>
                   Form a 3-in-a-row to trigger gravity chaos and disc theft!
                 </div>
@@ -213,7 +214,7 @@ const FunModeV2 = () => {
             )}
             {chaosChickenEnabled && (
               <InstructionSection>
-                <div style={{ fontWeight: 800, color: '#fff', fontSize: '14px' }}>🐔 CHAOS CHICKEN</div>
+                <div style={{ fontWeight: 800, color: '#fff', fontSize: '14px' }}>{EMOJIS.CHICKEN} CHAOS CHICKEN</div>
                 <div style={{ fontSize: '13px', color: '#94a3b8' }}>
                   Form a 2x2 square to poop on a column and block it for 3 turns!
                 </div>

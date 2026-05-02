@@ -1,6 +1,7 @@
 import React from "react";
 import { styled, keyframes } from "@mui/material/styles";
 import { tokens } from "../../tokens";
+import { EMOJIS } from "../../../../logic/core/coreConfig";
 
 // --- ANIMATIONS ---
 const wobble = keyframes`
@@ -75,14 +76,14 @@ const EffectCloud = styled("div")(({ delay }) => ({
  * THE UNIVERSAL BLOCK INDICATOR (PHASE 3)
  * Displays whatever projectile blocked the column (Poop, Banana, etc.)
  */
-const FeatureBlockIndicator = ({ columnIndex, turnsLeft, projectile = "💩", isUpsideDown = false }) => {
+const FeatureBlockIndicator = ({ columnIndex, turnsLeft, projectile = EMOJIS.POOP, isUpsideDown = false }) => {
   const particles = Array.from({ length: 3 }, (_, i) => ({
     id: i,
     delay: i * 0.6,
   }));
 
   // Choose effect emoji based on the projectile
-  const effectEmoji = projectile === "💩" ? "💨" : (projectile === "🍌" ? "✨" : "💢");
+  const effectEmoji = projectile === EMOJIS.POOP ? "💨" : (projectile === EMOJIS.BANANA ? "✨" : "💢");
 
   console.log('hey projectile',projectile)
 

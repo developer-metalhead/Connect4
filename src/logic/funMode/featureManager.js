@@ -1,5 +1,6 @@
 import { detectPattern } from "../../helperFunction/funMode/patternBridge";
 import { ACTIONS, executeGravityFlip, executeRemoveDisc, executeBlockColumn, executeExplosion } from "./actionEngine";
+import { EMOJIS } from "../core/coreConfig";
 
 /**
  * THE FEATURE MANAGER (PHASE 3: EVOLVED)
@@ -17,7 +18,7 @@ class FeatureManager {
   }
 
   getFeatureStats(featureName) {
-    return this.featureState[featureName] || { '🔴': 0, '🟡': 0 };
+    return this.featureState[featureName] || { [EMOJIS.RED_DISC]: 0, [EMOJIS.YELLOW_DISC]: 0 };
   }
 
   registerFeature(config) {
