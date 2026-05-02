@@ -13,7 +13,8 @@ export const ModalBackdrop = styled("div")({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  padding: "20px",
+  padding: "16px", // Slightly less padding to allow more space for content
+  boxSizing: "border-box",
   animation: "modalFadeIn 0.3s ease-out",
   
   "@keyframes modalFadeIn": {
@@ -23,8 +24,9 @@ export const ModalBackdrop = styled("div")({
 });
 
 export const ModalContainer = styled("div")({
-  width: "100%",
-  maxWidth: "500px",
+  width: "calc(100% - 40px)", // Safe margin for mobile
+  maxWidth: "440px", 
+  maxHeight: "90vh",
   backgroundColor: tokens.colors.surface,
   backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0))",
   border: tokens.glass.border,
@@ -33,7 +35,9 @@ export const ModalContainer = styled("div")({
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
-  animation: "modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+  position: "relative", // Centered by backdrop flex
+  boxSizing: "border-box",
+  animation: "modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
   
   "@keyframes modalSlideUp": {
     from: { opacity: 0, transform: "scale(0.95) translateY(10px)" },
@@ -52,6 +56,8 @@ export const ModalHeader = styled("div")({
 export const ModalTitle = styled("h3")({
   margin: 0,
   fontSize: "18px",
+  textAlign:'center',
+  alignItems:'center',
   fontWeight: 700,
   color: tokens.colors.text,
 });
@@ -71,4 +77,16 @@ export const ModalFooter = styled("div")({
   alignItems: "center",
   justifyContent: "flex-end",
   gap: "12px",
+
+  "@media (max-width: 480px)": {
+    justifyContent: "center",
+    padding: "16px",
+    gap: "8px",
+    "& button": {
+      flex: 1,
+      minWidth: "0",
+      padding: "8px 4px",
+      fontSize: "13px",
+    }
+  }
 });

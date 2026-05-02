@@ -5,16 +5,26 @@ export const GameLayout = styled("div")({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  gap: "32px",
+  gap: "16px", // Tightened for desktop
   width: "100%",
   maxWidth: "800px",
-  margin: "0 auto",
+  margin: "auto",
+
+  "@media (max-width: 768px)": {
+    gap: "0px", 
+    margin: "0 auto", // Anchor to top instead of centering vertically
+  }
 });
 
 export const FeatureRow = styled("div")({
   display: "flex",
   gap: "12px",
   marginBottom: "16px",
+  
+  "@media (max-width: 768px)": {
+    gap: "8px",
+    marginBottom: "8px",
+  }
 });
 
 export const FeatureBadge = styled("div", {
@@ -32,6 +42,11 @@ export const FeatureBadge = styled("div", {
   color: enabled ? tokens.colors.success : tokens.colors.danger,
   textTransform: "uppercase",
   letterSpacing: "0.5px",
+
+  "@media (max-width: 768px)": {
+    padding: "4px 10px",
+    fontSize: "10px",
+  }
 }));
 
 export const InstructionCard = styled("div")({
@@ -39,20 +54,26 @@ export const InstructionCard = styled("div")({
   backdropFilter: tokens.glass.blur,
   border: tokens.glass.border,
   borderRadius: tokens.radius.lg,
-  padding: "24px",
+  padding: "16px",
   width: "100%",
   maxWidth: "600px",
-  marginTop: "40px",
+  marginTop: "12px",
   display: "flex",
   flexDirection: "column",
-  gap: "20px",
+  gap: "12px",
   boxShadow: tokens.shadows.lg,
+
+  "@media (max-width: 768px)": {
+    display: "none", // Hide instructions on small screens to save space
+  }
 });
 
 export const InstructionSection = styled("div")({
   display: "flex",
   flexDirection: "column",
-  gap: "8px",
+  gap: "4px",
+  "& h3": { fontSize: "14px", margin: 0 },
+  "& p": { fontSize: "12px", opacity: 0.8, margin: 0 },
 });
 
 export const FunModeBoardWrapper = styled("div", {
@@ -70,4 +91,8 @@ export const ControlGroup = styled("div")({
   width: "100%",
   maxWidth: "320px",
   justifyContent: "center",
+  
+  "@media (max-width: 768px)": {
+    marginTop: "8px",
+  }
 });

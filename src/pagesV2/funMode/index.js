@@ -145,7 +145,6 @@ const FunModeV2 = () => {
 
   return (
     <PageWrapper>
-      <BackButton soundManager={soundManager} />
       <GiveUpButton onGiveUp={() => navigate("/play-offline")} soundManager={soundManager} />
       <Header>
         <HeaderContent>
@@ -233,7 +232,7 @@ const FunModeV2 = () => {
 
           <ControlGroup>
             <Button variant="secondary" fullWidth onClick={enhancedReset} soundManager={soundManager}>
-              New Game
+          Reset
             </Button>
           </ControlGroup>
 

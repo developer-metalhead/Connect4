@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useSoundManager from "../../hooks/core/useSoundManager.js";
+import { RefreshIconButton } from "../../components/designSystem/Layout.style";
 
 // New UI Components
 import { PageWrapper, MainContent } from "../../components/designSystem/Layout.style";
@@ -65,7 +66,7 @@ const HomeV2 = () => {
       <Decoration style={{ top: '20%', left: '10%' }} />
       <Decoration style={{ bottom: '20%', right: '10%', background: '#6366f1' }} />
       
-      <MainContent style={{ justifyContent: 'center', minHeight: '100vh' }}>
+      <MainContent style={{ justifyContent: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <HomeHeader>Connect 4</HomeHeader>
           <HomeSubtitle>

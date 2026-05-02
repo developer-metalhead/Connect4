@@ -17,8 +17,14 @@ export const StatusPill = styled("div", {
   color: tokens.colors.text,
   fontSize: "14px",
   fontWeight: 600,
-  marginTop: "24px",
+  marginTop: "12px", // Reduced from 24px
   transition: tokens.transition,
+  
+  "@media (max-width: 768px)": {
+    marginTop: "4px",
+    padding: "6px 16px",
+    fontSize: "13px",
+  },
   
   "&::before": {
     content: '""',

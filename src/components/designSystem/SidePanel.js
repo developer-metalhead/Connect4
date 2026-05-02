@@ -36,8 +36,9 @@ const PanelContainer = styled("div", {
   top: 0,
   right: 0,
   height: "100%",
-  width: "min(90vw, 380px)",
-  backgroundColor: tokens.glass.background,
+  width: "100%", // Full screen for mobile
+  backgroundColor: tokens.colors.surface,
+  backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0))",
   backdropFilter: tokens.glass.blur,
   borderLeft: tokens.glass.border,
   boxShadow: tokens.shadows.lg,
@@ -47,6 +48,16 @@ const PanelContainer = styled("div", {
   animation: `${isClosing ? slideOut : slideIn} 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards`,
   padding: "24px",
   color: "#fff",
+  boxSizing: "border-box",
+
+  "@media (min-width: 768px)": {
+    width: "380px", // Fixed width for desktop
+    height: "calc(100% - 40px)", // Floating effect
+    top: "20px",
+    right: "20px",
+    borderRadius: tokens.radius.lg,
+    border: tokens.glass.border,
+  }
 }));
 
 const Header = styled("div")({
@@ -98,15 +109,24 @@ const Content = styled("div")({
   overflowY: "auto",
   paddingRight: "8px",
   
+  /* Premium Themed Scrollbar */
   "&::-webkit-scrollbar": {
-    width: "4px",
+    width: "3px",
   },
   "&::-webkit-scrollbar-track": {
     background: "transparent",
   },
   "&::-webkit-scrollbar-thumb": {
-    background: "rgba(255, 255, 255, 0.1)",
+    background: "rgba(255, 255, 255, 0.08)",
     borderRadius: "10px",
+    border: "1px solid transparent",
+    backgroundClip: "content-box",
+    transition: "all 0.3s",
+    
+    "&:hover": {
+      background: tokens.colors.primary,
+      boxShadow: `0 0 10px ${tokens.colors.primary}4D`,
+    }
   },
 });
 

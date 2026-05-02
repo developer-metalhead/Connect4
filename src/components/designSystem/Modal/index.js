@@ -19,6 +19,7 @@ const Modal = ({
   title, 
   children, 
   footer,
+  showClose,
   maxWidth = "500px" 
 }) => {
   if (!isOpen) return null;
@@ -31,6 +32,7 @@ const Modal = ({
       >
         <ModalHeader>
           <ModalTitle>{title}</ModalTitle>
+          {showClose&&(
           <button 
             onClick={onClose}
             style={{ 
@@ -43,7 +45,7 @@ const Modal = ({
             }}
           >
             ✕
-          </button>
+          </button>)}
         </ModalHeader>
         
         <ModalBody>
