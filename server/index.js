@@ -170,7 +170,7 @@ io.on("connection", (socket) => {
     if (state.winner || state.isDraw) {
       // Auto-start rematch timer
       if (!room.rematch) {
-        const duration = 5000;
+        const duration = 10000;
         const expiresAt = Date.now() + duration;
         room.rematch = { requested: new Set(), timer: null };
         io.to(rid).emit("rematch_timer_started", { expiresAt });

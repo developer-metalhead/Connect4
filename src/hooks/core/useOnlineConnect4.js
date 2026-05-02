@@ -281,7 +281,7 @@ const useOnlineConnect4 = () => {
 
     socket.on("rematch_accepted", () => {
       console.log("✅ Rematch accepted by both! Preparing new game...");
-      setRematchState(prev => ({ ...prev, isAccepted: true }));
+      resetRematchState();
       // Clear game winner immediately so overlay disappears
       setGameState(prev => ({ ...prev, winner: null, isDraw: false, winningLine: null }));
     });
