@@ -1,7 +1,7 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
 import { tokens } from "../tokens";
-import { useCPUSettings } from "../../../hooks/core/useCPUSettings";
+import { useCPUSettings } from "../../../hooks/settings/useCPUSettings";
 import Button from "../Button";
 import { ToggleGroup, Label } from "../SoundSettings/SoundSettings.style";
 

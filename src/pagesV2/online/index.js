@@ -38,7 +38,7 @@ import Board from "../../components/organisms/boardStyles";
 import PoopBlockIndicator from "../../components/designSystem/Features/chaosChicken/PoopBlockIndicator";
 import useSoundManager from "../../hooks/core/useSoundManager";
 import useOnlineConnect4 from "../../hooks/gameplay/useOnlineConnect4";
-import { useGameSettings } from "../../hooks/core/useGameSettings";
+import { useGameSettings } from "../../hooks/settings/useGameSettings";
 import { PLAYER1, PLAYER2 } from "../../helperFunction/helperFunction";
 
 const OnlineV2 = () => {

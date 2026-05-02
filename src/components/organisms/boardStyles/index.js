@@ -18,7 +18,7 @@ import {  returnToNormalGravity,
   applyInvertedGravity,
   planInvertedGravityAnimation, } from "../../../helperFunction/funMode/monkeyModeFeatures";
 import PoopBlockIndicator from "../../designSystem/Features/chaosChicken/PoopBlockIndicator";
-import { useGameSettings } from "../../../hooks/core/useGameSettings";
+import { useGameSettings } from "../../../hooks/settings/useGameSettings";
 
 import { ANIMATION_CONFIG } from "../../../logic/core/coreConfig";
 

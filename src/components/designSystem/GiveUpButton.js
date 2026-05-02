@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { styled } from "@mui/material/styles";
 import { tokens } from "./tokens";
 import { useVideoManager } from "../../hooks/core/useVideoManager";
-import { useGameSettings } from "../../hooks/core/useGameSettings";
+import { useGameSettings } from "../../hooks/settings/useGameSettings";
 import ConfirmationModal from "./ConfirmationModal";
 
 const IconButton = styled("button")({
