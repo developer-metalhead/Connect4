@@ -130,7 +130,9 @@ const Board = ({
     setTimeout(() => {
       if (soundManager) soundManager.playSound("drop");
       setIsShaking(true);
+      setRippleCell({ row: targetRow, col, player: currentPlayer });
       setTimeout(() => setIsShaking(false), 150);
+      setTimeout(() => setRippleCell(null), 500); // 500ms duration matches CSS
     }, animationDuration * 0.5);
 
     // Impact 2 (82%)
@@ -141,8 +143,6 @@ const Board = ({
     // Impact 3 (97% - settle)
     setTimeout(() => {
       if (soundManager) soundManager.playSound("drop");
-      setRippleCell({ row: targetRow, col, player: currentPlayer });
-      setTimeout(() => setRippleCell(null), 500); // 500ms duration matches CSS
     }, animationDuration * 0.97);
 
     setTimeout(() => {
@@ -430,6 +430,7 @@ const Board = ({
                   opacity: droppingCol !== null && droppingCol !== c ? 0.7 : 1,
                   // CHANGE: Visual indication for blocked columns
                   filter: isColumnBlockedByPoop(c) ? "grayscale(0.5) brightness(0.8)" : "none",
+                  "--target-glow-color": currentPlayer === "🔴" ? "rgba(255, 68, 68, 0.4)" : "rgba(255, 221, 0, 0.4)",
                 }}
               >
                 {/* Hide original from-cells while overlay is animating */}

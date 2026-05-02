@@ -67,8 +67,18 @@ export const Cell = styled("div")({
     transform: "scale(1.06)",
   },
 
-  "&.target-glow": {
-    boxShadow: "inset 0 0 20px rgba(255, 255, 255, 0.4), inset 0 6px 12px rgba(0,0,0,0.4)",
+  "&.target-glow::after": {
+    content: '""',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: "50%",
+    backgroundColor: "var(--target-glow-color, rgba(255, 255, 255, 0.4))",
+    pointerEvents: "none",
+    zIndex: 10,
+    animation: "ghostPulse 1.2s infinite alternate",
   },
 });
 
