@@ -1,13 +1,5 @@
 import { ROWS, COLS, EMPTY } from "../helperFunction";
-
-// Monkey Mayhem voice lines
-const MONKEY_VOICE_LINES = [
-  "Time to flip things up!",
-  "Ooo-ooo! Gravity is my playground!",
-  "Board go brrr!",
-  "Monkey business time!",
-  "Let's turn this upside down!",
-];
+import { MONKEY_CONFIG } from "../../logic/funMode";
 
 // CHANGE: Updated to count overlapping 3-in-a-rows by removing usedCells tracking
 export const countSeparateThreeInARows = (board, player) => {
@@ -97,15 +89,9 @@ export const shouldTriggerMonkeyMayhem = (board, player, monkeyMayhemState) => {
   }
 
   const threeInARowCount = countSeparateThreeInARows(board, player);
-  const shouldTrigger = threeInARowCount >= 2;
-
-  console.log("🎯 MONKEY MAYHEM DECISION:", {
-    player,
-    threeInARowCount,
-    requiredCount: 2,
-    shouldTrigger,
-    isFirstOpportunity: !monkeyMayhemState.wasOffered,
-  });
+  const shouldTrigger = threeInARowCount >= MONKEY_CONFIG.TRIGGER_THRESHOLD;
+  
+  console.log(`📊 MONKEY MAYHEM DECISION: ${shouldTrigger} (Found ${threeInARowCount}/${MONKEY_CONFIG.TRIGGER_THRESHOLD})`);
 
   return shouldTrigger;
 };
@@ -148,13 +134,13 @@ export const flipBoardUpsideDown = (board) => {
 // === MONKEY STEAL DISC LOGIC ===
 // Probability check and disc stealing function starts here
 export const maybeStealDisc = (board, triggeringPlayer, isUpsideDown = false) => {
-// Probability of monkey stealing a disc = 75%
-  if (Math.random() > 0.25) {   // 75% chance to steal
-    console.log("🍌 NO DISC STOLEN (25% chance)");
+// Probability of monkey stealing a disc
+  if (Math.random() > MONKEY_CONFIG.STEAL_PROBABILITY) {   
+    console.log(`🍌 NO DISC STOLEN (${((1 - MONKEY_CONFIG.STEAL_PROBABILITY) * 100).toFixed(0)}% chance)`);
     return { newBoard: board, stolenCell: null };
   }
 
-  console.log("🍌 MONKEY STEALING A DISC! (75% chance)");
+  console.log(`🍌 MONKEY STEALING A DISC! (${(MONKEY_CONFIG.STEAL_PROBABILITY * 100).toFixed(0)}% chance)`);
 
   const opponentPlayer = triggeringPlayer === "🔴" ? "🟡" : "🔴";
   
@@ -217,8 +203,8 @@ export const maybeStealDisc = (board, triggeringPlayer, isUpsideDown = false) =>
 };
 
 export const getRandomMonkeyVoiceLine = () => {
-  return MONKEY_VOICE_LINES[
-    Math.floor(Math.random() * MONKEY_VOICE_LINES.length)
+  return MONKEY_CONFIG.VOICE_LINES[
+    Math.floor(Math.random() * MONKEY_CONFIG.VOICE_LINES.length)
   ];
 };
 

@@ -1,0 +1,93 @@
+# Connect 4 V2 Phased Implementation Plan (Core-Focused)
+
+This plan outlines the roadmap for upgrading and expanding the core Connect 4 experience, focusing on robustness, online multiplayer, and a solid foundation for future features.
+
+---
+
+## Phase 1: Core Foundation & Multiplayer (Highest Priority)
+**Goal:** Establish a reliable online and offline foundation.
+
+### Specific Features
+1. **Lobby & Room System (Online)**
+   - Create private rooms with shareable codes/links.
+   - Robust joining logic (validating room existence, player slots).
+   - "Ready" state before game starts.
+2. **Real-time Game State Sync (Online)**
+   - Improved WebSocket handling to prevent desync.
+   - Automatic reconnection logic for brief disconnects.
+   - Clear turn indicators for local vs. remote players.
+3. **Robust Offline Mode**
+   - Clean implementation of Local 2-Player mode.
+   - Refined AI integration with clear difficulty selection (Easy/Medium/Hard).
+   - "Surrender" and "Reset" functionality during active games.
+4. **Core Board Logic Consolidation**
+   - Refactor `checkWin` and `checkDraw` into a pure, testable core module.
+   - Ensure piece drop animations are consistent across all game types.
+
+| Feature | Priority | Effort | Dependencies | Order |
+| :--- | :--- | :--- | :--- | :--- |
+| Board Logic Refactor | P0 | Small | - | 1 |
+| Offline 2P & AI UI | P0 | Medium | `useConnect4CPU` | 2 |
+| Room/Lobby UI | P1 | Medium | `useOnlineConnect4` | 3 |
+| Room Invite System | P1 | Small | Lobby System | 4 |
+| Reconnection Logic | P2 | Medium | `wsClient` | 5 |
+
+---
+
+## Phase 2: Enhanced Core Experience
+**Goal:** Add player persistence, feedback, and deeper customization.
+
+### Specific Features
+1. **Profile & Progress System**
+   - Simple profile creation (Name, Avatar choice).
+   - Data stored in `localStorage` for offline persistence.
+2. **Match History & Statistics**
+   - Tracking wins/losses/draws per mode (Online vs AI vs Local).
+   - "Recent Matches" list with win/loss details.
+3. **Better AI Difficulty Tiers**
+   - **Easy:** Random-ish moves with simple blocking.
+   - **Medium:** Existing Minimax with mistake memory.
+   - **Hard:** Deeper Minimax search with better heuristics.
+4. **Game Customization**
+   - Core Themes (Classic, Dark, Modern).
+   - Toggleable settings (Board size 6x7 vs 7x8, turn timers).
+
+| Feature | Priority | Effort | Dependencies | Order |
+| :--- | :--- | :--- | :--- | :--- |
+| Local Persistence | P1 | Small | - | 1 |
+| Match History Tracking | P1 | Medium | Local Persistence | 2 |
+| AI Tiering | P2 | Medium | `useConnect4CPU` | 3 |
+| Theme System | P2 | Medium | - | 4 |
+
+---
+
+## Phase 3+: Advanced Features
+**Goal:** Scale the experience for competitive and social play.
+
+### Specific Features
+1. **Leaderboards & Ranking**
+   - Global ranking for online play (Elo-based system).
+   - Daily/Weekly leaderboards.
+2. **Friends & Social**
+   - Friends list (simple IDs).
+   - "Recently Played With" list.
+   - In-game quick chat/emojis.
+3. **Advanced Game Modes**
+   - Timed matches (Blitz Connect 4).
+   - Ranked matchmaking with skill brackets.
+4. **Cross-device Sync**
+   - (Optional) Account creation/Login to sync stats across devices.
+
+| Feature | Priority | Effort | Dependencies | Order |
+| :--- | :--- | :--- | :--- | :--- |
+| Emoji/Quick Chat | P2 | Small | Phase 1 Online | 1 |
+| Friend System | P3 | Large | Backend Support | 2 |
+| Timed Mode | P3 | Medium | Phase 1 Core | 3 |
+| Global Leaderboards | P3 | Large | Backend/Database | 4 |
+
+---
+
+## Technical Recommendations
+- **State Management:** Keep core game logic (win check, board state) in hooks that are agnostic to the transport layer (Online vs Offline).
+- **Transport Layer:** Enhance `wsClient.js` to handle event-queueing if messages arrive while the UI is animating.
+- **Testing:** Implement unit tests for `helperFunction.js` to ensure zero regressions in win/draw detection.

@@ -14,6 +14,7 @@ import {
   applyInvertedGravity,
   planInvertedGravityAnimation,
 } from "../../helperFunction/funMode/monkeyModeFeatures";
+import { MONKEY_CONFIG } from "../../logic/funMode";
 import { isValidMove,dropPiece } from "../../helperFunction/helperFunction";
 
 // CHANGE: Unified monkey mode hook (no more separate "mayhem" terminology)
@@ -226,7 +227,7 @@ export const useMonkeyMode = (options = {}) => {
       funModeHook.updateBoard(flippedBoard);
       setIsUpsideDown(true);
       setGravity("inverted"); // Gravity pulls to visual top
-      setUpsideDownTurnsLeft(4);
+      setUpsideDownTurnsLeft(MONKEY_CONFIG.MAYHEM_DURATION);
       setIsMonkeyAnimating(false);
       setMonkeyButtonPlayer(null);
       setMonkeyVoiceLine("");

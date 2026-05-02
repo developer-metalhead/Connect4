@@ -1,21 +1,5 @@
 import { ROWS, COLS, EMPTY } from "../helperFunction";
-
-// Chaos Chicken voice lines
-const CHICKEN_VOICE_LINES = [
-  "Bawk bawk! Chaos time!",
-  "Cluck cluck! Here comes trouble!",
-  "Chicken alert! Incoming poop!",
-  "Feathers flying everywhere!",
-  "Time to ruffle some feathers!",
-];
-
-const ROOSTER_VOICE_LINES = [
-  "RAAAWR! Rooster of Rage!",
-  "COCK-A-DOODLE-DOOM!",
-  "Fire and fury unleashed!",
-  "Behold the mighty rooster!",
-  "Rage mode activated!",
-];
+import { CHICKEN_CONFIG } from "../../logic/funMode";
 
 // Improved 2x2 Detection Function (Strict)
 export const detectNew2x2Squares = (board, player, lastRow, lastCol) => {
@@ -98,10 +82,10 @@ export const getRandomUnblockedColumn = (blockedColumns, board) => {
   
   // 70% chance to block a non-empty column, 30% chance for empty
   const roll = Math.random();
-  console.log(`🎲 Probability roll for column blocking: ${roll.toFixed(2)} (Target: < 0.70 for Non-Empty)`);
+  console.log(`🎲 Probability roll for column blocking: ${roll.toFixed(2)} (Target: < ${CHICKEN_CONFIG.POOP_NON_EMPTY_PROBABILITY.toFixed(2)} for Non-Empty)`);
   
   let targetColArray;
-  if (roll < 0.70 && nonEmptyColumns.length > 0) {
+  if (roll < CHICKEN_CONFIG.POOP_NON_EMPTY_PROBABILITY && nonEmptyColumns.length > 0) {
     console.log("📈 Selected 70% probability: Choosing a non-empty column");
     targetColArray = nonEmptyColumns;
   } else if (emptyColumns.length > 0) {
@@ -131,7 +115,7 @@ export const blockColumn = (blockedColumns, columnIndex) => {
   // Add new block
   filtered.push({
     columnIndex,
-    turnsLeft: 3,
+    turnsLeft: CHICKEN_CONFIG.POOP_BLOCK_DURATION,
     createdAt: Date.now()
   });
   
@@ -237,12 +221,12 @@ export const applyGravityAfterClear = (board, isUpsideDown = false) => {
 
 // Get random chicken voice line
 export const getRandomChickenVoiceLine = () => {
-  return CHICKEN_VOICE_LINES[Math.floor(Math.random() * CHICKEN_VOICE_LINES.length)];
+  return CHICKEN_CONFIG.CHICKEN_VOICE_LINES[Math.floor(Math.random() * CHICKEN_CONFIG.CHICKEN_VOICE_LINES.length)];
 };
 
 // Get random rooster voice line
 export const getRandomRoosterVoiceLine = () => {
-  return ROOSTER_VOICE_LINES[Math.floor(Math.random() * ROOSTER_VOICE_LINES.length)];
+  return CHICKEN_CONFIG.ROOSTER_VOICE_LINES[Math.floor(Math.random() * CHICKEN_CONFIG.ROOSTER_VOICE_LINES.length)];
 };
 
 // Check if player should trigger Chaos Chicken
@@ -284,7 +268,7 @@ export const getPlayerActivationCount = (chaosChickenState, player) => {
 // Check if this will be a Rooster of Rage activation
 export const isRoosterOfRageActivation = (chaosChickenState, player) => {
   const playerKey = player === "🔴" ? "player1" : "player2";
-  return chaosChickenState.chickenActivations[playerKey] === 1 && !chaosChickenState.hasUsedRooster[playerKey];
+  return chaosChickenState.chickenActivations[playerKey] === (CHICKEN_CONFIG.ROOSTER_THRESHOLD - 1) && !chaosChickenState.hasUsedRooster[playerKey];
 };
 
 // Find nearest available column
