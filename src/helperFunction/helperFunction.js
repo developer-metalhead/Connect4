@@ -25,7 +25,8 @@ export {
   isBoardFull,
   getNextPlayer,
   formatCoords,
-  getTargetRow
+  getTargetRow,
+  calculateDropDuration
 } from "../logic/engine";
 
 /**
