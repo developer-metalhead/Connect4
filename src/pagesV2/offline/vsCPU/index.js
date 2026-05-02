@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo,useState } from "react";
 import useSoundManager from "../../../hooks/core/useSoundManager";
 import useConnect4CPU from "../../../hooks/core/useConnect4CPU";
+import { useGameSettings } from "../../../hooks/core/useGameSettings";
+import { useCPUSettings } from "../../../hooks/core/useCPUSettings";
 import { PLAYER1, PLAYER2 } from "../../../helperFunction/helperFunction";
 
 // New UI Components
@@ -24,7 +26,8 @@ import Modal from "../../../components/designSystem/Modal";
 const PlayCPUV2 = () => {
   const navigate = useNavigate();
   const soundManager = useSoundManager();
-  const { monkeyAnimationEnabled } = useFunModeSettings();
+  const { monkeyAnimationEnabled } = useGameSettings();
+  const { difficulty, seriousCPU } = useCPUSettings();
   const [activePanel, setActivePanel] = useState(null); // 'cpu', 'fun', 'sound' or null
   const [surrendered, setSurrendered] = useState(false);
 
@@ -38,9 +41,15 @@ const PlayCPUV2 = () => {
     shouldShowPostVideoOverlay,
     setShouldShowPostVideoOverlay,
     closePostVideoOverlay
-  } = useConnect4CPU();
+  } = useConnect4CPU(difficulty);
 
   const { board, currentPlayer, winner, isDraw } = gameState;
+
+  // Background music management
+  useEffect(() => {
+    soundManager.pauseBackgroundMusic();
+    return () => soundManager.resumeBackgroundMusic();
+  }, [soundManager]);
 
   useEffect(() => {
     if (winner) {
@@ -64,7 +73,8 @@ const PlayCPUV2 = () => {
 
   const handleClosePostVideoOverlay = () => {
     closePostVideoOverlay();
-    navigate("/play-offline");
+    setSurrendered(true);
+    soundManager.playSurrenderSound();
   };
 
   const handleReset = () => {
@@ -91,13 +101,17 @@ const PlayCPUV2 = () => {
   return (
     <PageWrapper>
       <GiveUpButton 
+        seriousCPU={seriousCPU}
         onGiveUp={() => {
-          if (monkeyAnimationEnabled) {
-            // After video ends, show the minimalistic result card
+          if (seriousCPU) {
             setSurrendered(true);
+            soundManager.playSurrenderSound();
+          } else if (monkeyAnimationEnabled) {
+            setSurrendered(true);
+            soundManager.playSurrenderSound();
           } else {
-            // Show the crazy/chaotic overlay
             setShouldShowPostVideoOverlay(true);
+            // Result card will show after PostVideoOverlay closes (see handleClosePostVideoOverlay)
           }
         }} 
         soundManager={soundManager} 

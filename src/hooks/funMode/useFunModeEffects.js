@@ -39,11 +39,9 @@ export const useFunModeEffects = ({
   // CHANGE: Moved sound effects to custom hook
   useEffect(() => {
     if (winner) {
+      soundManager.playWinSound({ isFunMode: true });
       if (isMonkeyWinner) {
-        soundManager.playWinSound();
         setTimeout(() => soundManager.playSound("click"), 500);
-      } else {
-        soundManager.playWinSound();
       }
     } else if (isDraw) {
       soundManager.playDrawSound();

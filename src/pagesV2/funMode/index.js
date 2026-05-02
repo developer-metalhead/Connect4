@@ -38,6 +38,7 @@ import GiveUpButton from "../../components/designSystem/GiveUpButton";
 const FunModeV2 = () => {
   const navigate = useNavigate();
   const [removalOverlay, setRemovalOverlay] = useState(null);
+  const [surrendered, setSurrendered] = useState(null); // PLAYER1 or PLAYER2
   const { monkeyModeEnabled, chaosChickenEnabled } = useFunModeSettings();
   const soundManager = useSoundManager();
   const [activePanel, setActivePanel] = useState(null); // 'fun', 'sound' or null
@@ -106,6 +107,12 @@ const FunModeV2 = () => {
   const handleMonkeyButtonClick = useMemo(() => createMonkeyButtonHandler(soundManager, triggerMonkeyMayhem), [soundManager, triggerMonkeyMayhem]);
   const canInteract = useMemo(() => canInteractWithBoard(isMonkeyAnimating, showMonkeyButton, isGravityFalling), [isMonkeyAnimating, showMonkeyButton, isGravityFalling]);
 
+  // Background music management
+  useEffect(() => {
+    soundManager.pauseBackgroundMusic();
+    return () => soundManager.resumeBackgroundMusic();
+  }, [soundManager]);
+
   const enhancedMakeMove = (col) => {
     if (chaosChickenEnabled) {
       // Logic uses normal gravity because the board rotation handles visual anti-gravity
@@ -123,8 +130,14 @@ const FunModeV2 = () => {
     return true;
   };
 
+  const handleSurrender = () => {
+    soundManager.playLoseSound({ isFunMode: true }); // Play booWow
+    setSurrendered(currentPlayer);
+  };
+
   const enhancedReset = () => {
     soundManager?.playSound('coinsfalling');
+    setSurrendered(null);
     reset();
     if (chaosChickenEnabled) {
       resetChaosChicken();
@@ -148,7 +161,7 @@ const FunModeV2 = () => {
 
   return (
     <PageWrapper>
-      <GiveUpButton onGiveUp={() => navigate("/play-offline")} soundManager={soundManager} />
+      <GiveUpButton onGiveUp={handleSurrender} soundManager={soundManager} />
       <Header>
         <HeaderContent>
           <AppLogo onClick={() => {
@@ -267,16 +280,25 @@ const FunModeV2 = () => {
         </GameLayout>
       </MainContent>
 
-      {(winner || isDraw) && (
+      {(winner || isDraw || surrendered) && (
         <MatchResultOverlay 
-          title={winner ? "VICTORY" : "DRAW"}
-          subtitle={winner ? `${playerNames[winner]} has conquered the chaos!` : "Even mayhem ends in a stalemate."}
-          variant={winner ? "win" : "draw"}
+          title={
+            surrendered ? "SURRENDER" :
+            winner ? "VICTORY" : 
+            "DRAW"
+          }
+          subtitle={
+            surrendered ? `${playerNames[surrendered]} has conceded. Chaos wins!` :
+            winner ? `${playerNames[winner]} has conquered the chaos!` : 
+            "Even mayhem ends in a stalemate."
+          }
+          variant={isDraw ? "draw" : "win"}
+          icon={surrendered ? "🏳️" : winner ? "🏆" : "🤝"}
           onPrimaryAction={enhancedReset}
           primaryActionLabel="Rematch"
           onSecondaryAction={() => navigate("/home")}
           soundManager={soundManager}
-          isNaturalEnding={true}
+          isNaturalEnding={!surrendered}
         />
       )}
     </PageWrapper>

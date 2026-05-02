@@ -20,12 +20,18 @@ const Modal = ({
   children, 
   footer,
   showClose,
-  maxWidth = "500px" 
+  maxWidth = "500px",
+  soundManager 
 }) => {
   if (!isOpen) return null;
 
+  const handleClose = () => {
+    if (soundManager?.playClickSound) soundManager.playClickSound();
+    onClose();
+  };
+
   return ReactDOM.createPortal(
-    <ModalBackdrop onClick={onClose}>
+    <ModalBackdrop onClick={handleClose}>
       <ModalContainer 
         style={{ maxWidth }} 
         onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
@@ -34,7 +40,7 @@ const Modal = ({
           <ModalTitle>{title}</ModalTitle>
           {showClose&&(
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             style={{ 
               background: 'none', 
               border: 'none', 

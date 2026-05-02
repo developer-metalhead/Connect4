@@ -31,52 +31,17 @@ const save = (settings) => {
 const useFunModeSettings = () => {
   const [settings, setSettings] = useState(load);
 
-  useEffect(() => {
-    save(settings);
+  const saveFunModeSettings = useCallback((newSettings) => {
+    const updated = { ...settings, ...newSettings };
+    setSettings(updated);
+    save(updated);
   }, [settings]);
-
-  // CHANGE: Generic feature toggle function
-  const toggleFeature = useCallback((featureName) => {
-    setSettings((s) => ({ ...s, [featureName]: !s[featureName] }));
-  }, []);
-
-  const setFeature = useCallback((featureName, value) => {
-    setSettings((s) => ({ ...s, [featureName]: !!value }));
-  }, []);
-
-  // Specific feature accessors for convenience
-  const setMonkeyModeEnabled = useCallback((v) => {
-    setFeature('monkeyModeEnabled', v);
-  }, [setFeature]);
-
-  const toggleMonkeyMode = useCallback(() => {
-    toggleFeature('monkeyModeEnabled');
-  }, [toggleFeature]);
-
-  const setChaosChickenEnabled = useCallback((v) => {
-    setSettings((s) => ({ ...s, chaosChickenEnabled: !!v }));
-  }, []);
-
-  const toggleChaosChicken = useCallback(() => {
-    setSettings((s) => ({ ...s, chaosChickenEnabled: !s.chaosChickenEnabled }));
-  }, []);
 
   return {
     settings,
-    
-    // Generic feature management
-    toggleFeature,
-    setFeature,
-    
-    // Direct accessors for convenience
+    saveFunModeSettings,
     monkeyModeEnabled: settings.monkeyModeEnabled,
     chaosChickenEnabled: settings.chaosChickenEnabled,
-    setMonkeyModeEnabled,
-    setChaosChickenEnabled,
-    toggleMonkeyMode,
-    toggleChaosChicken,
-    
-    // CHANGE: Ready for future features
     powerUpsEnabled: settings.powerUpsEnabled,
   };
 };

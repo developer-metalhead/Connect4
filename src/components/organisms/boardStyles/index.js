@@ -20,6 +20,8 @@ import {  returnToNormalGravity,
 import PoopBlockIndicator from "../../designSystem/Features/chaosChicken/PoopBlockIndicator";
 import { useGameSettings } from "../../../hooks/core/useGameSettings";
 
+import { ANIMATION_CONFIG } from "../../../logic/constants";
+
 const Board = ({
   board,
   currentPlayer,
@@ -48,6 +50,11 @@ const Board = ({
   const [jigglingCols, setJigglingCols] = useState({});
   const [ejectedPieces, setEjectedPieces] = useState([]);
   const { enableBoardShake, shakeIntensity } = useGameSettings();
+
+  // Standardized timing function
+  const calculateDropDuration = (distance) => {
+    return ANIMATION_CONFIG.DROP_BASE_DURATION + (distance * ANIMATION_CONFIG.DROP_PER_ROW_ADDITION);
+  };
 
   // CHANGE: Decouple visual orientation from logical gravity
   // isLogicUpsideDown is true if gravity pulls towards logical Row 0
@@ -213,7 +220,7 @@ const Board = ({
     });
 
     const distance = isLogicUpsideDown ? targetRow + 1 : board.length - targetRow;
-    const animationDuration = 550 + distance * 25; // Slightly longer for juicier bounces
+    const animationDuration = calculateDropDuration(distance);
 
     // Impact 1 (50%)
     setTimeout(() => {
@@ -222,11 +229,11 @@ const Board = ({
         // Delay shake by 60ms to feel like a reaction
         setTimeout(() => {
           setIsShaking(true);
-          setTimeout(() => setIsShaking(false), 150);
-        }, 60);
+          setTimeout(() => setIsShaking(false), ANIMATION_CONFIG.SHAKE_DURATION);
+        }, ANIMATION_CONFIG.SHAKE_DELAY);
       }
       setRippleCell({ row: targetRow, col, player: currentPlayer });
-      setTimeout(() => setRippleCell(null), 500); // 500ms duration matches CSS
+      setTimeout(() => setRippleCell(null), ANIMATION_CONFIG.RIPPLE_DURATION); // 500ms duration matches CSS
     }, animationDuration * 0.5);
 
     // Impact 2 (82%)
@@ -366,7 +373,7 @@ const Board = ({
       currentRow: startRow,
       player: "🟡", // CPU player emoji
       // CHANGE: Calculate exact animation duration to match useConnect4CPU timing
-      animationDuration: 400 + Math.abs(distance) * 50,
+      animationDuration: calculateDropDuration(Math.abs(distance)),
     };
   })() : null;
 
@@ -421,7 +428,7 @@ const Board = ({
       <BoardContainer 
         data-board-container 
         className={isShaking ? "board-shake" : ""}
-        style={{ "--shake-amount": `${shakeIntensity * 0.4}px` }}
+        style={{ "--shake-amount": `${shakeIntensity * 0.8}px` }}
       >
         {/* CHANGE: Add poop block indicators */}
         {(blockedColumns || []).map((block) => (
@@ -491,7 +498,7 @@ const Board = ({
           gravityAnimation.length > 0 &&
           gravityAnimation.map((d, i) => {
             const distance = Math.abs(d.toRow - d.fromRow);
-            const duration = 400 + distance * 120; // Slower, more premium fall
+            const duration = ANIMATION_CONFIG.DROP_BASE_DURATION + distance * ANIMATION_CONFIG.GRAVITY_DROP_PER_ROW; // Slower, more premium fall
             return (
               <FallingDisc
                 key={`grav-${i}`}

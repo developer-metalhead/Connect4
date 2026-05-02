@@ -1,25 +1,9 @@
 import { ROWS, COLS, EMPTY } from "../helperFunction";
+import { CHICKEN_CONFIG } from "../../logic/funMode";
 
-// Chaos Chicken voice lines
-const CHICKEN_VOICE_LINES = [
-  "Bawk bawk! Chaos time!",
-  "Cluck cluck! Here comes trouble!",
-  "Chicken alert! Incoming poop!",
-  "Feathers flying everywhere!",
-  "Time to ruffle some feathers!",
-];
-
-const ROOSTER_VOICE_LINES = [
-  "RAAAWR! Rooster of Rage!",
-  "COCK-A-DOODLE-DOOM!",
-  "Fire and fury unleashed!",
-  "Behold the mighty rooster!",
-  "Rage mode activated!",
-];
-
-// Improved 2x2 Detection Function (Strict)
-export const detectNew2x2Squares = (board, player, lastRow, lastCol) => {
-  console.log(`🔍 Checking 2x2 immediately after placement at [${lastRow}][${lastCol}]`);
+// Improved Square Detection Function (Decoupled size)
+export const detectNewSquares = (board, player, lastRow, lastCol, size) => {
+  console.log(`🔍 Checking ${size}x${size} squares immediately after placement at [${lastRow}][${lastCol}]`);
   
   if (lastRow === -1 || lastCol === -1) return { count: 0, squares: [] };
   
@@ -27,35 +11,34 @@ export const detectNew2x2Squares = (board, player, lastRow, lastCol) => {
   const ROWS = board.length;
   const COLS = board[0].length;
   
-  // Check the maximum 4 possible 2x2 positions that can contain the newly placed disc:
-  // Top-left, Top-right, Bottom-left, Bottom-right
-  const possibleCorners = [
-    { r: lastRow, c: lastCol },         // Square is to the bottom-right
-    { r: lastRow, c: lastCol - 1 },     // Square is to the bottom-left
-    { r: lastRow - 1, c: lastCol },     // Square is to the top-right
-    { r: lastRow - 1, c: lastCol - 1 }  // Square is to the top-left
-  ];
-  
-  for (const corner of possibleCorners) {
-    const { r, c } = corner;
-    
-    // Bounds check
-    if (r >= 0 && r < ROWS - 1 && c >= 0 && c < COLS - 1) {
-      if (
-        board[r][c] === player &&
-        board[r][c + 1] === player &&
-        board[r + 1][c] === player &&
-        board[r + 1][c + 1] === player
-      ) {
-        squares.push({ startRow: r, startCol: c });
-        console.log(`✅ Found new 2x2 at [${r}][${c}] including placed cell`);
+  // A square of size 'size' can be in 'size * size' relative positions to the new piece.
+  // We iterate through all possible top-left corners that could include [lastRow, lastCol].
+  for (let rOffset = -(size - 1); rOffset <= 0; rOffset++) {
+    for (let cOffset = -(size - 1); cOffset <= 0; cOffset++) {
+      const r = lastRow + rOffset;
+      const c = lastCol + cOffset;
+
+      // Bounds check for the whole square
+      if (r >= 0 && r + size <= ROWS && c >= 0 && c + size <= COLS) {
+        let isSquare = true;
+        
+        // Check all cells in the square
+        for (let i = 0; i < size; i++) {
+          for (let j = 0; j < size; j++) {
+            if (board[r + i][c + j] !== player) {
+              isSquare = false;
+              break;
+            }
+          }
+          if (!isSquare) break;
+        }
+
+        if (isSquare) {
+          squares.push({ startRow: r, startCol: c });
+          console.log(`✅ Found new ${size}x${size} at [${r}][${c}]`);
+        }
       }
     }
-  }
-  
-  console.log(`📊 TOTAL NEW 2x2 SQUARES: ${squares.length}`);
-  if (squares.length > 0) {
-    console.log(`🚀 Triggering Chaos Chicken instantly for player ${player}`);
   }
   
   return { count: squares.length, squares };
@@ -98,10 +81,10 @@ export const getRandomUnblockedColumn = (blockedColumns, board) => {
   
   // 70% chance to block a non-empty column, 30% chance for empty
   const roll = Math.random();
-  console.log(`🎲 Probability roll for column blocking: ${roll.toFixed(2)} (Target: < 0.70 for Non-Empty)`);
+  console.log(`🎲 Probability roll for column blocking: ${roll.toFixed(2)} (Target: < ${CHICKEN_CONFIG.POOP_NON_EMPTY_PROBABILITY.toFixed(2)} for Non-Empty)`);
   
   let targetColArray;
-  if (roll < 0.70 && nonEmptyColumns.length > 0) {
+  if (roll < CHICKEN_CONFIG.POOP_NON_EMPTY_PROBABILITY && nonEmptyColumns.length > 0) {
     console.log("📈 Selected 70% probability: Choosing a non-empty column");
     targetColArray = nonEmptyColumns;
   } else if (emptyColumns.length > 0) {
@@ -131,7 +114,7 @@ export const blockColumn = (blockedColumns, columnIndex) => {
   // Add new block
   filtered.push({
     columnIndex,
-    turnsLeft: 3,
+    turnsLeft: CHICKEN_CONFIG.POOP_BLOCK_DURATION,
     createdAt: Date.now()
   });
   
@@ -237,54 +220,43 @@ export const applyGravityAfterClear = (board, isUpsideDown = false) => {
 
 // Get random chicken voice line
 export const getRandomChickenVoiceLine = () => {
-  return CHICKEN_VOICE_LINES[Math.floor(Math.random() * CHICKEN_VOICE_LINES.length)];
+  return CHICKEN_CONFIG.CHICKEN_VOICE_LINES[Math.floor(Math.random() * CHICKEN_CONFIG.CHICKEN_VOICE_LINES.length)];
 };
 
 // Get random rooster voice line
 export const getRandomRoosterVoiceLine = () => {
-  return ROOSTER_VOICE_LINES[Math.floor(Math.random() * ROOSTER_VOICE_LINES.length)];
+  return CHICKEN_CONFIG.ROOSTER_VOICE_LINES[Math.floor(Math.random() * CHICKEN_CONFIG.ROOSTER_VOICE_LINES.length)];
 };
 
 // Check if player should trigger Chaos Chicken
 export const shouldTriggerChaosChicken = (board, lastRow, lastCol, player, chaosChickenState) => {
-  console.log("🐔 CHECKING CHAOS CHICKEN TRIGGER:", {
-    player,
-    lastRow,
-    lastCol,
-    chaosChickenState
-  });
-  
-  // Check if player has retired their chicken
+  if (!chaosChickenState) return false;
+
+  // Check if player has reached their Rooster limit
   const playerKey = player === "🔴" ? "player1" : "player2";
-  if (chaosChickenState.hasUsedRooster[playerKey]) {
-    console.log("❌ PLAYER HAS RETIRED THEIR CHICKEN:", player);
+  const roosterCount = chaosChickenState.roosterCount?.[playerKey] || 0;
+  
+  if (roosterCount >= CHICKEN_CONFIG.MAX_ROOSTER_PER_PLAYER) {
+    console.log("❌ PLAYER HAS REACHED ROOSTER LIMIT:", player);
     return false;
   }
   
-  // Check if new 2x2 square was formed
-  const { count } = detectNew2x2Squares(board, player, lastRow, lastCol);
-  const hasNew2x2 = count > 0;
+  // Check if new square was formed based on configuration
+  const { count } = detectNewSquares(board, player, lastRow, lastCol, CHICKEN_CONFIG.PATTERN_SIZE);
+  const hasNewPattern = count > 0;
   
-  console.log("🎯 CHAOS CHICKEN DECISION:", {
-    player,
-    hasNew2x2,
-    playerActivations: chaosChickenState.chickenActivations[playerKey],
-    hasUsedRooster: chaosChickenState.hasUsedRooster[playerKey]
-  });
-  
-  return hasNew2x2;
-};
-
-// Get player activation count
-export const getPlayerActivationCount = (chaosChickenState, player) => {
-  const playerKey = player === "🔴" ? "player1" : "player2";
-  return chaosChickenState.chickenActivations[playerKey];
+  return hasNewPattern;
 };
 
 // Check if this will be a Rooster of Rage activation
 export const isRoosterOfRageActivation = (chaosChickenState, player) => {
+  if (!chaosChickenState || !chaosChickenState.chickenActivations) return false;
+
   const playerKey = player === "🔴" ? "player1" : "player2";
-  return chaosChickenState.chickenActivations[playerKey] === 1 && !chaosChickenState.hasUsedRooster[playerKey];
+  const currentActivations = chaosChickenState.chickenActivations[playerKey] || 0;
+  
+  // Triggers if it's the (ROOSTER_THRESHOLD)-th activation
+  return currentActivations === (CHICKEN_CONFIG.ROOSTER_THRESHOLD - 1);
 };
 
 // Find nearest available column

@@ -167,6 +167,24 @@ io.on("connection", (socket) => {
       state.currentPlayer = nextPlayer(state.currentPlayer);
     }
 
+    if (state.winner || state.isDraw) {
+      // Auto-start rematch timer
+      if (!room.rematch) {
+        const duration = 10000;
+        const expiresAt = Date.now() + duration;
+        room.rematch = { requested: new Set(), timer: null };
+        io.to(rid).emit("rematch_timer_started", { expiresAt });
+        
+        room.rematch.timer = setTimeout(() => {
+          if (rooms.has(rid) && room.rematch && room.rematch.requested.size < 2) {
+            console.log(`⏰ Rematch expired for room ${rid}`);
+            io.to(rid).emit("rematch_expired");
+            room.rematch = null;
+          }
+        }, duration);
+      }
+    }
+
     broadcastState(rid);
   });
 
@@ -190,6 +208,47 @@ io.on("connection", (socket) => {
     else broadcastState(rid);
   });
 
+  socket.on("request_rematch", ({ roomId, playerId }) => {
+    const rid = String(roomId || "").toUpperCase();
+    const pid = String(playerId || "");
+    const room = rooms.get(rid);
+    if (!room) return;
+
+    console.log(`🔄 Rematch requested by ${pid} in room ${rid}`);
+
+    if (!room.rematch) {
+      room.rematch = { requested: new Set(), timer: null };
+    }
+
+    room.rematch.requested.add(pid);
+    
+    // Broadcast who requested
+    io.to(rid).emit("rematch_requested", { playerId: pid });
+
+    // If both players accepted, start new game
+    if (room.rematch.requested.size >= 2) {
+      console.log(`✅ Rematch accepted by both in room ${rid}. Resetting game...`);
+      if (room.rematch.timer) clearTimeout(room.rematch.timer);
+      room.rematch = null;
+      room.state = resetState();
+      io.to(rid).emit("rematch_accepted");
+      broadcastState(rid);
+    }
+  });
+
+  socket.on("decline_rematch", ({ roomId, playerId }) => {
+    const rid = String(roomId || "").toUpperCase();
+    const pid = String(playerId || "");
+    const room = rooms.get(rid);
+    if (!room) return;
+
+    console.log(`❌ Rematch declined by ${pid} in room ${rid}`);
+
+    if (room.rematch?.timer) clearTimeout(room.rematch.timer);
+    room.rematch = null;
+    io.to(rid).emit("rematch_declined", { playerId: pid });
+  });
+
   socket.on("disconnect", () => {
     // Remove from queue if present
     const idx = queue.findIndex((q) => q.socketId === socket.id);
@@ -200,6 +259,12 @@ io.on("connection", (socket) => {
       const p = room.players.find((pp) => pp.socketId === socket.id);
       if (p) {
         p.socketId = ""; // mark offline
+        // If someone disconnects, cancel any pending rematch
+        if (room.rematch) {
+          if (room.rematch.timer) clearTimeout(room.rematch.timer);
+          room.rematch = null;
+          io.to(rid).emit("rematch_declined", { playerId: p.id, reason: "disconnect" });
+        }
         broadcastState(rid);
       }
     }

@@ -1,22 +1,10 @@
 import { ROWS, COLS, EMPTY } from "../helperFunction";
+import { MONKEY_CONFIG } from "../../logic/funMode";
 
-// Monkey Mayhem voice lines
-const MONKEY_VOICE_LINES = [
-  "Time to flip things up!",
-  "Ooo-ooo! Gravity is my playground!",
-  "Board go brrr!",
-  "Monkey business time!",
-  "Let's turn this upside down!",
-];
-
-// CHANGE: Updated to count overlapping 3-in-a-rows by removing usedCells tracking
-export const countSeparateThreeInARows = (board, player) => {
-  console.log("🔍 COUNTING 3-IN-A-ROWS FOR PLAYER:", player);
-  console.log(
-    "📋 CURRENT BOARD:",
-    board.map((row) => row.join("")),
-  );
-
+// General pattern counting function (decoupled from "3-in-a-row")
+export const countSeparateInARows = (board, player, size) => {
+  console.log(`🔍 COUNTING ${size}-IN-A-ROWS FOR PLAYER:`, player);
+  
   let count = 0;
 
   const directions = [
@@ -26,25 +14,14 @@ export const countSeparateThreeInARows = (board, player) => {
     [1, -1], // diagonal up-right
   ];
 
-  const directionNames = [
-    "horizontal",
-    "vertical",
-    "diagonal-down-right",
-    "diagonal-up-right",
-  ];
-
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
       if (board[row][col] !== player) continue;
 
-      for (let dirIndex = 0; dirIndex < directions.length; dirIndex++) {
-        const [dr, dc] = directions[dirIndex];
-        const dirName = directionNames[dirIndex];
-
-        const cells = [];
+      for (let [dr, dc] of directions) {
         let valid = true;
 
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < size; i++) {
           const r = row + i * dr;
           const c = col + i * dc;
 
@@ -58,26 +35,16 @@ export const countSeparateThreeInARows = (board, player) => {
             valid = false;
             break;
           }
-
-          const cellKey = `${r},${c}`;
-          cells.push(cellKey);
         }
 
         if (valid) {
           count++;
-
-          console.log("✅ FOUND 3-IN-A-ROW:", {
-            direction: dirName,
-            startPos: `${row},${col}`,
-            cells: cells,
-            totalCount: count,
-          });
         }
       }
     }
   }
 
-  console.log("📊 FINAL 3-IN-A-ROW COUNT:", {
+  console.log(`📊 FINAL ${size}-IN-A-ROW COUNT:`, {
     player,
     count,
   });
@@ -85,27 +52,17 @@ export const countSeparateThreeInARows = (board, player) => {
   return count;
 };
 
-export const shouldTriggerMonkeyMayhem = (board, player, monkeyMayhemState) => {
-  console.log("🐒 CHECKING MONKEY MAYHEM TRIGGER:", {
-    player,
-    monkeyMayhemState,
-  });
-
-  if (monkeyMayhemState.wasOffered || monkeyMayhemState.wasUsed) {
-    console.log("❌ MONKEY MAYHEM ALREADY OFFERED/USED:", monkeyMayhemState);
+export const shouldTriggerMonkeyMayhem = (board, player, monkeyState) => {
+  // Check if we reached the match limit
+  if (monkeyState.totalActivations >= MONKEY_CONFIG.MAX_ACTIVATIONS_PER_MATCH) {
+    console.log("❌ MONKEY MAYHEM MATCH LIMIT REACHED:", MONKEY_CONFIG.MAX_ACTIVATIONS_PER_MATCH);
     return false;
   }
 
-  const threeInARowCount = countSeparateThreeInARows(board, player);
-  const shouldTrigger = threeInARowCount >= 2;
-
-  console.log("🎯 MONKEY MAYHEM DECISION:", {
-    player,
-    threeInARowCount,
-    requiredCount: 2,
-    shouldTrigger,
-    isFirstOpportunity: !monkeyMayhemState.wasOffered,
-  });
+  const patternCount = countSeparateInARows(board, player, MONKEY_CONFIG.PATTERN_SIZE);
+  const shouldTrigger = patternCount >= MONKEY_CONFIG.TRIGGER_THRESHOLD;
+  
+  console.log(`📊 MONKEY MAYHEM DECISION: ${shouldTrigger} (Found ${patternCount}/${MONKEY_CONFIG.TRIGGER_THRESHOLD} of size ${MONKEY_CONFIG.PATTERN_SIZE})`);
 
   return shouldTrigger;
 };
@@ -148,13 +105,13 @@ export const flipBoardUpsideDown = (board) => {
 // === MONKEY STEAL DISC LOGIC ===
 // Probability check and disc stealing function starts here
 export const maybeStealDisc = (board, triggeringPlayer, isUpsideDown = false) => {
-// Probability of monkey stealing a disc = 75%
-  if (Math.random() > 0.25) {   // 75% chance to steal
-    console.log("🍌 NO DISC STOLEN (25% chance)");
+// Probability of monkey stealing a disc
+  if (Math.random() > MONKEY_CONFIG.STEAL_PROBABILITY) {   
+    console.log(`🍌 NO DISC STOLEN (${((1 - MONKEY_CONFIG.STEAL_PROBABILITY) * 100).toFixed(0)}% chance)`);
     return { newBoard: board, stolenCell: null };
   }
 
-  console.log("🍌 MONKEY STEALING A DISC! (75% chance)");
+  console.log(`🍌 MONKEY STEALING A DISC! (${(MONKEY_CONFIG.STEAL_PROBABILITY * 100).toFixed(0)}% chance)`);
 
   const opponentPlayer = triggeringPlayer === "🔴" ? "🟡" : "🔴";
   
@@ -217,8 +174,8 @@ export const maybeStealDisc = (board, triggeringPlayer, isUpsideDown = false) =>
 };
 
 export const getRandomMonkeyVoiceLine = () => {
-  return MONKEY_VOICE_LINES[
-    Math.floor(Math.random() * MONKEY_VOICE_LINES.length)
+  return MONKEY_CONFIG.VOICE_LINES[
+    Math.floor(Math.random() * MONKEY_CONFIG.VOICE_LINES.length)
   ];
 };
 

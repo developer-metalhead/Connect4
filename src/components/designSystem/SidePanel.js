@@ -130,7 +130,7 @@ const Content = styled("div")({
   },
 });
 
-const SidePanel = ({ isOpen, onClose, title, children }) => {
+const SidePanel = ({ isOpen, onClose, title, children, soundManager }) => {
   const [isClosing, setIsClosing] = React.useState(false);
 
   React.useEffect(() => {
@@ -138,6 +138,7 @@ const SidePanel = ({ isOpen, onClose, title, children }) => {
   }, [isOpen]);
 
   const handleClose = () => {
+    if (soundManager?.playClickSound) soundManager.playClickSound();
     setIsClosing(true);
     setTimeout(() => {
       onClose();

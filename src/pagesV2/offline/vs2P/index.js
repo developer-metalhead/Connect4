@@ -27,14 +27,20 @@ const Game2PV2 = () => {
   const { gameState, makeMove, reset: baseReset } = useConnect4();
   const { board, currentPlayer, winner, isDraw } = gameState;
 
+  // Background music management
+  useEffect(() => {
+    soundManager.pauseBackgroundMusic();
+    return () => soundManager.resumeBackgroundMusic();
+  }, [soundManager]);
+
   const reset = () => {
-    soundManager?.playSound('coinsfalling');
+    soundManager?.playClickSound();
     setSurrendered(null);
     baseReset();
   };
 
   const handleSurrender = () => {
-    // Current player surrenders, other player wins
+    soundManager.playSurrenderSound();
     setSurrendered(currentPlayer);
   };
 
