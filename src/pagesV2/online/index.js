@@ -303,6 +303,7 @@ const OnlineV2 = () => {
           primaryActionLabel="Rematch"
           onSecondaryAction={() => navigate("/home")}
           soundManager={soundManager}
+          isNaturalEnding={true}
         />
       )}
     </PageWrapper>

@@ -31,8 +31,22 @@ export const MatchResultOverlay = ({
   secondaryActionLabel = "Main Menu",
   variant = "win", // win, loss, draw, default
   icon,
-  soundManager
+  soundManager,
+  isNaturalEnding = false,
 }) => {
+  const [isVisible, setIsVisible] = React.useState(!isNaturalEnding);
+
+  React.useEffect(() => {
+    if (isNaturalEnding) {
+      const timer = setTimeout(() => setIsVisible(true), 1000); // 1.5s gap for natural win
+      return () => clearTimeout(timer);
+    } else {
+      setIsVisible(true);
+    }
+  }, [isNaturalEnding]);
+
+  if (!isVisible) return null;
+
   return (
     <OverlayBackdrop>
       <ResultCard>

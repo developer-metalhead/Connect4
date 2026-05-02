@@ -71,6 +71,18 @@ export const Cell = styled("div")({
     animation: "nopeJiggle 0.4s cubic-bezier(.36,.07,.19,.97) both",
   },
 
+  "&.winning-piece": {
+    animation: "winHeartbeat 1.5s infinite ease-in-out",
+    zIndex: 20,
+    position: "relative",
+  },
+
+  "&.losing-piece": {
+    opacity: 0.4,
+    transition: "opacity 0.8s ease-in-out",
+    filter: "grayscale(0.6)",
+  },
+
   "&.target-glow::after": {
     content: '""',
     position: "absolute",
@@ -334,6 +346,15 @@ export const GlobalStyles = `
     60% { transform: translateX(3px) rotate(2deg); }
     75% { transform: translateX(-2px) rotate(-1deg); }
     100% { transform: translateX(0); }
+  }
+
+  @keyframes winHeartbeat {
+    0% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    15% { transform: scale(1.15); box-shadow: 0 15px 25px rgba(0,0,0,0.5); }
+    30% { transform: scale(1.05); box-shadow: 0 8px 18px rgba(0,0,0,0.3); }
+    45% { transform: scale(1.15); box-shadow: 0 15px 25px rgba(0,0,0,0.5); }
+    70% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
   }
 
   @keyframes rippleOut {

@@ -452,16 +452,27 @@ const Board = ({
 
         {board.map((row, r) => (
           <Row key={r}>
-            {row.map((cell, c) => (
-              <Cell
-                key={c}
+            {row.map((cell, c) => {
+              // Calculate win state classes
+              const isWinningPiece = winner && winningLine && winningLine.some(loc => loc.row === r && loc.col === c);
+              const isLosingPiece = winner && !isWinningPiece && cell !== "⚪";
+
+              return (
+                <Cell
+                  key={c}
                 onClick={() => canInteract && handleClick(c)}
                 onMouseEnter={() => handleMouseEnter(c)}
                 onMouseLeave={handleMouseLeave}
                 onTouchStart={() => handleTouchStart(c)}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-                className={`${droppingCol === c ? "dropping" : ""} ${activeCol === c && activeTargetRow === r && droppingCol === null ? "target-glow" : ""} ${jigglingCols[c] ? "jiggle" : ""}`}
+                className={`
+                  ${droppingCol === c ? "dropping" : ""} 
+                  ${activeCol === c && activeTargetRow === r && droppingCol === null ? "target-glow" : ""} 
+                  ${jigglingCols[c] ? "jiggle" : ""}
+                  ${isWinningPiece ? "winning-piece" : ""}
+                  ${isLosingPiece ? "losing-piece" : ""}
+                `}
                 style={{
                   cursor:
                     canInteract && !winner && !isDraw && droppingCol === null
@@ -488,9 +499,10 @@ const Board = ({
                       "--ripple-color": rippleCell.player === "🔴" ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)" 
                     }} 
                   />
-                )}
-              </Cell>
-            ))}
+                  )}
+                </Cell>
+              );
+            })}
           </Row>
         ))}
 

@@ -163,16 +163,13 @@ const PlayCPUV2 = () => {
             winner === PLAYER2 ? "The CPU has claimed this victory." :
             "A tactical stalemate."
           }
-          variant={
-            (winner === PLAYER1) ? "win" : 
-            (winner === PLAYER2 || surrendered) ? "loss" :
-            "draw"
-          }
-          icon={surrendered ? "🏳️" : (winner === PLAYER1 ? "🏆" : (winner === PLAYER2 ? "🤖" : "🤝"))}
+          variant={isDraw ? "draw" : winner === PLAYER1 ? "win" : "loss"}
+          icon={surrendered ? "🏳️" : winner === PLAYER1 ? "🏆" : winner === PLAYER2 ? "😔" : "🤝"}
           onPrimaryAction={handleReset}
           primaryActionLabel="Rematch"
           onSecondaryAction={() => navigate("/play-offline")}
           soundManager={soundManager}
+          isNaturalEnding={!surrendered}
         />
       )}
 

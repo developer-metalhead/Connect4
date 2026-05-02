@@ -123,6 +123,7 @@ const Game2PV2 = () => {
           primaryActionLabel="Rematch"
           onSecondaryAction={() => navigate("/play-offline")}
           soundManager={soundManager}
+          isNaturalEnding={!surrendered}
         />
       )}
 
