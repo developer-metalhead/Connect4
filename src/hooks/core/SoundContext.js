@@ -52,7 +52,7 @@ const SOUND_CONFIG = {
   },
   bgMusic: {
     files: ["bg2cut.mp3"],
-    volume: 0.3,
+    volume: 0.5,
     loop: true,
   },
 };
@@ -280,11 +280,34 @@ export const SoundProvider = ({ children }) => {
     },
     pauseBackgroundMusic: () => {
       const bg = audioInstancesRef.current.bgMusic;
-      if (bg) bg.pause();
+      if (!bg) return;
+      
+      const fadeOut = setInterval(() => {
+        if (bg.volume > 0.05) {
+          bg.volume -= 0.05;
+        } else {
+          bg.volume = 0;
+          bg.pause();
+          clearInterval(fadeOut);
+        }
+      }, 50);
     },
     resumeBackgroundMusic: () => {
       const bg = audioInstancesRef.current.bgMusic;
-      if (bg && isMusicEnabled && !isMuted) bg.play().catch(() => {});
+      if (!bg || !isMusicEnabled || isMuted) return;
+
+      const targetVolume = (SOUND_CONFIG.bgMusic.volume || 1) * musicVolume;
+      bg.volume = 0;
+      bg.play().catch(() => {});
+      
+      const fadeIn = setInterval(() => {
+        if (bg.volume < targetVolume - 0.05) {
+          bg.volume += 0.05;
+        } else {
+          bg.volume = targetVolume;
+          clearInterval(fadeIn);
+        }
+      }, 50);
     },
     isAudioSupported: Object.keys(audioInstancesRef.current).length > 0,
   };

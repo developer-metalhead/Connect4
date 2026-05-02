@@ -44,18 +44,18 @@ const SoundSettings = ({ soundManager, onClose }) => {
     }
   };
 
-  if (!isAudioSupported) {
-    return (
-      <SettingsContainer>
-        <p style={{ textAlign: 'center', color: '#ef4444', fontSize: '14px' }}>
-          Audio is not supported in this browser environment.
-        </p>
-        <Button variant="primary" fullWidth onClick={onClose} soundManager={soundManager}>
-          Close
-        </Button>
-      </SettingsContainer>
-    );
-  }
+  // if (!isAudioSupported) {
+  //   return (
+  //     <SettingsContainer>
+  //       <p style={{ textAlign: 'center', color: '#ef4444', fontSize: '14px' }}>
+  //         Audio is not supported in this browser environment.
+  //       </p>
+  //       <Button variant="primary" fullWidth onClick={onClose} soundManager={soundManager}>
+  //         Close
+  //       </Button>
+  //     </SettingsContainer>
+  //   );
+  // }
 
   return (
     <SettingsContainer>

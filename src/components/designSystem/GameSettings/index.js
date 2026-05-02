@@ -42,7 +42,7 @@ const GameSettings = ({ soundManager, onClose }) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <Label>🔊 Alternate Audio</Label>
           <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
-            Use fun winWow/booWow sounds for matches
+            Use fun sounds for matches
           </span>
         </div>
         <Button 
