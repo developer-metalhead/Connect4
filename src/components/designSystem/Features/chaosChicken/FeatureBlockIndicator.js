@@ -2,6 +2,7 @@ import React from "react";
 import { styled, keyframes } from "@mui/material/styles";
 import { tokens } from "../../tokens";
 
+// --- ANIMATIONS ---
 const wobble = keyframes`
   0%, 100% { transform: rotate(0deg) scale(1); }
   25% { transform: rotate(-5deg) scale(1.1); }
@@ -19,9 +20,8 @@ const glow = keyframes`
   50% { filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8)); }
 `;
 
-const PoopContainer = styled("div", {
-  shouldForwardProp: (prop) => prop !== "isUpsideDown" && prop !== "columnIndex",
-})(({ columnIndex }) => ({
+// --- STYLED COMPONENTS ---
+const IndicatorContainer = styled("div")(({ columnIndex }) => ({
   position: "absolute",
   top: "-70px",
   left: `calc(var(--board-padding) + ${columnIndex} * (var(--cell) + var(--gap)))`,
@@ -39,7 +39,7 @@ const PoopContainer = styled("div", {
   },
 }));
 
-const PoopEmoji = styled("div")({
+const IndicatorEmoji = styled("div")({
   fontSize: "calc(var(--cell) * 0.85)",
   animation: `${wobble} 2s infinite ease-in-out, ${glow} 2s infinite`,
   marginBottom: "4px",
@@ -60,7 +60,7 @@ const BlockedLabel = styled("div")({
   whiteSpace: "nowrap",
 });
 
-const StinkCloud = styled("div")(({ delay }) => ({
+const EffectCloud = styled("div")(({ delay }) => ({
   position: "absolute",
   top: "-15px",
   left: "50%",
@@ -71,29 +71,41 @@ const StinkCloud = styled("div")(({ delay }) => ({
   opacity: 0,
 }));
 
-const PoopBlockIndicator = ({ columnIndex, turnsLeft, isUpsideDown = false }) => {
-  const stinkClouds = Array.from({ length: 3 }, (_, i) => ({
+/**
+ * THE UNIVERSAL BLOCK INDICATOR (PHASE 3)
+ * Displays whatever projectile blocked the column (Poop, Banana, etc.)
+ */
+const FeatureBlockIndicator = ({ columnIndex, turnsLeft, projectile = "💩", isUpsideDown = false }) => {
+  const particles = Array.from({ length: 3 }, (_, i) => ({
     id: i,
     delay: i * 0.6,
   }));
 
+  // Choose effect emoji based on the projectile
+  const effectEmoji = projectile === "💩" ? "💨" : (projectile === "🍌" ? "✨" : "💢");
+
+  console.log('hey projectile',projectile)
+
   return (
-    <PoopContainer
+    <IndicatorContainer
       columnIndex={columnIndex}
-      isUpsideDown={isUpsideDown}
       style={{ transform: isUpsideDown ? "rotate(180deg)" : "none" }}
     >
-      <PoopEmoji>💩</PoopEmoji>
+      {/* THE DYNAMIC EMOJI */}
+      <IndicatorEmoji>{projectile}</IndicatorEmoji>
+      
       <BlockedLabel>
         Blocked ({turnsLeft})
       </BlockedLabel>
-      {stinkClouds.map(cloud => (
-        <StinkCloud key={cloud.id} delay={cloud.delay}>
-          💨
-        </StinkCloud>
+
+      {/* Floating particles for extra juice */}
+      {particles.map(p => (
+        <EffectCloud key={p.id} delay={p.delay}>
+          {effectEmoji}
+        </EffectCloud>
       ))}
-    </PoopContainer>
+    </IndicatorContainer>
   );
 };
 
-export default PoopBlockIndicator;
+export default FeatureBlockIndicator;

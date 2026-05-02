@@ -11,7 +11,6 @@ import Scoreboard from "../../../components/designSystem/Scoreboard";
 import { GameStatus, MatchResultOverlay } from "../../../components/designSystem/Status";
 import BackButton from "../../../components/designSystem/BackButton";
 import GiveUpButton from "../../../components/designSystem/GiveUpButton";
-import PoopBlockIndicator from "../../../components/designSystem/Features/chaosChicken/PoopBlockIndicator";
 import { GameLayout, ControlGroup } from "./index.style";
 
 // Original Logic Components
@@ -90,7 +89,6 @@ const Game2PV2 = () => {
             onDrop={makeMove}
             soundManager={soundManager}
             winningLine={gameState.winningLine}
-            PoopBlockIndicatorComponent={PoopBlockIndicator}
           />
 
           <GameStatus 

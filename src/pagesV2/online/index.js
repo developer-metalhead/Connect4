@@ -35,7 +35,6 @@ import {
 
 // Original Logic
 import Board from "../../components/organisms/boardStyles";
-import PoopBlockIndicator from "../../components/designSystem/Features/chaosChicken/PoopBlockIndicator";
 import useSoundManager from "../../hooks/core/useSoundManager";
 import useOnlineConnect4 from "../../hooks/gameplay/useOnlineConnect4";
 import { useGameSettings } from "../../hooks/settings/useGameSettings";
@@ -366,7 +365,6 @@ const OnlineV2 = () => {
               canInteract={myTurn}
               soundManager={soundManager}
               winningLine={gameState.winningLine}
-              PoopBlockIndicatorComponent={PoopBlockIndicator}
             />
 
             <GameStatus 

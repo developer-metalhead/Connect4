@@ -17,7 +17,7 @@ import {
 import {  returnToNormalGravity,
   applyInvertedGravity,
   planInvertedGravityAnimation, } from "../../../helperFunction/funMode/monkeyModeFeatures";
-import PoopBlockIndicator from "../../designSystem/Features/chaosChicken/PoopBlockIndicator";
+import FeatureBlockIndicator from "../../designSystem/Features/chaosChicken/FeatureBlockIndicator";
 import { useGameSettings } from "../../../hooks/settings/useGameSettings";
 
 import { ANIMATION_CONFIG, CORE_CONFIG, PATTERNS } from "../../../logic/core/coreConfig";
@@ -40,7 +40,7 @@ const Board = ({
   winningLine = null,
   blockedColumns = [],
   onBlockedColumnAttempt = null,
-  PoopBlockIndicatorComponent = PoopBlockIndicator,
+  BlockIndicatorComponent = FeatureBlockIndicator,
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
@@ -432,10 +432,12 @@ const Board = ({
       >
         {/* CHANGE: Add poop block indicators */}
         {(blockedColumns || []).map((block) => (
-          <PoopBlockIndicatorComponent
-            key={`poop-${block.columnIndex}`}
+          <BlockIndicatorComponent
+            key={`block-${block.columnIndex}`}
             columnIndex={block.columnIndex}
+            projectile={block.projectile}
             turnsLeft={block.turnsLeft}
+            isUpsideDown={isUpsideDown}
           />
         ))}
 
