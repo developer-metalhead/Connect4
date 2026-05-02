@@ -9,7 +9,7 @@
 
   // Pattern Size is The dimension of the pattern (e.g. 3 for 3-in-a-row, 2 for 2x2 square)
 
-import { PATTERNS } from "../core/constants";
+import { PATTERNS } from "../core/coreConfig";
 
 export const MONKEY_CONFIG = {
   // The type of board pattern that fuels this ability

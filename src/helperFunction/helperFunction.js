@@ -15,7 +15,7 @@ export {
   PLAYER2, 
   EMPTY,
   ANIMATION_CONFIG 
-} from "../logic/core/constants";
+} from "../logic/core/coreConfig";
 
 // Re-export core engine logic
 export {

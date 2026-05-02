@@ -1,4 +1,4 @@
-import { ROWS, COLS, EMPTY } from "../../logic/core/constants";
+import { ROWS, COLS, EMPTY } from "../../logic/core/coreConfig";
 import { MONKEY_CONFIG } from "../../logic/funMode/funMode";
 import { detectPattern } from "./patternDispatcher";
 import { countSeparateInARows } from "./patternDetectors";

@@ -1,4 +1,4 @@
-import { ROWS, COLS, EMPTY } from "../../logic/core/constants";
+import { ROWS, COLS, EMPTY } from "../../logic/core/coreConfig";
 import { CHICKEN_CONFIG } from "../../logic/funMode/funMode";
 import { detectPattern } from "./patternDispatcher";
 import { detectNewSquares } from "./patternDetectors";
