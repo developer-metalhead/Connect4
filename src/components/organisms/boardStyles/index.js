@@ -38,7 +38,7 @@ const Board = ({
   const [isShaking, setIsShaking] = useState(false);
   const [touchCol, setTouchCol] = useState(null);
   const [touchTimeout, setTouchTimeout] = useState(null);
-  const { enableBoardShake } = useBoardSettings();
+  const { enableBoardShake, shakeIntensity } = useBoardSettings();
 
   // Build a quick mask to hide source cells during mass-fall overlays
   const maskedKeys =
@@ -132,8 +132,11 @@ const Board = ({
     setTimeout(() => {
       if (soundManager) soundManager.playSound("drop");
       if (enableBoardShake) {
-        setIsShaking(true);
-        setTimeout(() => setIsShaking(false), 150);
+        // Delay shake by 60ms to feel like a reaction
+        setTimeout(() => {
+          setIsShaking(true);
+          setTimeout(() => setIsShaking(false), 150);
+        }, 60);
       }
       setRippleCell({ row: targetRow, col, player: currentPlayer });
       setTimeout(() => setRippleCell(null), 500); // 500ms duration matches CSS
@@ -328,7 +331,11 @@ const Board = ({
         </PreviewRow>
       )}
 
-      <BoardContainer data-board-container className={isShaking ? "board-shake" : ""}>
+      <BoardContainer 
+        data-board-container 
+        className={isShaking ? "board-shake" : ""}
+        style={{ "--shake-amount": `${shakeIntensity * 0.4}px` }}
+      >
         {/* CHANGE: Add poop block indicators */}
         {(blockedColumns || []).map((block) => (
           <PoopBlockIndicatorComponent

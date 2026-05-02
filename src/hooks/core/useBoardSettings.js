@@ -10,9 +10,22 @@ export const useBoardSettings = () => {
     }
   });
 
+  const [shakeIntensity, setShakeIntensity] = useState(() => {
+    try {
+      const saved = localStorage.getItem('board_shakeIntensity');
+      return saved !== null ? JSON.parse(saved) : 5;
+    } catch {
+      return 5;
+    }
+  });
+
   useEffect(() => {
     localStorage.setItem('board_enableShake', JSON.stringify(enableBoardShake));
   }, [enableBoardShake]);
 
-  return { enableBoardShake, setEnableBoardShake };
+  useEffect(() => {
+    localStorage.setItem('board_shakeIntensity', JSON.stringify(shakeIntensity));
+  }, [shakeIntensity]);
+
+  return { enableBoardShake, setEnableBoardShake, shakeIntensity, setShakeIntensity };
 };

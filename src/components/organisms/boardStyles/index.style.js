@@ -337,8 +337,8 @@ export const GlobalStyles = `
 
   @keyframes boardShake {
     0% { transform: translateY(0); }
-    25% { transform: translateY(2px); }
-    75% { transform: translateY(-1px); }
+    25% { transform: translateY(var(--shake-amount, 2px)); }
+    75% { transform: translateY(calc(var(--shake-amount, 2px) * -0.5)); }
     100% { transform: translateY(0); }
   }
 `;
