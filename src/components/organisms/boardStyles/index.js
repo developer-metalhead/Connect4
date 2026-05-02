@@ -1,4 +1,4 @@
-import { useState,useMemo } from "react";
+import { useState,useMemo,useEffect } from "react";
 import {
   BoardContainer,
   Row,
@@ -38,6 +38,7 @@ const Board = ({
   const [isShaking, setIsShaking] = useState(false);
   const [touchCol, setTouchCol] = useState(null);
   const [touchTimeout, setTouchTimeout] = useState(null);
+  const [jigglingCols, setJigglingCols] = useState({});
   const { enableBoardShake, shakeIntensity } = useBoardSettings();
 
   // Build a quick mask to hide source cells during mass-fall overlays
@@ -65,6 +66,20 @@ const Board = ({
     return col >= 0 && col < 7 ? col : null;
   };
 
+  useEffect(() => {
+    return () => clearTouchTimeout();
+  }, []);
+
+  // CHANGE: Reset dropping state if the board is completely cleared (game reset)
+  useEffect(() => {
+    if (board.every(row => row.every(cell => cell === "⚪"))) {
+      setDroppingCol(null);
+      setFallingDisc(null);
+      setHoverCol(null);
+      setJigglingCols({});
+    }
+  }, [board]);
+
   // CHANGE: Check if column is blocked by poop
   const isColumnBlockedByPoop = (col) => {
     return (blockedColumns || []).some(block => block.columnIndex === col && block.turnsLeft > 0);
@@ -75,6 +90,12 @@ const Board = ({
 
     // CHANGE: Handle blocked columns
     if (isColumnBlockedByPoop(col)) {
+      setJigglingCols(prev => ({ ...prev, [col]: true }));
+      if (soundManager) soundManager.playSound("error"); // Will fallback to click or ignore if error.mp3 not found
+      setTimeout(() => {
+        setJigglingCols(prev => ({ ...prev, [col]: false }));
+      }, 400);
+
       console.log("💩 ATTEMPTED DROP ON BLOCKED COLUMN:", col);
       if (onBlockedColumnAttempt) {
         const redirectCol = onBlockedColumnAttempt(col);
@@ -94,7 +115,6 @@ const Board = ({
     setHoverCol(null);
     setTouchCol(null);
     clearTouchTimeout();
-    setDroppingCol(col);
 
     // Find target row based on board orientation
     let targetRow = -1;
@@ -115,6 +135,8 @@ const Board = ({
     }
 
     if (targetRow === -1) return;
+
+    setDroppingCol(col);
 
     const startRow = isUpsideDown ? board.length : -1;
 
@@ -432,11 +454,11 @@ const Board = ({
                 onTouchStart={() => handleTouchStart(c)}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-                className={`${droppingCol === c ? "dropping" : ""} ${activeCol === c && activeTargetRow === r && droppingCol === null ? "target-glow" : ""}`}
+                className={`${droppingCol === c ? "dropping" : ""} ${activeCol === c && activeTargetRow === r && droppingCol === null ? "target-glow" : ""} ${jigglingCols[c] ? "jiggle" : ""}`}
                 style={{
                   cursor:
-                    canInteract && !winner && !isDraw && droppingCol === null && !isColumnBlockedByPoop(c)
-                      ? "pointer"
+                    canInteract && !winner && !isDraw && droppingCol === null
+                      ? isColumnBlockedByPoop(c) ? "not-allowed" : "pointer"
                       : "default",
                   opacity: droppingCol !== null && droppingCol !== c ? 0.7 : 1,
                   // CHANGE: Visual indication for blocked columns

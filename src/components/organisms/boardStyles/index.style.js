@@ -66,6 +66,10 @@ export const Cell = styled("div")({
   "&:hover": {
     transform: "scale(1.06)",
   },
+  
+  "&.jiggle": {
+    animation: "nopeJiggle 0.4s cubic-bezier(.36,.07,.19,.97) both",
+  },
 
   "&.target-glow::after": {
     content: '""',
@@ -320,6 +324,16 @@ export const GlobalStyles = `
   @keyframes targetPulse {
     0% { transform: scale(0.85); opacity: 0.7; }
     100% { transform: scale(1.1); opacity: 1; }
+  }
+
+  @keyframes nopeJiggle {
+    0% { transform: translateX(0); }
+    15% { transform: translateX(-6px) rotate(-4deg); }
+    30% { transform: translateX(5px) rotate(3deg); }
+    45% { transform: translateX(-4px) rotate(-3deg); }
+    60% { transform: translateX(3px) rotate(2deg); }
+    75% { transform: translateX(-2px) rotate(-1deg); }
+    100% { transform: translateX(0); }
   }
 
   @keyframes rippleOut {

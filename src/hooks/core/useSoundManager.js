@@ -23,6 +23,11 @@ const SOUND_CONFIG = {
     volume: 0.6,
     pitchVariation: false,
   },
+  error: {
+    files: ["click.mp3", "click.ogg"], // Using click as a subtle thud
+    volume: 0.5,
+    pitchVariation: false,
+  },
   coinsfalling: {
     files: ["coinsfalling.mp3", "coinsfalling.ogg"],
     volume: 0.8,
