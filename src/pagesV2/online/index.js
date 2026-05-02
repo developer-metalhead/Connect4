@@ -92,8 +92,10 @@ const OnlineV2 = () => {
   };
 
   const handleSurrenderClick = () => {
-    // If game already ended, just leave
-    if (gameState.winner || gameState.isDraw) {
+    // If game already ended, OR we are waiting alone for an opponent, just leave.
+    // No one should get a forfeit if the match never started (less than 2 players).
+    if (gameState.winner || gameState.isDraw || players.length < 2) {
+      console.log("🚶 Leaving room (No match active or already ended).");
       leaveRoom();
       navigate("/home");
       return;
@@ -282,7 +284,15 @@ const OnlineV2 = () => {
 
       {!inRoom && <Header />}
 
-      {!inRoom && (<BackButton soundManager={soundManager} />)}
+      {!inRoom && (
+        <BackButton 
+          soundManager={soundManager} 
+          onClick={() => {
+            stopQueue();
+            navigate("/home");
+          }} 
+        />
+      )}
 
 
       <SidePanel 
@@ -304,7 +314,7 @@ const OnlineV2 = () => {
       <MainContent>
         {!connected && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-            <GameStatus message="Connecting to server..." />
+            <GameStatus message="Connecting... (Try Refreshing)" />
             {/* <Button variant="outline" size="sm" onClick={() => window.location.reload()} soundManager={soundManager}>
               Refresh Server
             </Button> */}
