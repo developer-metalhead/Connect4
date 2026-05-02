@@ -1,27 +1,24 @@
 /* eslint-disable no-unused-vars */
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  resetGame,
-  dropPiece,
-  checkWin,
-  isBoardFull,
   isValidMove,
-  getNextPlayer,
   PLAYER1,
   PLAYER2,
   EMPTY,
   ANIMATION_CONFIG,
   calculateDropDuration,
 } from "../../helperFunction/helperFunction";
+import { CPU_CONFIG } from "../../logic/cpu/vsCPU";
 import { pickCpuMoveSmart, getBoardKey } from "../../logic/cpu/cpuEngine";
 import { updateMemoryOnGameEnd } from "../../logic/cpu/cpuMemory";
+import { createInitialState, processMove } from "../../logic/gameEngine";
 
 // Players
 const HUMAN = PLAYER1; // 🔴
 const CPU = PLAYER2; // 🟡
 
 export const useConnect4CPU = (difficulty = "Expert") => {
-  const [gameState, setGameState] = useState(resetGame);
+  const [gameState, setGameState] = useState(createInitialState);
   const [isCpuThinking, setIsCpuThinking] = useState(false);
   const [cpuPreviewCol, setCpuPreviewCol] = useState(null);
   const [isCpuDropping, setIsCpuDropping] = useState(false);
@@ -37,17 +34,10 @@ export const useConnect4CPU = (difficulty = "Expert") => {
   const makeHumanMove = useCallback((col) => {
     if (gameState.winner || gameState.isDraw || gameState.currentPlayer !== HUMAN || !isValidMove(gameState.board, col) || isCpuThinking) return false;
     
-    const { newBoard, row } = dropPiece(gameState.board, col, HUMAN);
-    const winResult = checkWin(newBoard, row, col, HUMAN);
-    
-    setGameState(prev => ({
-      ...prev,
-      board: newBoard,
-      winner: winResult ? HUMAN : prev.winner,
-      winningLine: winResult || prev.winningLine,
-      isDraw: !winResult && isBoardFull(newBoard),
-      currentPlayer: winResult ? HUMAN : getNextPlayer(HUMAN)
-    }));
+    setGameState(prev => {
+      const next = processMove(prev, col);
+      return next.moveValid ? next : prev;
+    });
     
     return true;
   }, [gameState, isCpuThinking]);
@@ -84,17 +74,11 @@ export const useConnect4CPU = (difficulty = "Expert") => {
         const animationDuration = calculateDropDuration(board.length - targetRow);
 
         setTimeout(() => {
-          const { newBoard, row } = dropPiece(board, col, CPU);
-          const winResult = checkWin(newBoard, row, col, CPU);
-          
-          setGameState(prev => ({
-            ...prev,
-            board: newBoard,
-            winner: winResult ? CPU : prev.winner,
-            winningLine: winResult || prev.winningLine,
-            isDraw: !winResult && isBoardFull(newBoard),
-            currentPlayer: winResult ? CPU : getNextPlayer(CPU)
-          }));
+          // Use processMove for the CPU too
+          setGameState(prev => {
+            const next = processMove(prev, col);
+            return next.moveValid ? next : prev;
+          });
           
           setIsCpuDropping(false);
           setCpuDroppingCol(null);
@@ -125,7 +109,7 @@ export const useConnect4CPU = (difficulty = "Expert") => {
     setCpuPreviewCol(null);
     setIsCpuDropping(false);
     setCpuDroppingCol(null);
-    setGameState(resetGame());
+    setGameState(createInitialState());
   }, []);
 
   return { 

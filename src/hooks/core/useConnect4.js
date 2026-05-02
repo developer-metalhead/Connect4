@@ -1,45 +1,30 @@
 import { useState, useCallback } from "react";
-import {
-  resetGame,
-  dropPiece,
-  checkWin,
-  isBoardFull,
-  isValidMove,
-  getNextPlayer,
-} from "../../helperFunction/helperFunction";
+import { createInitialState, processMove } from "../../logic/gameEngine";
 
+/**
+ * Clean, decoupled hook for 2-Player Local matches.
+ */
 export const useConnect4 = () => {
-  const [gameState, setGameState] = useState(resetGame);
+  const [gameState, setGameState] = useState(createInitialState);
 
-  const makeMove = useCallback(
-    (col) => {
-      const { board, currentPlayer, winner, isDraw } = gameState;
-
-      if (winner || isDraw || !isValidMove(board, col)) return false;
-
-      const { newBoard, row } = dropPiece(board, col, currentPlayer);
-
-      let newState = { ...gameState, board: newBoard };
-
-      const winResult = checkWin(newBoard, row, col, currentPlayer);
-      if (winResult) {
-        newState.winner = currentPlayer;
-        newState.winningLine = winResult;
-      } else if (isBoardFull(newBoard)) {
-        newState.isDraw = true;
-      } else {
-        newState.currentPlayer = getNextPlayer(currentPlayer);
-      }
-
-      setGameState(newState);
-      return true;
-    },
-    [gameState],
-  );
-
-  const reset = useCallback(() => {
-    setGameState(resetGame());
+  const makeMove = useCallback((col) => {
+    setGameState(prevState => {
+      const nextState = processMove(prevState, col);
+      // Only update if the move was actually valid
+      return nextState.moveValid ? nextState : prevState;
+    });
+    
+    // Return true/false to let components know if the move was accepted
+    return true; 
   }, []);
 
-  return { gameState, makeMove, reset };
+  const reset = useCallback(() => {
+    setGameState(createInitialState());
+  }, []);
+
+  return { 
+    gameState, 
+    makeMove, 
+    reset 
+  };
 };

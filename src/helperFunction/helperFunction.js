@@ -4,8 +4,8 @@
  * so that legacy components and hooks continue to work correctly.
  */
 
-import { PLAYER1 } from "../logic/core/constants";
-import { createEmptyBoard, getTargetRow } from "../logic/core/engine";
+import { createEmptyBoard } from "../logic/core/engine";
+import { CORE_CONFIG } from "../logic/coreConfig";
 
 // Re-export constants
 export { 
@@ -26,20 +26,9 @@ export {
   getNextPlayer,
   formatCoords,
   getTargetRow,
-  calculateDropDuration
+  calculateDropDuration,
+  dropPiece
 } from "../logic/core/engine";
-
-/**
- * Drop a piece into the board (Legacy wrapper)
- */
-export const dropPiece = (board, col, player) => {
-  const row = getTargetRow(board, col);
-  if (row === -1) return { newBoard: board, row: -1 };
-  
-  const newBoard = board.map((r) => [...r]);
-  newBoard[row][col] = player;
-  return { newBoard, row };
-};
 
 /**
  * Reset game state (Legacy wrapper)
@@ -47,7 +36,7 @@ export const dropPiece = (board, col, player) => {
 export const resetGame = () => {
   return {
     board: createEmptyBoard(),
-    currentPlayer: PLAYER1,
+    currentPlayer: CORE_CONFIG.DEFAULT_FIRST_PLAYER,
     winner: null,
     winningLine: null,
     isDraw: false,
