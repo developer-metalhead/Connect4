@@ -17,7 +17,7 @@ import {
 import {  returnToNormalGravity,
   applyInvertedGravity,
   planInvertedGravityAnimation, } from "../../../helperFunction/funMode/monkeyModeFeatures";
-import FeatureBlockIndicator from "../../designSystem/Features/chaosChicken/FeatureBlockIndicator";
+import FeatureBlockIndicator from "../../designSystem/Features/core/FeatureBlockIndicator";
 import { useGameSettings } from "../../../hooks/settings/useGameSettings";
 
 import { ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS } from "../../../logic/core/coreConfig";
