@@ -41,21 +41,25 @@ export const useGameSettings = () => {
     }
   });
 
-  useEffect(() => {
-    localStorage.setItem('game_enableShake', JSON.stringify(enableBoardShake));
-  }, [enableBoardShake]);
-
-  useEffect(() => {
-    localStorage.setItem('game_shakeIntensity', JSON.stringify(shakeIntensity));
-  }, [shakeIntensity]);
-
-  useEffect(() => {
-    localStorage.setItem('game_monkeyAnimationEnabled', JSON.stringify(monkeyAnimationEnabled));
-  }, [monkeyAnimationEnabled]);
+  const saveGameSettings = (newSettings) => {
+    if (newSettings.enableBoardShake !== undefined) {
+      setEnableBoardShake(newSettings.enableBoardShake);
+      localStorage.setItem('game_enableShake', JSON.stringify(newSettings.enableBoardShake));
+    }
+    if (newSettings.shakeIntensity !== undefined) {
+      setShakeIntensity(newSettings.shakeIntensity);
+      localStorage.setItem('game_shakeIntensity', JSON.stringify(newSettings.shakeIntensity));
+    }
+    if (newSettings.monkeyAnimationEnabled !== undefined) {
+      setMonkeyAnimationEnabled(newSettings.monkeyAnimationEnabled);
+      localStorage.setItem('game_monkeyAnimationEnabled', JSON.stringify(newSettings.monkeyAnimationEnabled));
+    }
+  };
 
   return { 
-    enableBoardShake, setEnableBoardShake, 
-    shakeIntensity, setShakeIntensity,
-    monkeyAnimationEnabled, setMonkeyAnimationEnabled 
+    enableBoardShake, 
+    shakeIntensity, 
+    monkeyAnimationEnabled,
+    saveGameSettings
   };
 };

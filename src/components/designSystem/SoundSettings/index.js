@@ -13,38 +13,34 @@ import Button from '../Button';
 const SoundSettings = ({ soundManager, onClose }) => {
   const {
     isMuted,
-    setIsMuted,
     volume,
-    setVolume,
     musicVolume,
-    setMusicVolume,
     isMusicEnabled,
-    toggleBackgroundMusic,
-    playClickSound,
+    saveSoundSettings,
+    playDropSound,
     isAudioSupported
   } = soundManager;
 
-  const handleMuteToggle = () => {
-    setIsMuted(!isMuted);
-  };
+  const [pendingMuted, setPendingMuted] = React.useState(isMuted);
+  const [pendingVolume, setPendingVolume] = React.useState(volume);
+  const [pendingMusicVolume, setPendingMusicVolume] = React.useState(musicVolume);
+  const [pendingMusicEnabled, setPendingMusicEnabled] = React.useState(isMusicEnabled);
 
-  const handleVolumeChange = (e) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-  };
-
-  const handleMusicVolumeChange = (e) => {
-    const newVolume = parseFloat(e.target.value);
-    setMusicVolume(newVolume);
-  };
-
-  const handleMusicToggle = () => {
-    toggleBackgroundMusic();
+  const handleSave = () => {
+    saveSoundSettings({
+      isMuted: pendingMuted,
+      volume: pendingVolume,
+      musicVolume: pendingMusicVolume,
+      isMusicEnabled: pendingMusicEnabled
+    });
+    if (soundManager?.playSound) soundManager.playSound('coinsfalling');
+    onClose();
   };
 
   const handleTestSound = () => {
-    if (soundManager.playDropSound) {
-      soundManager.playDropSound();
+    // Temporarily play a sound using pending settings for preview
+    if (playDropSound) {
+      playDropSound();
     }
   };
 
@@ -71,28 +67,28 @@ const SoundSettings = ({ soundManager, onClose }) => {
           </span>
         </div>
         <Button 
-          variant={isMuted ? "danger" : "primary"}
+          variant={pendingMuted ? "danger" : "primary"}
           size="sm"
-          onClick={handleMuteToggle}
+          onClick={() => setPendingMuted(!pendingMuted)}
           soundManager={soundManager}
         >
-          {isMuted ? 'Muted' : 'Enabled'}
+          {pendingMuted ? 'Muted' : 'Enabled'}
         </Button>
       </ToggleGroup>
       
       <SettingRow>
         <LabelGroup>
           <Label>SFX Volume</Label>
-          <VolumeDisplay>{Math.round(volume * 100)}%</VolumeDisplay>
+          <VolumeDisplay>{Math.round(pendingVolume * 100)}%</VolumeDisplay>
         </LabelGroup>
         <Slider
           type="range"
           min="0"
           max="1"
           step="0.05"
-          value={volume}
-          onChange={handleVolumeChange}
-          disabled={isMuted}
+          value={pendingVolume}
+          onChange={(e) => setPendingVolume(parseFloat(e.target.value))}
+          disabled={pendingMuted}
         />
       </SettingRow>
 
@@ -104,38 +100,38 @@ const SoundSettings = ({ soundManager, onClose }) => {
           </span>
         </div>
         <Button 
-          variant={isMusicEnabled ? "primary" : "secondary"}
+          variant={pendingMusicEnabled ? "primary" : "secondary"}
           size="sm"
-          onClick={handleMusicToggle}
-          disabled={isMuted}
+          onClick={() => setPendingMusicEnabled(!pendingMusicEnabled)}
+          disabled={pendingMuted}
           soundManager={soundManager}
         >
-          {isMusicEnabled ? 'On' : 'Off'}
+          {pendingMusicEnabled ? 'On' : 'Off'}
         </Button>
       </ToggleGroup>
 
       <SettingRow>
         <LabelGroup>
           <Label>Music Volume</Label>
-          <VolumeDisplay>{Math.round(musicVolume * 100)}%</VolumeDisplay>
+          <VolumeDisplay>{Math.round(pendingMusicVolume * 100)}%</VolumeDisplay>
         </LabelGroup>
         <Slider
           type="range"
           min="0"
           max="1"
           step="0.05"
-          value={musicVolume}
-          onChange={handleMusicVolumeChange}
-          disabled={isMuted || !isMusicEnabled}
+          value={pendingMusicVolume}
+          onChange={(e) => setPendingMusicVolume(parseFloat(e.target.value))}
+          disabled={pendingMuted || !pendingMusicEnabled}
         />
       </SettingRow>
 
-      <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-        <Button variant="outline" fullWidth onClick={handleTestSound} disabled={isMuted} soundManager={soundManager}>
-          Test Sound
+      <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+        <Button variant="outline" fullWidth onClick={handleTestSound} disabled={pendingMuted} soundManager={soundManager}>
+          Test
         </Button>
-        <Button variant="primary" fullWidth onClick={onClose} soundManager={soundManager}>
-          Done
+        <Button variant="primary" fullWidth onClick={handleSave} soundManager={soundManager}>
+          Save
         </Button>
       </div>
     </SettingsContainer>

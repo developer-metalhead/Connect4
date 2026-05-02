@@ -221,25 +221,24 @@ export const useSoundManager = () => {
     });
   }, [volume, musicVolume, logSoundEvent]);
 
-  // Persist settings to localStorage
-  useEffect(() => {
-    localStorage.setItem("connect4_muted", JSON.stringify(isMuted));
-  }, [isMuted]);
-
-  useEffect(() => {
-    localStorage.setItem("connect4_volume", volume.toString());
-  }, [volume]);
-
-  useEffect(() => {
-    localStorage.setItem("connect4_music_volume", musicVolume.toString());
-  }, [musicVolume]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "connect4_music_enabled",
-      JSON.stringify(isMusicEnabled),
-    );
-  }, [isMusicEnabled]);
+  const saveSoundSettings = useCallback((newSettings) => {
+    if (newSettings.isMuted !== undefined) {
+      setIsMuted(newSettings.isMuted);
+      localStorage.setItem("connect4_muted", JSON.stringify(newSettings.isMuted));
+    }
+    if (newSettings.volume !== undefined) {
+      setVolume(newSettings.volume);
+      localStorage.setItem("connect4_volume", newSettings.volume.toString());
+    }
+    if (newSettings.musicVolume !== undefined) {
+      setMusicVolume(newSettings.musicVolume);
+      localStorage.setItem("connect4_music_volume", newSettings.musicVolume.toString());
+    }
+    if (newSettings.isMusicEnabled !== undefined) {
+      setIsMusicEnabled(newSettings.isMusicEnabled);
+      localStorage.setItem("connect4_music_enabled", JSON.stringify(newSettings.isMusicEnabled));
+    }
+  }, []);
 
   // CHANGE: Add stopSound method to stop specific sounds
   const stopSound = useCallback(
@@ -438,13 +437,10 @@ export const useSoundManager = () => {
 
     // Settings
     isMuted,
-    setIsMuted,
     volume,
-    setVolume: (newVolume) => setVolume(Math.max(0, Math.min(1, newVolume))),
     musicVolume,
-    setMusicVolume: (newVolume) =>
-      setMusicVolume(Math.max(0, Math.min(1, newVolume))),
     isMusicEnabled,
+    saveSoundSettings,
     toggleBackgroundMusic,
 
     // Utility

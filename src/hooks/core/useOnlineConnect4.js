@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import socket from "../../services/wsClient";
-
-// Same emojis as your helper to keep rendering consistent
-const PLAYER1 = "🔴";
-const PLAYER2 = "🟡";
-const EMPTY = "⚪";
+import { 
+  PLAYER1, 
+  PLAYER2, 
+  EMPTY, 
+  resetGame as initialState 
+} from "../../helperFunction/helperFunction";
 
 // Simple local UUID for anonymous players
 const getOrCreatePlayerId = () => {
@@ -31,16 +32,6 @@ const defaultName = () => {
   return name;
 };
 
-const initialState = () => ({
-  board: Array(6)
-    .fill(null)
-    .map(() => Array(7).fill(EMPTY)),
-  currentPlayer: PLAYER1,
-  winner: null,
-  winningLine: null,
-  isDraw: false,
-});
-
 const useOnlineConnect4 = () => {
   const [connected, setConnected] = useState(false);
   const [status, setStatus] = useState("idle"); // idle | lobby | searching | room | error
@@ -53,6 +44,7 @@ const useOnlineConnect4 = () => {
 
   const playerIdRef = useRef(getOrCreatePlayerId());
   const nameRef = useRef(defaultName());
+  const roomIdRef = useRef(null);
 
   // Derived flags
   const myTurn = useMemo(
@@ -79,9 +71,22 @@ const useOnlineConnect4 = () => {
       setConnected(true);
       setError(null);
       socket.emit("hello", { playerId: pId });
-      if (!roomId) setStatus("lobby");
+      
+      // Auto-rejoin if we were in a room
+      if (roomIdRef.current) {
+        socket.emit("join_room", { 
+          roomId: roomIdRef.current, 
+          name: nameRef.current, 
+          playerId: pId 
+        });
+      } else if (status === "idle" || status === "error") {
+        setStatus("lobby");
+      }
     };
-    const onDisconnect = () => setConnected(false);
+    const onDisconnect = () => {
+      setConnected(false);
+      // We don't clear roomId here to allow for auto-rejoin on next connect
+    };
     const onConnectError = (e) => {
       setConnected(false);
       setError(e?.message || "Connection error");
@@ -95,6 +100,7 @@ const useOnlineConnect4 = () => {
     // Room events
     socket.on("room_created", ({ roomId: rid, disc, players: ps, state }) => {
       setRoomId(rid);
+      roomIdRef.current = rid;
       setMyDisc(disc);
       setPlayers(ps);
       setGameState(state);
@@ -103,6 +109,7 @@ const useOnlineConnect4 = () => {
 
     socket.on("joined", ({ roomId: rid, disc, players: ps, state }) => {
       setRoomId(rid);
+      roomIdRef.current = rid;
       setMyDisc(disc);
       setPlayers(ps);
       setGameState(state);
@@ -115,14 +122,25 @@ const useOnlineConnect4 = () => {
     });
 
     socket.on("matched", ({ roomId: rid, disc }) => {
-      // Server will also send room_state after it sets up; ensure we reflect matched state
       setRoomId(rid);
+      roomIdRef.current = rid;
       setMyDisc(disc);
       setStatus("room");
     });
 
+    socket.on("player_left", ({ playerId: leftId, name: leftName }) => {
+      // Optional: show a toast or notification in UI
+      console.log(`Player ${leftName} left the room.`);
+    });
+
     socket.on("error_msg", ({ message }) => {
       setError(message || "Unknown error");
+      // If room not found on rejoin, clear local room state
+      if (message?.toLowerCase().includes("not found")) {
+        setRoomId(null);
+        roomIdRef.current = null;
+        setStatus("lobby");
+      }
     });
 
     // Connect now
@@ -204,6 +222,7 @@ const useOnlineConnect4 = () => {
     if (!connected || !roomId) return;
     socket.emit("leave_room", { roomId, playerId: playerIdRef.current });
     setRoomId(null);
+    roomIdRef.current = null;
     setPlayers([]);
     setMyDisc(null);
     setGameState(initialState());

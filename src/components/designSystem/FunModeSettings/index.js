@@ -17,20 +17,34 @@ const FunModeSettings = ({ soundManager, onClose }) => {
   const { 
     monkeyModeEnabled, 
     chaosChickenEnabled, 
-    toggleMonkeyMode, 
-    toggleChaosChicken,
+    saveFunModeSettings,
   } = useFunModeSettings();
 
-  const handleToggle = (handler) => {
-    handler();
-    if (soundManager?.playClickSound) {
-      soundManager.playClickSound();
-    }
+  const [pendingMonkey, setPendingMonkey] = React.useState(monkeyModeEnabled);
+  const [pendingChicken, setPendingChicken] = React.useState(chaosChickenEnabled);
+
+  const handleSave = () => {
+    saveFunModeSettings({
+      monkeyModeEnabled: pendingMonkey,
+      chaosChickenEnabled: pendingChicken
+    });
+    if (soundManager?.playSound) soundManager.playSound('coinsfalling');
+    onClose();
+  };
+
+  const handleToggleMonkey = () => {
+    setPendingMonkey(!pendingMonkey);
+    if (soundManager?.playClickSound) soundManager.playClickSound();
+  };
+
+  const handleToggleChicken = () => {
+    setPendingChicken(!pendingChicken);
+    if (soundManager?.playClickSound) soundManager.playClickSound();
   };
 
   return (
     <SettingsContainer>
-      <FeatureCard active={monkeyModeEnabled}>
+      <FeatureCard active={pendingMonkey}>
         <CardHeader>
           <TitleGroup>
             <FeatureTitle>🐒 Monkey Mode</FeatureTitle>
@@ -41,15 +55,15 @@ const FunModeSettings = ({ soundManager, onClose }) => {
           <SwitchWrapper>
             <SwitchInput 
               type="checkbox" 
-              checked={monkeyModeEnabled} 
-              onChange={() => handleToggle(toggleMonkeyMode)} 
+              checked={pendingMonkey} 
+              onChange={handleToggleMonkey} 
             />
-            <SwitchSlider active={monkeyModeEnabled} />
+            <SwitchSlider active={pendingMonkey} />
           </SwitchWrapper>
         </CardHeader>
       </FeatureCard>
 
-      <FeatureCard active={chaosChickenEnabled}>
+      <FeatureCard active={pendingChicken}>
         <CardHeader>
           <TitleGroup>
             <FeatureTitle>🐔 Chaos Chicken</FeatureTitle>
@@ -60,17 +74,17 @@ const FunModeSettings = ({ soundManager, onClose }) => {
           <SwitchWrapper>
             <SwitchInput 
               type="checkbox" 
-              checked={chaosChickenEnabled} 
-              onChange={() => handleToggle(toggleChaosChicken)} 
+              checked={pendingChicken} 
+              onChange={handleToggleChicken} 
             />
-            <SwitchSlider active={chaosChickenEnabled} />
+            <SwitchSlider active={pendingChicken} />
           </SwitchWrapper>
         </CardHeader>
       </FeatureCard>
 
-      <div style={{ marginTop: '12px' }}>
-        <Button variant="primary" fullWidth onClick={onClose} soundManager={soundManager}>
-          Save & Close
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+        <Button variant="primary" fullWidth onClick={handleSave} soundManager={soundManager}>
+          Save
         </Button>
       </div>
     </SettingsContainer>

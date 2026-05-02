@@ -105,7 +105,7 @@ const LandingPage = () => {
               onClick={() => navigate("/home")}
               soundManager={soundManager}
             >
-              Play Overhauled <VersionTag>Recommended</VersionTag>
+              Play Overhauled <VersionTag>V2</VersionTag>
             </Button>
             
             <Button 

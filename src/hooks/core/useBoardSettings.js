@@ -19,13 +19,20 @@ export const useBoardSettings = () => {
     }
   });
 
-  useEffect(() => {
-    localStorage.setItem('board_enableShake', JSON.stringify(enableBoardShake));
-  }, [enableBoardShake]);
+  const saveBoardSettings = (newSettings) => {
+    if (newSettings.enableBoardShake !== undefined) {
+      setEnableBoardShake(newSettings.enableBoardShake);
+      localStorage.setItem('board_enableShake', JSON.stringify(newSettings.enableBoardShake));
+    }
+    if (newSettings.shakeIntensity !== undefined) {
+      setShakeIntensity(newSettings.shakeIntensity);
+      localStorage.setItem('board_shakeIntensity', JSON.stringify(newSettings.shakeIntensity));
+    }
+  };
 
-  useEffect(() => {
-    localStorage.setItem('board_shakeIntensity', JSON.stringify(shakeIntensity));
-  }, [shakeIntensity]);
-
-  return { enableBoardShake, setEnableBoardShake, shakeIntensity, setShakeIntensity };
+  return { 
+    enableBoardShake, 
+    shakeIntensity, 
+    saveBoardSettings 
+  };
 };

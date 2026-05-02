@@ -11,7 +11,7 @@ export const createEmptyBoard = () => {
     .map(() => Array(COLS).fill(EMPTY));
 };
 
-// Reset game (returns initial state)
+// Reset game / Initial State (returns fresh state)
 export const resetGame = () => {
   return {
     board: createEmptyBoard(),
@@ -39,8 +39,8 @@ export const isValidMove = (board, col) => {
   return col >= 0 && col < COLS && board[0][col] === EMPTY;
 };
 
-// CHANGE: Added upside-down mode parameter to check win function
-export const checkWin = (board, row, col, player, isUpsideDown = false) => {
+// Core win detection logic (canonical)
+export const checkWin = (board, row, col, player) => {
   const directions = [
     [0, 1], // Horizontal
     [1, 0], // Vertical
@@ -77,7 +77,7 @@ export const checkWin = (board, row, col, player, isUpsideDown = false) => {
   return null;
 };
 
-// Check draw
+// Check if board is full (draw)
 export const isBoardFull = (board) => {
   return board[0].every((cell) => cell !== EMPTY);
 };

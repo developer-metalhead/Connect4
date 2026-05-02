@@ -38,7 +38,7 @@ const BoardSettings = ({ soundManager, onClose }) => {
       
       <div style={{ display: 'flex', gap: '12px', marginTop: 'auto' }}>
         <Button variant="primary" fullWidth onClick={onClose} soundManager={soundManager}>
-          Done
+          Save
         </Button>
       </div>
     </SettingsContainer>

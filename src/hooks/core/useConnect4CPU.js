@@ -205,37 +205,51 @@ const minimax = (board, depth, alpha, beta, maximizingPlayer) => {
 };
 
 // Root picker: applies mistake-memory bias on top of minimax scores
-const pickCpuMoveSmart = (board) => {
+const pickCpuMoveSmart = (board, difficulty = "Expert") => {
   const valid = getValidColumns(board);
   if (valid.length === 0) return null;
 
-  // Choose dynamic depth (conservative for mobile)
+  // Choose dynamic depth based on difficulty
   let movesMade = 0;
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++) {
       const v = board[r][c];
       if (v === PLAYER1 || v === PLAYER2) movesMade++;
     }
-  const depth = movesMade < 8 ? 5 : movesMade < 18 ? 5 : 6; // slightly deeper in late game
+
+  let depth = 5;
+  if (difficulty === "Novice") {
+    depth = 2;
+    // 40% chance of a random move on Novice to make it "perfect for learning"
+    if (Math.random() < 0.4) return valid[Math.floor(Math.random() * valid.length)];
+  } else if (difficulty === "Skilled") {
+    depth = 4;
+  } else {
+    // Expert (default)
+    depth = movesMade < 8 ? 5 : movesMade < 18 ? 6 : 7;
+  }
 
   const stateKey = boardKey(board, CPU);
   const memory = loadMemory();
 
   let best = { col: valid[0], score: -Infinity };
 
-  // Optional quick tactical checks to reduce tree (win/block 1-ply)
+  // Tactical checks
   // 1) Win now
   for (const c of valid) {
     const { simBoard, row } = simulateDrop(board, c, CPU);
     if (row !== -1 && checkWin(simBoard, row, c, CPU)) return c;
   }
-  // 2) Block human's win
-  for (const c of valid) {
-    const { simBoard, row } = simulateDrop(board, c, HUMAN);
-    if (row !== -1 && checkWin(simBoard, row, c, HUMAN)) return c;
+  
+  // 2) Block human's win (Skilled and Expert only)
+  if (difficulty !== "Novice") {
+    for (const c of valid) {
+      const { simBoard, row } = simulateDrop(board, c, HUMAN);
+      if (row !== -1 && checkWin(simBoard, row, c, HUMAN)) return c;
+    }
   }
 
-  // Evaluate with minimax, adjust with memory penalties
+  // Evaluate with minimax
   for (const c of orderedColumns) {
     if (!valid.includes(c)) continue;
 
@@ -289,11 +303,10 @@ const updateMemoryOnGameEnd = ({ winner }, historyRef) => {
   historyRef.current = [];
 };
 
-export const useConnect4CPU = () => {
+export const useConnect4CPU = (difficulty = "Expert") => {
   const [gameState, setGameState] = useState(resetGame);
   const [isCpuDropping, setIsCpuDropping] = useState(false);
   const [cpuDroppingCol, setCpuDroppingCol] = useState(null);
-  // CHANGE: Add state to trigger PostVideoOverlay when CPU wins
   const [shouldShowPostVideoOverlay, setShouldShowPostVideoOverlay] = useState(false);
   const aiTimerRef = useRef(null);
   const historyRef = useRef([]); // track states & CPU moves for mistake memory
@@ -334,7 +347,7 @@ export const useConnect4CPU = () => {
     if (winner || isDraw || currentPlayer !== CPU) return;
 
     aiTimerRef.current = setTimeout(() => {
-      const col = pickCpuMoveSmart(board);
+      const col = pickCpuMoveSmart(board, difficulty);
       if (col === null) {
         setGameState((prev) => ({ ...prev, isDraw: true }));
         return;
@@ -380,16 +393,13 @@ export const useConnect4CPU = () => {
 
         setIsCpuDropping(false);
         setCpuDroppingCol(null);
-
-        // CPU won naturally - we just let the page handle it via gameState.winner
-        // PostVideoOverlay is now reserved for surrender (animation disabled)
       }, animationDuration);
-    }, 350); // small delay for UX
+    }, 450); // small delay for UX
 
     return () => {
       if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
     };
-  }, [gameState]);
+  }, [gameState, difficulty]);
 
 
   // Learn at end of game (penalize losing CPU moves; forgive on win)
@@ -404,12 +414,10 @@ export const useConnect4CPU = () => {
     historyRef.current = [];
     setIsCpuDropping(false);
     setCpuDroppingCol(null);
-    // CHANGE: Reset PostVideoOverlay state on game reset
     setShouldShowPostVideoOverlay(false);
     setGameState(resetGame());
   }, []);
 
-  // CHANGE: Add function to close PostVideoOverlay
   const closePostVideoOverlay = useCallback(() => {
     setShouldShowPostVideoOverlay(false);
   }, []);
@@ -425,9 +433,8 @@ export const useConnect4CPU = () => {
     CPU,
     isCpuDropping,
     cpuDroppingCol,
-    // CHANGE: Export PostVideoOverlay state and controls
     shouldShowPostVideoOverlay,
-    setShouldShowPostVideoOverlay, // Added setter for surrender case
+    setShouldShowPostVideoOverlay,
     closePostVideoOverlay
   };
 };

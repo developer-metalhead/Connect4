@@ -1,6 +1,8 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
 import { tokens } from "../tokens";
+import { useCPUSettings } from "../../../hooks/core/useCPUSettings";
+import Button from "../Button";
 
 const Container = styled("div")({
   display: "flex",
@@ -32,31 +34,52 @@ const Description = styled("div")({
   color: "rgba(255, 255, 255, 0.6)",
 });
 
-const CPUSettings = ({ soundManager }) => {
-  // Placeholder difficulty settings
-  const [difficulty, setDifficulty] = React.useState("Expert");
+const CPUSettings = ({ soundManager, onClose }) => {
+  const { difficulty, saveDifficulty } = useCPUSettings();
+  const [pendingDifficulty, setPendingDifficulty] = React.useState(difficulty);
+  const [isSaved, setIsSaved] = React.useState(false);
 
   const handleSelect = (diff) => {
-    setDifficulty(diff);
+    setPendingDifficulty(diff);
+    setIsSaved(false);
     if (soundManager?.playClickSound) soundManager.playClickSound();
+  };
+
+  const handleSave = () => {
+    saveDifficulty(pendingDifficulty);
+    setIsSaved(true);
+    if (soundManager?.playSound) soundManager.playSound('coinsfalling');
+    if (onClose) onClose();
   };
 
   return (
     <Container>
-      <DifficultyCard active={difficulty === "Novice"} onClick={() => handleSelect("Novice")}>
+      <DifficultyCard active={pendingDifficulty === "Novice"} onClick={() => handleSelect("Novice")}>
         <Title>Novice</Title>
         <Description>Makes occasional mistakes. Perfect for learning.</Description>
       </DifficultyCard>
       
-      <DifficultyCard active={difficulty === "Skilled"} onClick={() => handleSelect("Skilled")}>
+      <DifficultyCard active={pendingDifficulty === "Skilled"} onClick={() => handleSelect("Skilled")}>
         <Title>Skilled</Title>
         <Description>A balanced opponent with decent tactical awareness.</Description>
       </DifficultyCard>
-
-      <DifficultyCard active={difficulty === "Expert"} onClick={() => handleSelect("Expert")}>
-        <Title>Expert (Active)</Title>
+ 
+      <DifficultyCard active={pendingDifficulty === "Expert"} onClick={() => handleSelect("Expert")}>
+        <Title>Expert</Title>
         <Description>Uses Minimax with alpha-beta pruning. Highly competitive.</Description>
       </DifficultyCard>
+
+      <div style={{ marginTop: '12px' }}>
+        <Button 
+          variant="primary" 
+          fullWidth 
+          onClick={handleSave} 
+          disabled={pendingDifficulty === difficulty && isSaved}
+          soundManager={soundManager}
+        >
+          {isSaved ? "Saved!" : "Save"}
+        </Button>
+      </div>
     </Container>
   );
 };

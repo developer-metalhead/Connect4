@@ -13,19 +13,24 @@ import { useGameSettings } from '../../../hooks/core/useGameSettings';
 
 const GameSettings = ({ soundManager, onClose }) => {
   const { 
-    enableBoardShake, setEnableBoardShake, 
-    shakeIntensity, setShakeIntensity,
-    monkeyAnimationEnabled, setMonkeyAnimationEnabled
+    enableBoardShake, 
+    shakeIntensity, 
+    monkeyAnimationEnabled,
+    saveGameSettings
   } = useGameSettings();
 
-  const handleToggleShake = () => {
-    setEnableBoardShake(!enableBoardShake);
-    if (soundManager?.playClickSound) soundManager.playClickSound();
-  };
+  const [pendingShake, setPendingShake] = React.useState(enableBoardShake);
+  const [pendingIntensity, setPendingIntensity] = React.useState(shakeIntensity);
+  const [pendingMonkey, setPendingMonkey] = React.useState(monkeyAnimationEnabled);
 
-  const handleToggleMonkey = () => {
-    setMonkeyAnimationEnabled(!monkeyAnimationEnabled);
-    if (soundManager?.playClickSound) soundManager.playClickSound();
+  const handleSave = () => {
+    saveGameSettings({
+      enableBoardShake: pendingShake,
+      shakeIntensity: pendingIntensity,
+      monkeyAnimationEnabled: pendingMonkey
+    });
+    if (soundManager?.playSound) soundManager.playSound('coinsfalling');
+    onClose();
   };
 
   return (
@@ -38,36 +43,39 @@ const GameSettings = ({ soundManager, onClose }) => {
           </span>
         </div>
         <Button 
-          variant={enableBoardShake ? "primary" : "secondary"}
+          variant={pendingShake ? "primary" : "secondary"}
           size="sm"
-          onClick={handleToggleShake}
+          onClick={() => {
+            setPendingShake(!pendingShake);
+            if (soundManager?.playClickSound) soundManager.playClickSound();
+          }}
           soundManager={soundManager}
         >
-          {enableBoardShake ? 'On' : 'Off'}
+          {pendingShake ? 'On' : 'Off'}
         </Button>
       </ToggleGroup>
       
       <div style={{
-        maxHeight: enableBoardShake ? '100px' : '0',
-        opacity: enableBoardShake ? 1 : 0,
+        maxHeight: pendingShake ? '100px' : '0',
+        opacity: pendingShake ? 1 : 0,
         overflow: 'hidden',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        marginTop: enableBoardShake ? '12px' : '0',
-        paddingBottom: enableBoardShake ? '8px' : '0',
-        marginBottom: enableBoardShake ? '-8px' : '0'
+        marginTop: pendingShake ? '12px' : '0',
+        paddingBottom: pendingShake ? '8px' : '0',
+        marginBottom: pendingShake ? '-8px' : '0'
       }}>
         <SettingRow style={{ padding: '0 8px 8px 8px' }}>
           <LabelGroup>
             <Label>Shake Intensity</Label>
-            <VolumeDisplay>{shakeIntensity}</VolumeDisplay>
+            <VolumeDisplay>{pendingIntensity}</VolumeDisplay>
           </LabelGroup>
           <Slider
             type="range"
             min="1"
             max="10"
             step="1"
-            value={shakeIntensity}
-            onChange={(e) => setShakeIntensity(Number(e.target.value))}
+            value={pendingIntensity}
+            onChange={(e) => setPendingIntensity(Number(e.target.value))}
           />
         </SettingRow>
       </div>
@@ -80,18 +88,21 @@ const GameSettings = ({ soundManager, onClose }) => {
           </span>
         </div>
         <Button 
-          variant={monkeyAnimationEnabled ? "primary" : "secondary"}
+          variant={pendingMonkey ? "primary" : "secondary"}
           size="sm"
-          onClick={handleToggleMonkey}
+          onClick={() => {
+            setPendingMonkey(!pendingMonkey);
+            if (soundManager?.playClickSound) soundManager.playClickSound();
+          }}
           soundManager={soundManager}
         >
-          {monkeyAnimationEnabled ? 'On' : 'Off'}
+          {pendingMonkey ? 'On' : 'Off'}
         </Button>
       </ToggleGroup>
       
       <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-        <Button variant="primary" fullWidth onClick={onClose} soundManager={soundManager}>
-          Done
+        <Button variant="primary" fullWidth onClick={handleSave} soundManager={soundManager}>
+          Save
         </Button>
       </div>
     </SettingsContainer>

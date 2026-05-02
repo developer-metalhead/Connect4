@@ -117,6 +117,31 @@ const OnlineV2 = () => {
     };
   }, [players, gameState]);
 
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(inviteLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    soundManager?.playClickSound();
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Connect 4 Match',
+          text: 'Join my Connect 4 room and let\'s play!',
+          url: inviteLink,
+        });
+      } catch (err) {
+        console.log('Share failed:', err);
+      }
+    } else {
+      handleCopy();
+    }
+  };
+
   return (
     <PageWrapper>
       <RefreshIconButton 
@@ -297,10 +322,23 @@ const OnlineV2 = () => {
                     onFocus={(e) => e.target.select()}
                     style={{ flex: 1 }}
                   />
-                  <Button variant="secondary" size="sm" onClick={() => navigator.clipboard.writeText(inviteLink)} soundManager={soundManager}>
-                    Copy
-                  </Button>
+                  {navigator.share ? (
+                    <Button variant="secondary" size="sm" onClick={handleShare} soundManager={soundManager}>
+                      Share
+                    </Button>
+                  ) : (
+                    <Button variant="secondary" size="sm" onClick={handleCopy} soundManager={soundManager}>
+                      {copied ? "Copied!" : "Copy"}
+                    </Button>
+                  )}
                 </div>
+                {navigator.share && (
+                  <div style={{ marginTop: '8px', textAlign: 'center' }}>
+                    <Button variant="ghost" size="sm" onClick={handleCopy} soundManager={soundManager}>
+                      {copied ? "Link Copied!" : "Copy Link Instead"}
+                    </Button>
+                  </div>
+                )}
               </InviteSection>
             )}
           </GameLayout>

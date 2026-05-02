@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo,useState } from "react";
 import useSoundManager from "../../../hooks/core/useSoundManager";
 import useConnect4CPU from "../../../hooks/core/useConnect4CPU";
+import { useGameSettings } from "../../../hooks/core/useGameSettings";
+import { useCPUSettings } from "../../../hooks/core/useCPUSettings";
 import { PLAYER1, PLAYER2 } from "../../../helperFunction/helperFunction";
 
 // New UI Components
@@ -24,7 +26,8 @@ import Modal from "../../../components/designSystem/Modal";
 const PlayCPUV2 = () => {
   const navigate = useNavigate();
   const soundManager = useSoundManager();
-  const { monkeyAnimationEnabled } = useFunModeSettings();
+  const { monkeyAnimationEnabled } = useGameSettings();
+  const { difficulty } = useCPUSettings();
   const [activePanel, setActivePanel] = useState(null); // 'cpu', 'fun', 'sound' or null
   const [surrendered, setSurrendered] = useState(false);
 
@@ -38,7 +41,7 @@ const PlayCPUV2 = () => {
     shouldShowPostVideoOverlay,
     setShouldShowPostVideoOverlay,
     closePostVideoOverlay
-  } = useConnect4CPU();
+  } = useConnect4CPU(difficulty);
 
   const { board, currentPlayer, winner, isDraw } = gameState;
 
