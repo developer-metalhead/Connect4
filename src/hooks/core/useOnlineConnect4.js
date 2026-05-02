@@ -45,6 +45,7 @@ const useOnlineConnect4 = () => {
   const playerIdRef = useRef(getOrCreatePlayerId());
   const nameRef = useRef(defaultName());
   const roomIdRef = useRef(null);
+  const myDiscRef = useRef(null);
 
   // Derived flags
   const myTurn = useMemo(
@@ -102,6 +103,7 @@ const useOnlineConnect4 = () => {
       setRoomId(rid);
       roomIdRef.current = rid;
       setMyDisc(disc);
+      myDiscRef.current = disc;
       setPlayers(ps);
       setGameState(state);
       setStatus("room");
@@ -111,6 +113,7 @@ const useOnlineConnect4 = () => {
       setRoomId(rid);
       roomIdRef.current = rid;
       setMyDisc(disc);
+      myDiscRef.current = disc;
       setPlayers(ps);
       setGameState(state);
       setStatus("room");
@@ -125,12 +128,35 @@ const useOnlineConnect4 = () => {
       setRoomId(rid);
       roomIdRef.current = rid;
       setMyDisc(disc);
+      myDiscRef.current = disc;
       setStatus("room");
     });
 
     socket.on("player_left", ({ playerId: leftId, name: leftName }) => {
-      // Optional: show a toast or notification in UI
-      console.log(`Player ${leftName} left the room.`);
+      setPlayers(prev => prev.filter(p => p.id !== leftId));
+      
+      // If we are in a match and the opponent leaves, they forfeit
+      setGameState(prev => {
+        if (prev.winner || prev.isDraw) return prev;
+        
+        // Find the disc of the player who stayed
+        const myDiscLocal = myDiscRef.current;
+        if (!myDiscLocal) return prev;
+        
+        return {
+          ...prev,
+          winner: myDiscLocal,
+          winningLine: null // Forfeit
+        };
+      });
+    });
+
+    socket.on("surrendered", ({ playerId: surrenderingId, winnerDisc }) => {
+      setGameState(prev => ({
+        ...prev,
+        winner: winnerDisc,
+        winningLine: null // No winning line for surrender
+      }));
     });
 
     socket.on("error_msg", ({ message }) => {
@@ -234,6 +260,22 @@ const useOnlineConnect4 = () => {
     socket.emit("reset_room", { roomId });
   }, [connected, roomId]);
 
+  const surrender = useCallback(() => {
+    if (!connected || !roomId) return;
+    console.log("🏳️ Emitting surrender for room:", roomId);
+    socket.emit("surrender", { roomId, playerId: playerIdRef.current });
+    
+    // Local fallback: set winner immediately to show overlay for the surrendering player
+    setGameState(prev => {
+      const otherDisc = myDiscRef.current === PLAYER1 ? PLAYER2 : PLAYER1;
+      return {
+        ...prev,
+        winner: otherDisc,
+        winningLine: null
+      };
+    });
+  }, [connected, roomId]);
+
   const makeMove = useCallback(
     (col) => {
       if (!roomId || !myTurn) return;
@@ -272,6 +314,7 @@ const useOnlineConnect4 = () => {
     stopQueue,
     leaveRoom,
     resetRoom,
+    surrender,
     makeMove,
   };
 };

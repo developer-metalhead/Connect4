@@ -17,12 +17,20 @@ import Scoreboard from "../../components/designSystem/Scoreboard";
 import { GameStatus, MatchResultOverlay } from "../../components/designSystem/Status";
 import Modal from "../../components/designSystem/Modal";
 import Input from "../../components/designSystem/Input";
+import ConfirmationModal from "../../components/designSystem/ConfirmationModal";
 import { 
   GameLayout, 
   LobbyCard, 
   RoomBadge, 
   InviteSection, 
-  SectionTitle 
+  SectionTitle, 
+  RoomToolbar,
+  RoomIdBadge,
+  CopyButton,
+  LeaveButton,
+  LiveGroup,
+  LiveDot,
+  LiveText
 } from "./index.style";
 
 // Original Logic
@@ -32,11 +40,15 @@ import useSoundManager from "../../hooks/core/useSoundManager";
 import useOnlineConnect4 from "../../hooks/core/useOnlineConnect4";
 import { PLAYER1, PLAYER2 } from "../../helperFunction/helperFunction";
 
+
+
 const OnlineV2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const soundManager = useSoundManager();
   const [activePanel, setActivePanel] = useState(null); // 'sound' or null
+  const [showSurrenderConfirm, setShowSurrenderConfirm] = useState(false);
+  const [copyStatus, setCopyStatus] = useState("Copy");
 
   const {
     connected,
@@ -54,8 +66,51 @@ const OnlineV2 = () => {
     stopQueue,
     leaveRoom,
     resetRoom,
+    surrender,
     makeMove,
   } = useOnlineConnect4();
+
+  const handleCopyRoomId = () => {
+    if (!roomId) return;
+    navigator.clipboard.writeText(roomId);
+    setCopyStatus("Copied!");
+    soundManager?.playClickSound();
+    setTimeout(() => setCopyStatus("Copy"), 2000);
+  };
+
+  const handleSurrenderClick = () => {
+    // If game already ended, just leave
+    if (gameState.winner || gameState.isDraw) {
+      leaveRoom();
+      navigate("/home");
+      return;
+    }
+    soundManager?.playClickSound();
+    setShowSurrenderConfirm(true);
+  };
+
+  const handleConfirmSurrender = () => {
+    setShowSurrenderConfirm(false);
+    surrender();
+  };
+
+  const handleCancelSurrender = () => {
+    soundManager?.playClickSound();
+    setShowSurrenderConfirm(false);
+  };
+
+  // Browser/Mobile back button should trigger confirmation
+  useEffect(() => {
+    const handlePopState = (e) => {
+      if (status === "room" && !gameState.winner && !gameState.isDraw) {
+        window.history.pushState(null, "", window.location.pathname);
+        handleSurrenderClick();
+      }
+    };
+    window.history.pushState(null, "", window.location.pathname);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [status, gameState.winner, gameState.isDraw]);
 
   const nameByDisc = useMemo(
     () =>
@@ -144,6 +199,7 @@ const OnlineV2 = () => {
 
   return (
     <PageWrapper>
+      {!inRoom && !connected && (
       <RefreshIconButton 
         onClick={() => {
           soundManager?.playClickSound();
@@ -152,18 +208,38 @@ const OnlineV2 = () => {
         style={{ position: 'fixed', top: '12px', right: '12px', zIndex: 1001 }}
       >
         <svg viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" /></svg>
-      </RefreshIconButton>
+      </RefreshIconButton>)}
  
-      
-      {inRoom ? (
-        <GiveUpButton 
-          onGiveUp={() => {
-            leaveRoom();
-            navigate("/home");
-          }} 
-          soundManager={soundManager} 
-        />
-      ) : connected ? (
+      {inRoom && (
+        <RoomToolbar>
+          <LiveGroup>
+            <LiveDot />
+            <LiveText>Live</LiveText>
+          </LiveGroup>
+          
+          <RoomIdBadge>
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', textTransform: 'uppercase' }}>ID:</span>
+            {roomId}
+            <CopyButton onClick={handleCopyRoomId} title={copyStatus}>
+              {copyStatus === "Copied!" ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3">
+                  <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </CopyButton>
+          </RoomIdBadge>
+
+          <LeaveButton onClick={handleSurrenderClick}>
+            Quit
+          </LeaveButton>
+        </RoomToolbar>
+      )}
+
+      {!inRoom && connected && (
         <SettingsMenu
           soundManager={soundManager}
           activeOption={activePanel}
@@ -175,7 +251,9 @@ const OnlineV2 = () => {
             { id: 'online', label: 'Online Settings', icon: <span>🌐</span> },
           ]}
         />
-      ) : (
+      )}
+
+      {!inRoom && !connected && (
         <RefreshIconButton 
           onClick={() => {
             soundManager?.playClickSound();
@@ -187,11 +265,10 @@ const OnlineV2 = () => {
         </RefreshIconButton>
       )}
 
-      <Header/>
-      
-        
-   
-      <BackButton soundManager={soundManager} />
+      {!inRoom && <Header />}
+
+      {!inRoom && (<BackButton soundManager={soundManager} />)}
+
 
       <SidePanel 
         isOpen={activePanel !== null} 
@@ -277,14 +354,7 @@ const OnlineV2 = () => {
         )}
 
         {inRoom && (
-          <GameLayout>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-              <RoomBadge>Room ID: {roomId}</RoomBadge>
-              <Button variant="ghost" size="sm" onClick={leaveRoom} soundManager={soundManager}>
-                Leave Room
-              </Button>
-            </div>
-
+          <GameLayout style={{ marginTop: '100px' }}>
             <Scoreboard p1={p1Data} p2={p2Data} />
 
             <Board
@@ -312,7 +382,7 @@ const OnlineV2 = () => {
               currentPlayerColor={gameState.currentPlayer === PLAYER1 ? "red" : "yellow"}
             />
 
-            {inviteLink && myDisc === PLAYER1 && !players.find(p => p.disc === PLAYER2) && (
+            {/* {inviteLink && myDisc === PLAYER1 && !players.find(p => p.disc === PLAYER2) && (
               <InviteSection>
                 <SectionTitle>Invite a Friend</SectionTitle>
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -339,29 +409,51 @@ const OnlineV2 = () => {
                     </Button>
                   </div>
                 )}
-              </InviteSection>
-            )}
+              </InviteSection> */}
+            {/* )} */}
           </GameLayout>
         )}
       </MainContent>
 
-
-
       {(gameState.winner || gameState.isDraw) && (
         <MatchResultOverlay 
-          title={gameState.winner ? (gameState.winner === myDisc ? "VICTORY" : "DEFEAT") : "DRAW"}
-          subtitle={gameState.winner ? (gameState.winner === myDisc ? "You dominated the board!" : "Better luck next time.") : "A perfect stalemate."}
+          title={
+            gameState.winner 
+              ? (gameState.winner === myDisc ? (gameState.winningLine ? "VICTORY" : "OPPONENT FORFEIT") : (gameState.winningLine ? "DEFEAT" : "FORFEIT")) 
+              : "DRAW"
+          }
+          subtitle={
+            gameState.winner 
+              ? (gameState.winner === myDisc ? (gameState.winningLine ? "You dominated the board!" : "Your opponent surrendered. You win!") : (gameState.winningLine ? "Better luck next time." : "You've conceded. Victory goes to your opponent.")) 
+              : "A perfect stalemate."
+          }
           variant={gameState.winner ? (gameState.winner === myDisc ? "win" : "loss") : "draw"}
-          onPrimaryAction={() => {
+          icon={gameState.winner ? (gameState.winner === myDisc ? "🏆" : "🏳️") : "🤝"}
+          onPrimaryAction={!!gameState.winningLine ? () => {
             soundManager?.playSound('coinsfalling');
             resetRoom();
+          } : null}
+          primaryActionLabel={!!gameState.winningLine ? "Rematch" : null}
+          onSecondaryAction={() => {
+            leaveRoom();
+            navigate("/home");
           }}
-          primaryActionLabel="Rematch"
-          onSecondaryAction={() => navigate("/home")}
+          secondaryActionLabel="Main Menu"
           soundManager={soundManager}
-          isNaturalEnding={true}
+          isNaturalEnding={!!gameState.winningLine}
         />
       )}
+
+      <ConfirmationModal
+        isOpen={showSurrenderConfirm}
+        onAccept={handleConfirmSurrender}
+        onDecline={handleCancelSurrender}
+        onClose={handleCancelSurrender}
+        title="Surrender Match?"
+        message="Are you sure you want to give up? This will count as a loss."
+        acceptLabel="Yes, Surrender"
+        declineLabel="Keep Playing"
+      />
     </PageWrapper>
   );
 };

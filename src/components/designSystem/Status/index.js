@@ -60,15 +60,17 @@ export const MatchResultOverlay = ({
         </div>
         
         <ActionGroup>
-          <Button 
-            variant="primary" 
-            size="lg" 
-            fullWidth
-            onClick={onPrimaryAction}
-            soundManager={soundManager}
-          >
-            {primaryActionLabel}
-          </Button>
+          {onPrimaryAction && primaryActionLabel && (
+            <Button 
+              variant="primary" 
+              size="lg" 
+              fullWidth
+              onClick={onPrimaryAction}
+              soundManager={soundManager}
+            >
+              {primaryActionLabel}
+            </Button>
+          )}
           {onSecondaryAction && (
             <Button 
               variant="outline" 
