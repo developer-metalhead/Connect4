@@ -2,7 +2,7 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 import { tokens } from "../tokens";
 import Input from "../Input";
-import useOnlineConnect4 from "../../../hooks/core/useOnlineConnect4";
+import useOnlineConnect4 from "../../../hooks/gameplay/useOnlineConnect4";
 
 const Container = styled("div")({
   display: "flex",

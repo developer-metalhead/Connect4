@@ -5,7 +5,7 @@
  */
 
 import { createEmptyBoard } from "../logic/core/engine";
-import { CORE_CONFIG } from "../logic/coreConfig";
+import { CORE_CONFIG } from "../logic/core/coreConfig";
 
 // Re-export constants
 export { 
@@ -15,7 +15,7 @@ export {
   PLAYER2, 
   EMPTY,
   ANIMATION_CONFIG 
-} from "../logic/core/constants";
+} from "../logic/core/coreConfig";
 
 // Re-export core engine logic
 export {

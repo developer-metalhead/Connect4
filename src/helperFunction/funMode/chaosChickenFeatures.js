@@ -1,7 +1,6 @@
-import { ROWS, COLS, EMPTY } from "../../logic/core/constants";
+import { ROWS, COLS, EMPTY } from "../../logic/core/coreConfig";
 import { CHICKEN_CONFIG } from "../../logic/funMode/funMode";
-import { detectPattern } from "./patternDispatcher";
-import { detectNewSquares } from "./patternDetectors";
+import { detectPattern } from "./patternBridge";
 
 // === CHAOS CHICKEN COLUMN BLOCKING PROBABILITY (70-30) ===
 export const getRandomUnblockedColumn = (blockedColumns, board) => {
@@ -200,9 +199,15 @@ export const shouldTriggerChaosChicken = (board, lastRow, lastCol, player, chaos
     return false;
   }
   
-  // PLUG & PLAY: Use the dispatcher to find matches based on REQUIRED_PATTERN
-  const { count } = detectPattern(board, player, CHICKEN_CONFIG, { row: lastRow, col: lastCol });
-  const hasNewPattern = count > 0;
+  // PLUG & PLAY: Use the coupled PATTERN object from config
+  const matches = detectPattern(
+    board, 
+    lastRow, 
+    lastCol, 
+    player, 
+    CHICKEN_CONFIG.PATTERN
+  );
+  const hasNewPattern = matches.length > 0;
   
   return hasNewPattern;
 };

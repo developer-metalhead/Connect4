@@ -9,7 +9,7 @@ import {
   VolumeDisplay
 } from '../SoundSettings/SoundSettings.style'; 
 import Button from '../Button';
-import { useGameSettings } from '../../../hooks/core/useGameSettings';
+import { useGameSettings } from '../../../hooks/settings/useGameSettings';
 
 const GameSettings = ({ soundManager, onClose }) => {
   const { 

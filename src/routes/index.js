@@ -17,7 +17,7 @@ import PlayCPUV2 from "../pagesV2/offline/vsCPU";
 import FunModeV2 from "../pagesV2/funMode";
 
 // Common Components
-import LandingPage from "../pages/LandingPage";
+import LandingPage from "../pagesV2/LandingPage";
 
 const AppRoutes = () => {
   return (

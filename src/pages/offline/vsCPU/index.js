@@ -9,7 +9,7 @@ import useSoundManager from "../../../hooks/core/useSoundManager";
 // CHANGE: Import PostVideoOverlay component
 import PostVideoOverlay from "../../../components/organisms/postVideoOverlay";
 
-import useConnect4CPU from "../../../hooks/core/useConnect4CPU";
+import useConnect4CPU from "../../../hooks/gameplay/useConnect4CPU";
 
 import {
   PageContainer,

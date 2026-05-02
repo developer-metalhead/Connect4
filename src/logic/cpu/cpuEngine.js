@@ -1,93 +1,89 @@
 import { 
   dropPiece, 
   checkWin, 
-  isValidMove, 
-  PLAYER1, 
-  PLAYER2, 
-  EMPTY, 
-  COLS, 
-  ROWS 
-} from "../../helperFunction/helperFunction";
-import { CPU_CONFIG } from "./vsCPU";
-import { loadMemory } from "./cpuMemory";
+  isValidMove 
+} from "../../logic/core/engine";
+import { PLAYERS, CORE_CONFIG } from "../../logic/core/coreConfig";
+import { loadMemory } from "../../logic/cpu/cpuMemory";
 
-const HUMAN = PLAYER1;
-const CPU = PLAYER2;
+const HUMAN = PLAYERS.P1;
+const CPU = PLAYERS.P2;
+const { EMPTY, WIN_LENGTH } = CORE_CONFIG;
 
 /**
- * Creates a reproducible state key for memory (includes side-to-move)
+ * Creates a reproducible state key for memory
  */
 export const getBoardKey = (board, currentPlayer) => {
   const grid = board.map((r) => r.join("")).join("/");
   return `${currentPlayer}|${grid}`;
 };
 
+/**
+ * Standard middle-out column search
+ */
+const COLUMN_ORDER = [3, 2, 4, 1, 5, 0, 6];
+
+/**
+ * Returns valid columns for the standard grid
+ */
 const getValidColumns = (board) => {
   const cols = [];
-  for (let c = 0; c < COLS; c++) if (isValidMove(board, c)) cols.push(c);
+  for (let c = 0; c < 7; c++) if (isValidMove(board, c)) cols.push(c);
   return cols;
 };
 
-const simulateDrop = (board, col, player) => {
-  const { newBoard, row } = dropPiece(board, col, player);
-  return { simBoard: newBoard, row };
-};
-
 /**
- * Heuristic evaluation (CPU-centric)
+ * Heuristic evaluation (Standard 6x7)
  */
 export const evaluateBoard = (board, BLOCKING_PRIORITY = true) => {
+  const rows = 6;
+  const cols = 7;
   let score = 0;
-  const S = CPU_CONFIG.SCORES;
 
-  // Center control
-  const centerCol = Math.floor(COLS / 2);
-  let cpuCenter = 0;
-  let humanCenter = 0;
-  for (let r = 0; r < ROWS; r++) {
-    if (board[r][centerCol] === CPU) cpuCenter++;
-    else if (board[r][centerCol] === HUMAN) humanCenter++;
+  // 1. Center Control
+  const centerCol = 3;
+  for (let r = 0; r < rows; r++) {
+    if (board[r][centerCol] === CPU) score += 3;
+    else if (board[r][centerCol] === HUMAN) score -= 3;
   }
-  score += (cpuCenter - humanCenter) * S.CENTER_CONTROL;
 
   const scoreWindow = (cells) => {
     const cpuCount = cells.filter((x) => x === CPU).length;
     const humanCount = cells.filter((x) => x === HUMAN).length;
     const emptyCount = cells.filter((x) => x === EMPTY).length;
 
-    if (cpuCount === 4) return S.WIN;
-    if (humanCount === 4) return S.LOSS;
+    if (cpuCount === 4) return 10000;
+    if (humanCount === 4) return -10000;
 
     let s = 0;
-    if (cpuCount === 3 && emptyCount === 1) s += S.THREE_IN_ROW;
-    if (cpuCount === 2 && emptyCount === 2) s += S.TWO_IN_ROW;
+    if (cpuCount === 3 && emptyCount === 1) s += 5;
+    if (cpuCount === 2 && emptyCount === 2) s += 2;
     
     if (BLOCKING_PRIORITY) {
-      if (humanCount === 3 && emptyCount === 1) s += S.OPPONENT_THREE;
-      if (humanCount === 2 && emptyCount === 2) s += S.OPPONENT_TWO;
+      if (humanCount === 3 && emptyCount === 1) s -= 80;
+      if (humanCount === 2 && emptyCount === 2) s -= 10;
     }
-
     return s;
   };
 
-  // Scan board for windows
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c <= COLS - 4; c++) {
+  // Scans
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c <= cols - 4; c++) {
       score += scoreWindow([board[r][c], board[r][c+1], board[r][c+2], board[r][c+3]]);
     }
   }
-  for (let r = 0; r <= ROWS - 4; r++) {
-    for (let c = 0; c < COLS; c++) {
+  for (let r = 0; r <= rows - 4; r++) {
+    for (let c = 0; c < cols; c++) {
       score += scoreWindow([board[r][c], board[r+1][c], board[r+2][c], board[r+3][c]]);
     }
   }
-  for (let r = 0; r <= ROWS - 4; r++) {
-    for (let c = 0; c <= COLS - 4; c++) {
+  for (let r = 0; r <= rows - 4; r++) {
+    for (let c = 0; c <= cols - 4; c++) {
       score += scoreWindow([board[r][c], board[r+1][c+1], board[r+2][c+2], board[r+3][c+3]]);
     }
   }
-  for (let r = 3; r < ROWS; r++) {
-    for (let c = 0; c <= COLS - 4; c++) {
+  for (let r = 3; r < rows; r++) {
+    for (let c = 0; c <= cols - 4; c++) {
       score += scoreWindow([board[r][c], board[r-1][c+1], board[r-2][c+2], board[r-3][c+3]]);
     }
   }
@@ -96,7 +92,7 @@ export const evaluateBoard = (board, BLOCKING_PRIORITY = true) => {
 };
 
 /**
- * Minimax algorithm with Alpha-Beta pruning
+ * Minimax with Alpha-Beta
  */
 export const minimax = (board, depth, alpha, beta, maximizingPlayer, BLOCKING_PRIORITY) => {
   const valid = getValidColumns(board);
@@ -104,16 +100,14 @@ export const minimax = (board, depth, alpha, beta, maximizingPlayer, BLOCKING_PR
     return { col: null, score: evaluateBoard(board, BLOCKING_PRIORITY) };
   }
 
-  const S = CPU_CONFIG.SCORES;
-
   if (maximizingPlayer) {
     let bestScore = -Infinity;
     let bestCol = valid[0];
-    for (const c of CPU_CONFIG.COLUMN_ORDER) {
+    for (const c of COLUMN_ORDER) {
       if (!valid.includes(c)) continue;
-      const { simBoard, row } = simulateDrop(board, c, CPU);
-      if (row !== -1 && checkWin(simBoard, row, c, CPU)) return { col: c, score: S.WIN + depth };
-      const res = minimax(simBoard, depth - 1, alpha, beta, false, BLOCKING_PRIORITY);
+      const { newBoard, row } = dropPiece(board, c, CPU);
+      if (row !== -1 && checkWin(newBoard, row, c, CPU, 4)) return { col: c, score: 10000 + depth };
+      const res = minimax(newBoard, depth - 1, alpha, beta, false, BLOCKING_PRIORITY);
       if (res.score > bestScore) { bestScore = res.score; bestCol = c; }
       alpha = Math.max(alpha, bestScore);
       if (alpha >= beta) break;
@@ -122,11 +116,11 @@ export const minimax = (board, depth, alpha, beta, maximizingPlayer, BLOCKING_PR
   } else {
     let bestScore = Infinity;
     let bestCol = valid[0];
-    for (const c of CPU_CONFIG.COLUMN_ORDER) {
+    for (const c of COLUMN_ORDER) {
       if (!valid.includes(c)) continue;
-      const { simBoard, row } = simulateDrop(board, c, HUMAN);
-      if (row !== -1 && checkWin(simBoard, row, c, HUMAN)) return { col: c, score: S.LOSS - depth };
-      const res = minimax(simBoard, depth - 1, alpha, beta, true, BLOCKING_PRIORITY);
+      const { newBoard, row } = dropPiece(board, c, HUMAN);
+      if (row !== -1 && checkWin(newBoard, row, c, HUMAN, 4)) return { col: c, score: -10000 - depth };
+      const res = minimax(newBoard, depth - 1, alpha, beta, true, BLOCKING_PRIORITY);
       if (res.score < bestScore) { bestScore = res.score; bestCol = c; }
       beta = Math.min(beta, bestScore);
       if (alpha >= beta) break;
@@ -136,58 +130,39 @@ export const minimax = (board, depth, alpha, beta, maximizingPlayer, BLOCKING_PR
 };
 
 /**
- * Root function to pick the smartest move based on difficulty and memory
+ * Root pickMove function
  */
 export const pickCpuMoveSmart = (board, difficulty) => {
   const valid = getValidColumns(board);
   if (valid.length === 0) return null;
 
-  const config = CPU_CONFIG.DIFFICULTY[difficulty] || CPU_CONFIG.DIFFICULTY.Expert;
-  
-  let movesMade = 0;
-  board.forEach(row => row.forEach(cell => { if (cell !== EMPTY) movesMade++; }));
-
-  const depth = typeof config.MINIMAX_DEPTH === 'number' 
-    ? config.MINIMAX_DEPTH 
-    : config.GET_DEPTH(movesMade);
-
-  if (config.RANDOM_MOVE_CHANCE > 0 && Math.random() < config.RANDOM_MOVE_CHANCE) {
-    return valid[Math.floor(Math.random() * valid.length)];
-  }
+  // Standard difficulty mapping
+  const depth = difficulty === 'Expert' ? 5 : difficulty === 'Skilled' ? 3 : 1;
+  const BLOCKING_PRIORITY = true;
 
   // Tactical overrides
   for (const c of valid) {
-    const { simBoard, row } = simulateDrop(board, c, CPU);
-    if (row !== -1 && checkWin(simBoard, row, c, CPU)) return c;
+    const { newBoard, row } = dropPiece(board, c, CPU);
+    if (row !== -1 && checkWin(newBoard, row, c, CPU, 4)) return c;
   }
-  if (config.BLOCKING_PRIORITY) {
-    for (const c of valid) {
-      const { simBoard, row } = simulateDrop(board, c, HUMAN);
-      if (row !== -1 && checkWin(simBoard, row, c, HUMAN)) return c;
-    }
+  for (const c of valid) {
+    const { newBoard, row } = dropPiece(board, c, HUMAN);
+    if (row !== -1 && checkWin(newBoard, row, c, HUMAN, 4)) return c;
   }
 
   const memory = loadMemory();
   const stateKey = getBoardKey(board, CPU);
   let best = { col: valid[0], score: -Infinity };
 
-  for (const c of CPU_CONFIG.COLUMN_ORDER) {
+  for (const c of COLUMN_ORDER) {
     if (!valid.includes(c)) continue;
-    const { simBoard } = simulateDrop(board, c, CPU);
+    const { newBoard } = dropPiece(board, c, CPU);
+    const res = minimax(newBoard, depth - 1, -Infinity, Infinity, false, BLOCKING_PRIORITY);
     
-    let antiTrapPenalty = 0;
-    if (config.BLOCKING_PRIORITY) {
-      if (getValidColumns(simBoard).some(hc => {
-        const { simBoard: hb, row: hr } = simulateDrop(simBoard, hc, HUMAN);
-        return hr !== -1 && checkWin(hb, hr, hc, HUMAN);
-      })) antiTrapPenalty = 150;
-    }
+    const memPenalty = (memory[`${stateKey}|${c}`] || 0) * 50;
+    const score = res.score - memPenalty;
 
-    const res = minimax(simBoard, depth - 1, -Infinity, Infinity, false, config.BLOCKING_PRIORITY);
-    const memPenalty = memory[`${stateKey}|${c}`] || 0;
-    const adjusted = res.score - (memPenalty * CPU_CONFIG.MEMORY.PENALTY_WEIGHT) - antiTrapPenalty;
-
-    if (adjusted > best.score) { best = { col: c, score: adjusted }; }
+    if (score > best.score) { best = { col: c, score }; }
   }
 
   return best.col;

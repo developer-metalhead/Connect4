@@ -1,7 +1,6 @@
-import { ROWS, COLS, EMPTY } from "../../logic/core/constants";
+import { ROWS, COLS, EMPTY } from "../../logic/core/coreConfig";
 import { MONKEY_CONFIG } from "../../logic/funMode/funMode";
-import { detectPattern } from "./patternDispatcher";
-import { countSeparateInARows } from "./patternDetectors";
+import { countPatternsAll } from "./patternBridge";
 
 export const shouldTriggerMonkeyMayhem = (board, player, monkeyState) => {
   // Check if we reached the match limit
@@ -10,8 +9,12 @@ export const shouldTriggerMonkeyMayhem = (board, player, monkeyState) => {
     return false;
   }
 
-  // PLUG & PLAY: Use the dispatcher to find matches based on REQUIRED_PATTERN
-  const { count: patternCount } = detectPattern(board, player, MONKEY_CONFIG);
+  // PLUG & PLAY: Use the coupled PATTERN object from config
+  const patternCount = countPatternsAll(
+    board, 
+    player, 
+    MONKEY_CONFIG.PATTERN
+  );
   const shouldTrigger = patternCount >= MONKEY_CONFIG.TRIGGER_THRESHOLD;
   
   console.log(`📊 MONKEY MAYHEM DECISION: ${shouldTrigger} (Found ${patternCount}/${MONKEY_CONFIG.TRIGGER_THRESHOLD})`);

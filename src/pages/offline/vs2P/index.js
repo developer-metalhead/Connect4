@@ -5,7 +5,7 @@ import Status from "../../../components/organisms/status";
 import Board from "../../../components/organisms/boardStyles";
 import useSoundManager from "../../../hooks/core/useSoundManager";
 
-import { useConnect4 } from "../../../hooks/core/useConnect4";
+import { useConnect4 } from "../../../hooks/gameplay/useConnect4";
 import {
   PageContainer,
   HeaderContainer,
