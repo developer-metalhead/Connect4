@@ -1,4 +1,5 @@
 import React from "react";
+import { EMOJIS } from "../../logic/core/coreConfig";
 import { useNavigate } from "react-router-dom";
 import useSoundManager from "../../hooks/core/useSoundManager";
 import { RefreshIconButton } from "../../components/designSystem/Layout.style";
@@ -36,11 +37,11 @@ const OfflineV2 = () => {
         activeOption={activePanel}
         onOptionClick={(id) => setActivePanel(activePanel === id ? null : id)}
         options={[
-          { id: 'game', label: 'Game Settings', icon: <span>🎮</span> },
-          { id: 'sound', label: 'Sound Settings', icon: <span>🔊</span> },
-          { id: 'board', label: 'Board Settings', icon: <span>⚙️</span> },
-          { id: 'cpu', label: 'CPU Settings', icon: <span>🤖</span> },
-          { id: 'fun', label: 'Fun Mode Settings', icon: <span>🔥</span> },
+          { id: 'game', label: 'Game Settings', icon: <span>{EMOJIS.UI_GAME}</span> },
+          { id: 'sound', label: 'Sound Settings', icon: <span>{EMOJIS.UI_SOUND}</span> },
+          { id: 'board', label: 'Board Settings', icon: <span>{EMOJIS.UI_BOARD}</span> },
+          { id: 'cpu', label: 'CPU Settings', icon: <span>{EMOJIS.UI_CPU}</span> },
+          { id: 'fun', label: 'Fun Mode Settings', icon: <span>{EMOJIS.UI_FUN}</span> },
         ]}
       />
 

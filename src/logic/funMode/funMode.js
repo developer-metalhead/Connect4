@@ -1,29 +1,54 @@
 /**
- * FUN MODE CONFIGURATION
+ * FUN MODE CONFIGURATION (PHASE 3: UNIVERSAL ULTIMATES)
  * 
- * --- PATTERN DICTIONARY ---
- * Use these coupled objects to define triggers.
+ * --- CHARACTER CORE ---
+ * NAME: Unique ID for the character.
+ * ACTOR: Emoji that runs across the screen.
+ * PROJECTILE: Emoji dropped/thrown on the board.
+ * PATTERN: Geometry that triggers the character (Line, Square, Cross).
  * 
- * 1. { type: PATTERNS.LINE, length: N }     -> N pieces in a straight line (H, V, or D)
- * 2. { type: PATTERNS.SQUARE, size: N }     -> An N x N solid square (e.g. 2x2, 3x3)
- * 3. { type: PATTERNS.CROSS, armLength: N } -> A center piece with arms of length N
+ * --- ACTION PARAMETERS (The "Sacred Names") ---
+ * MAYHEM_DURATION: Turns the gravity stays flipped.
+ * STEAL_PROBABILITY: Chance (0-1) to remove a random disc.
+ * POOP_BLOCK_DURATION: Turns a column stays blocked.
+ * POOP_NON_EMPTY_PROBABILITY: Chance to target an occupied column.
+ * EXPLOSION_RADIUS: Number of cells cleared around the center.
+ * ROOSTER_STRIKE_PROBABILITY: Success rate of the Ultimate Ability.
+ * 
+ * --- EVOLUTION KEYS ---
+ * TRIGGER_THRESHOLD: Matches needed to trigger BASE actions.
+ * ULTIMATE_THRESHOLD: Matches needed to escalate to ULTIMATE actions.
  */
-import { PATTERNS } from "../core/coreConfig";
+import { PATTERNS, FEATURES, EMOJIS } from "../core/coreConfig";
+import { ACTIONS } from "./actionEngine";
 
 export const MONKEY_CONFIG = {
-  PATTERN: { type: PATTERNS.LINE, length: 3 },// Number of completed pattern matches required to enable the Monkey Mayhem button
-  TRIGGER_THRESHOLD: 2,
+  NAME: FEATURES.MONKEY,
+  ACTOR: EMOJIS.MONKEY,
+  PROJECTILE: EMOJIS.BANANA,
+  PATTERN: { type: PATTERNS.LINE, length: 3 },
   
-  // Chance that the monkey will steal a disc after it appears (0.0 to 1.0)
-  STEAL_PROBABILITY: 0.75,
-
-  // How many turns the board stays upside down after mayhem is activated
-  MAYHEM_DURATION: 4,
-
-  // Global match limit: total times Monkey Mayhem can trigger in a single game
+  // BASE ACTIONS (Triggers normally)
+  ACTIONS: [
+    { 
+      type: ACTIONS.GRAVITY_FLIP, 
+      MAYHEM_DURATION: 4 
+    },
+    { 
+      type: ACTIONS.REMOVE_DISC, 
+      STEAL_PROBABILITY: 0.75 
+    },
+       // { 
+    //   type: ACTIONS.BLOCK_COLUMN, 
+    //   POOP_NON_EMPTY_PROBABILITY: 0.70, 
+    //   POOP_BLOCK_DURATION: 3 
+    // }
+  ],
+  
+  TRIGGER_THRESHOLD: 2,
   MAX_ACTIVATIONS_PER_MATCH: 1,
   
-  // The monkey's personality lines
+  
   VOICE_LINES: [
     "Time to flip things up!",
     "Ooo-ooo! Gravity is my playground!",
@@ -34,52 +59,64 @@ export const MONKEY_CONFIG = {
 };
 
 export const CHICKEN_CONFIG = {
+  NAME: FEATURES.CHICKEN,
+  ACTOR: EMOJIS.CHICKEN,
+  PROJECTILE: EMOJIS.POOP,
   PATTERN: { type: PATTERNS.SQUARE, size: 2 },
- // Matches required to trigger a standard Chaos Chicken event
- TRIGGER_THRESHOLD: 1,
   
- // Matches required to escalate to a Rooster of Rage event (replaces chicken)
- ROOSTER_THRESHOLD: 2,
+  // BASE ACTIONS (Chaos Chicken - Pooping)
+  ACTIONS: [
+    { 
+      type: ACTIONS.BLOCK_COLUMN, 
+      POOP_NON_EMPTY_PROBABILITY: 0.70, 
+      POOP_BLOCK_DURATION: 3 
+    }
+  ],
 
- // Max times a single player can unleash the Rooster per match
- MAX_ROOSTER_PER_PLAYER: 1,
-
- // Whether to reset the pattern counter after a Rooster strike
- RESET_AFTER_ROOSTER: false,
+  // ULTIMATE ACTIONS (Rooster of Rage - Stealing/Clearing)
+  ULTIMATE_ACTIONS: [
+    { 
+      type: ACTIONS.REMOVE_DISC, 
+      ROOSTER_STRIKE_PROBABILITY: 1.0 
+    }
+  ],
+  
+  TRIGGER_THRESHOLD: 1,
+  ULTIMATE_THRESHOLD: 2, 
  
- // Probability split: Chance to target a column that already has discs
- POOP_NON_EMPTY_PROBABILITY: 0.70,
- 
- // Duration of the column block effect
- POOP_BLOCK_DURATION: 3,
- 
- // Standard chicken commentary
- CHICKEN_VOICE_LINES: [
-   "Bawk bawk! Chaos time!",
-   "Cluck cluck! Here comes trouble!",
-   "Chicken alert! Incoming poop!",
-   "Feathers flying everywhere!",
-   "Time to ruffle some feathers!",
- ],
- 
- // High-stakes rooster commentary
- ROOSTER_VOICE_LINES: [
-   "RAAAWR! Rooster of Rage!",
-   "COCK-A-DOODLE-DOOM!",
-   "Fire and fury unleashed!",
-   "Behold the mighty rooster!",
-   "Rage mode activated!",
- ]
+  MAX_ROOSTER_PER_PLAYER: 1,
+  RESET_AFTER_ROOSTER: false,
+  
+  CHICKEN_VOICE_LINES: [
+    "Bawk bawk! Chaos time!",
+    "Cluck cluck! Here comes trouble!",
+    "Chicken alert! Incoming poop!",
+    "Feathers flying everywhere!",
+    "Time to ruffle some feathers!",
+  ],
+  
+  ROOSTER_VOICE_LINES: [
+    "RAAAWR! Rooster of Rage!",
+    "COCK-A-DOODLE-DOOM!",
+    "Fire and fury unleashed!",
+    "Behold the mighty rooster!",
+    "Rage mode activated!",
+  ]
 };
 
 export const BOMB_CONFIG = {
+  NAME: FEATURES.BOMB,
+  ACTOR: EMOJIS.BOMB,
+  PROJECTILE: EMOJIS.EXPLOSION,
   PATTERN: { type: PATTERNS.CROSS, armLength: 1 },
+  ACTIONS: [
+    { type: ACTIONS.EXPLODE, EXPLOSION_RADIUS: 2 }
+  ],
   TRIGGER_THRESHOLD: 1,
-  EXPLOSION_RADIUS: 2,
 };
 
 export const FUN_MODE_CONFIG = {
-  MONKEY: MONKEY_CONFIG,
-  CHICKEN: CHICKEN_CONFIG,
-  BOMB: BOMB_CONFIG,
+  [FEATURES.MONKEY]: MONKEY_CONFIG,
+  [FEATURES.CHICKEN]: CHICKEN_CONFIG,
+  [FEATURES.BOMB]: BOMB_CONFIG,
 };

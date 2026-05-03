@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { styled, keyframes } from "@mui/material/styles";
 import { tokens } from "../../tokens";
 import { formatCoords,ROWS } from "../../../../helperFunction/helperFunction";
+import { FEATURES, EMOJIS } from "../../../../logic/core/coreConfig";
 
 const slideIn = keyframes`
   0% { transform: translate(-50%, -150%) scale(0.8); opacity: 0; }
@@ -25,8 +26,8 @@ const OverlayContainer = styled("div", {
   transform: "translate(-50%, -50%)",
   backgroundColor: tokens.glass.background,
   backdropFilter: tokens.glass.blur,
-  border: `2px solid ${type === "monkey" ? "#FFC107" : "#FF5722"}`,
-  boxShadow: `0 0 30px ${type === "monkey" ? "rgba(255, 193, 7, 0.3)" : "rgba(255, 87, 34, 0.3)"}`,
+  border: `2px solid ${type === FEATURES.MONKEY ? "#FFC107" : "#FF5722"}`,
+  boxShadow: `0 0 30px ${type === FEATURES.MONKEY ? "rgba(255, 193, 7, 0.3)" : "rgba(255, 87, 34, 0.3)"}`,
   color: "#fff",
   borderRadius: tokens.radius.xl,
   padding: "32px 48px",
@@ -80,7 +81,7 @@ const RemovalOverlay = ({ data, onComplete }) => {
     for (let i = 0; i < (data.count || 1) * 3; i++) {
       newParticles.push({
         id: i,
-        disc: data.player || "⚪",
+        disc: data.player || EMOJIS.EMPTY_SLOT,
         size: Math.random() * 40 + 70,
         destX: (Math.random() - 0.5) * 600,
         destY: (Math.random() - 0.5) * 600,
@@ -103,10 +104,11 @@ const RemovalOverlay = ({ data, onComplete }) => {
   return (
     <OverlayContainer type={data.type}>
       <Emojis>
-        {data.type === "monkey" ? "🐒" : "🔥🐓"}
+        {data.type === FEATURES.MONKEY ? EMOJIS.MONKEY : `${EMOJIS.FIRE}${EMOJIS.ROOSTER}`}
+        {data.player && <span>{data.player}</span>}
       </Emojis>
       <Text>
-        {data.type === "monkey"
+        {data.type === FEATURES.MONKEY
           ? `Monkey stole ${data.player} disc from ${formatCoords(data.row, data.col)}!`
           : `Rooster of Rage cleared ${data.count} ${data.player} discs from Row ${ROWS - data.row}!`}
       </Text>

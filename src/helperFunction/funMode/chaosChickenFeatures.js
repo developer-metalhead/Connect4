@@ -219,8 +219,8 @@ export const isRoosterOfRageActivation = (chaosChickenState, player) => {
   const playerKey = player === "🔴" ? "player1" : "player2";
   const currentActivations = chaosChickenState.chickenActivations[playerKey] || 0;
   
-  // Triggers if it's the (ROOSTER_THRESHOLD)-th activation
-  return currentActivations === (CHICKEN_CONFIG.ROOSTER_THRESHOLD - 1);
+  // Triggers if it's the (ULTIMATE_THRESHOLD)-th activation
+  return currentActivations === (CHICKEN_CONFIG.ULTIMATE_THRESHOLD - 1);
 };
 
 // Find nearest available column

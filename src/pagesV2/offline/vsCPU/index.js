@@ -17,7 +17,6 @@ import { GameLayout, ControlGroup, DifficultyContainer, DifficultyButton, Slidin
 // Original Logic Components
 import Board from "../../../components/organisms/boardStyles";
 import PostVideoOverlay from "../../../components/designSystem/PostVideoOverlay";
-import PoopBlockIndicator from "../../../components/designSystem/Features/chaosChicken/PoopBlockIndicator";
 import GiveUpButton from "../../../components/designSystem/GiveUpButton";
 import { PLAYERS } from "../../../logic/core/coreConfig";
 
@@ -153,7 +152,6 @@ const PlayCPUV2 = () => {
             isCpuDropping={isCpuDropping}
             cpuDroppingCol={cpuDroppingCol}
             winningLine={gameState.winningLine}
-            PoopBlockIndicatorComponent={PoopBlockIndicator}
           />
 
           <GameStatus 

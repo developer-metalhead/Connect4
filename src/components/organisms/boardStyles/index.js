@@ -17,10 +17,10 @@ import {
 import {  returnToNormalGravity,
   applyInvertedGravity,
   planInvertedGravityAnimation, } from "../../../helperFunction/funMode/monkeyModeFeatures";
-import PoopBlockIndicator from "../../designSystem/Features/chaosChicken/PoopBlockIndicator";
+import FeatureBlockIndicator from "../../designSystem/Features/core/FeatureBlockIndicator";
 import { useGameSettings } from "../../../hooks/settings/useGameSettings";
 
-import { ANIMATION_CONFIG, CORE_CONFIG, PATTERNS } from "../../../logic/core/coreConfig";
+import { ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS, SOUNDS } from "../../../logic/core/coreConfig";
 
 const Board = ({
   board,
@@ -40,7 +40,7 @@ const Board = ({
   winningLine = null,
   blockedColumns = [],
   onBlockedColumnAttempt = null,
-  PoopBlockIndicatorComponent = PoopBlockIndicator,
+  BlockIndicatorComponent = FeatureBlockIndicator,
 }) => {
   const [hoverCol, setHoverCol] = useState(null);
   const [droppingCol, setDroppingCol] = useState(null);
@@ -66,14 +66,14 @@ const Board = ({
 
   // CHANGE: Physics-based reset animation detection
   useEffect(() => {
-    const isNowEmpty = board.every(row => row.every(cell => cell === "⚪"));
-    const wasNotEmpty = prevBoardRef.current && prevBoardRef.current.some(row => row.some(cell => cell !== "⚪"));
+    const isNowEmpty = board.every(row => row.every(cell => cell === EMOJIS.EMPTY_SLOT));
+    const wasNotEmpty = prevBoardRef.current && prevBoardRef.current.some(row => row.some(cell => cell !== EMOJIS.EMPTY_SLOT));
 
     if (isNowEmpty && wasNotEmpty) {
       const newEjected = [];
       prevBoardRef.current.forEach((row, r) => {
         row.forEach((cell, c) => {
-          if (cell !== "⚪") {
+          if (cell !== EMOJIS.EMPTY_SLOT) {
             // Random physics trajectories
             const vx = (Math.random() - 0.5) * 1200; // Wider horizontal spread
             const vy = -(Math.random() * 600 + 400); // Stronger upward pop
@@ -95,7 +95,7 @@ const Board = ({
       setEjectedPieces(newEjected);
       // Play a special sound if possible
       if (soundManager) {
-        soundManager.playSound('coinsfalling'); // Already added in previous turn
+        soundManager.playSound(SOUNDS.COINS); // Already added in previous turn
       }
       
       setTimeout(() => setEjectedPieces([]), 1500);
@@ -139,7 +139,7 @@ const Board = ({
 
   // CHANGE: Reset dropping state if the board is completely cleared (game reset)
   useEffect(() => {
-    if (board.every(row => row.every(cell => cell === "⚪"))) {
+    if (board.every(row => row.every(cell => cell === EMOJIS.EMPTY_SLOT))) {
       setDroppingCol(null);
       setFallingDisc(null);
       setHoverCol(null);
@@ -148,7 +148,7 @@ const Board = ({
   }, [board]);
 
   // CHANGE: Check if column is blocked by poop
-  const isColumnBlockedByPoop = (col) => {
+  const isColumnBlocked = (col) => {
     return (blockedColumns || []).some(block => block.columnIndex === col && block.turnsLeft > 0);
   };
 
@@ -156,7 +156,7 @@ const Board = ({
     if (winner || isDraw || !canInteract || droppingCol !== null) return;
 
     // CHANGE: Handle blocked columns
-    if (isColumnBlockedByPoop(col)) {
+    if (isColumnBlocked(col)) {
       const clickedCol = col;
       // Force animation restart by briefly removing the state
       setJigglingCols(prev => ({ ...prev, [clickedCol]: false }));
@@ -194,14 +194,14 @@ const Board = ({
     let targetRow = -1;
     if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
-        if (board[row][col] === "⚪") {
+        if (board[row][col] === EMOJIS.EMPTY_SLOT) {
           targetRow = row;
           break;
         }
       }
     } else {
       for (let row = board.length - 1; row >= 0; row--) {
-        if (board[row][col] === "⚪") {
+        if (board[row][col] === EMOJIS.EMPTY_SLOT) {
           targetRow = row;
           break;
         }
@@ -258,7 +258,7 @@ const Board = ({
   const handleMouseEnter = (col) => {
     if (canInteract && !winner && !isDraw && droppingCol === null) {
       // CHANGE: Show different hover state for blocked columns
-      if (isColumnBlockedByPoop(col)) {
+      if (isColumnBlocked(col)) {
         setHoverCol(null); // Don't highlight blocked columns
         return;
       }
@@ -281,7 +281,7 @@ const Board = ({
       clearTouchTimeout();
       
       // CHANGE: Don't highlight blocked columns on touch
-      if (isColumnBlockedByPoop(col)) {
+      if (isColumnBlocked(col)) {
         setTouchCol(null);
         return;
       }
@@ -303,7 +303,7 @@ const Board = ({
         clearTouchTimeout();
         
         // CHANGE: Don't highlight blocked columns
-        if (isColumnBlockedByPoop(newCol)) {
+        if (isColumnBlocked(newCol)) {
           setTouchCol(null);
           return;
         }
@@ -329,14 +329,14 @@ const Board = ({
   if (activeCol !== null) {
     if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
-        if (board[row][activeCol] === "⚪") {
+        if (board[row][activeCol] === EMOJIS.EMPTY_SLOT) {
           activeTargetRow = row;
           break;
         }
       }
     } else {
       for (let row = board.length - 1; row >= 0; row--) {
-        if (board[row][activeCol] === "⚪") {
+        if (board[row][activeCol] === EMOJIS.EMPTY_SLOT) {
           activeTargetRow = row;
           break;
         }
@@ -350,14 +350,14 @@ const Board = ({
     let targetRow = -1;
     if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
-        if (board[row][cpuDroppingCol] === "⚪") {
+        if (board[row][cpuDroppingCol] === EMOJIS.EMPTY_SLOT) {
           targetRow = row;
           break;
         }
       }
     } else {
       for (let row = board.length - 1; row >= 0; row--) {
-        if (board[row][cpuDroppingCol] === "⚪") {
+        if (board[row][cpuDroppingCol] === EMOJIS.EMPTY_SLOT) {
           targetRow = row;
           break;
         }
@@ -373,7 +373,7 @@ const Board = ({
       col: cpuDroppingCol,
       targetRow,
       currentRow: startRow,
-      player: "🟡", // CPU player emoji
+      player: EMOJIS.YELLOW_DISC, // CPU player emoji
       animationDuration: calculateDropDuration(Math.abs(distance)),
     };
   })() : null;
@@ -385,12 +385,12 @@ const Board = ({
     if (isLogicUpsideDown) {
       // Find top-most empty cell
       for (let r = 0; r < 6; r++) {
-        if (board[r][activeCol] === "⚪") return r;
+        if (board[r][activeCol] === EMOJIS.EMPTY_SLOT) return r;
       }
     } else {
       // Find bottom-most empty cell
       for (let r = 5; r >= 0; r--) {
-        if (board[r][activeCol] === "⚪") return r;
+        if (board[r][activeCol] === EMOJIS.EMPTY_SLOT) return r;
       }
     }
     return null;
@@ -417,7 +417,7 @@ const Board = ({
                 !isDraw &&
                 droppingCol === null &&
                 activeCol === col &&
-                !isColumnBlockedByPoop(col) && (
+                !isColumnBlocked(col) && (
                   <span className="preview-piece">{currentPlayer}</span>
                 )}
             </div>
@@ -432,10 +432,12 @@ const Board = ({
       >
         {/* CHANGE: Add poop block indicators */}
         {(blockedColumns || []).map((block) => (
-          <PoopBlockIndicatorComponent
-            key={`poop-${block.columnIndex}`}
+          <BlockIndicatorComponent
+            key={`block-${block.columnIndex}`}
             columnIndex={block.columnIndex}
+            projectile={block.projectile}
             turnsLeft={block.turnsLeft}
+            isUpsideDown={isUpsideDown}
           />
         ))}
 
@@ -538,7 +540,7 @@ const Board = ({
             {row.map((cell, c) => {
               // Calculate win state classes
               const isWinningPiece = winner && winningLine && winningLine.some(loc => loc.row === r && loc.col === c);
-              const isLosingPiece = winner && !isWinningPiece && cell !== "⚪";
+              const isLosingPiece = winner && !isWinningPiece && cell !== EMOJIS.EMPTY_SLOT;
 
               return (
                 <Cell
@@ -559,16 +561,16 @@ const Board = ({
                 style={{
                   cursor:
                     canInteract && !winner && !isDraw && droppingCol === null
-                      ? isColumnBlockedByPoop(c) ? "not-allowed" : "pointer"
+                      ? isColumnBlocked(c) ? "not-allowed" : "pointer"
                       : "default",
                   opacity: droppingCol !== null && droppingCol !== c ? 0.7 : 1,
                   // CHANGE: Visual indication for blocked columns
-                  filter: isColumnBlockedByPoop(c) ? "grayscale(0.5) brightness(0.8)" : "none",
-                  "--target-glow-color": currentPlayer === "🔴" ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)",
+                  filter: isColumnBlocked(c) ? "grayscale(0.5) brightness(0.8)" : "none",
+                  "--target-glow-color": currentPlayer === EMOJIS.RED_DISC ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)",
                 }}
               >
                 {/* Hide original from-cells while overlay is animating */}
-                {maskedKeys && maskedKeys.has(`${r},${c}`) ? "⚪" : cell}
+                {maskedKeys && maskedKeys.has(`${r},${c}`) ? EMOJIS.EMPTY_SLOT : cell}
 
                 {/* Ghost Preview Disc */}
                 {previewRow === r && activeCol === c && (
@@ -579,7 +581,7 @@ const Board = ({
                 {rippleCell && rippleCell.row === r && rippleCell.col === c && (
                   <ImpactRipple 
                     style={{ 
-                      "--ripple-color": rippleCell.player === "🔴" ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)" 
+                      "--ripple-color": rippleCell.player === EMOJIS.RED_DISC ? "rgba(255, 68, 68, 0.8)" : "rgba(255, 221, 0, 0.8)" 
                     }} 
                   />
                   )}
@@ -712,7 +714,7 @@ const Board = ({
                 !isDraw &&
                 droppingCol === null &&
                 activeCol === col &&
-                !isColumnBlockedByPoop(col) && (
+                !isColumnBlocked(col) && (
                   <span className="preview-piece">{currentPlayer}</span>
                 )}
             </div>

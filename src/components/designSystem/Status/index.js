@@ -9,6 +9,7 @@ import {
   ActionGroup 
 } from "./Status.style";
 import Button from "../Button";
+import { EMOJIS } from "../../../logic/core/coreConfig";
 
 /**
  * Current Turn / Game State Indicator
@@ -96,7 +97,7 @@ export const MatchResultOverlay = ({
     <OverlayBackdrop>
       <ResultCard>
         <ResultIcon variant={variant}>
-          {icon || (variant === "win" ? "🏆" : variant === "loss" ? "😔" : "🤝")}
+          {icon || (variant === "win" ? EMOJIS.WIN_CROWN || "🏆" : variant === "loss" ? EMOJIS.LOSS_SAD || "😔" : EMOJIS.DRAW_HANDSHAKE || "🤝")}
         </ResultIcon>
         
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>

@@ -1,0 +1,79 @@
+# Connect 4: Technical Deep Dive (Phases 5-8)
+
+This document provides the technical specifications for the "Core Engine" phases of the passion project.
+
+---
+
+## 🧠 Phase 5: Strategy Pattern for CPU AI
+**Objective:** Replace hardcoded AI logic with a modular "Personality Registry".
+
+### 🛠️ Technical Architecture
+- **`src/logic/cpu/StrategyRegistry.js`**: A directory mapping strategy IDs to class implementations.
+- **`BaseStrategy`**: An abstract class defining the interface:
+  ```javascript
+  evaluate(board, myPlayer, featureState) { /* returns prioritized list of moves */ }
+  ```
+- **Example Personalities**:
+  - **The Tactician (Defensive)**: Prioritizes blocking opponent 3-in-a-rows and saving features for defensive removals.
+  - **The Chaos Monkey (Aggressive)**: Prioritizes triggering modular features and flipping the board at every opportunity.
+  - **The Grandmaster (Heuristic)**: Uses Minimax with Alpha-Beta pruning for deep board evaluation.
+
+### ✅ Action Items
+1. Abstract `cpuEngine.js` into a controller that selects a strategy.
+2. Implement 3 distinct strategy classes.
+3. Add "AI Personality" selection to the CPU settings menu.
+
+---
+
+## ⚖️ Phase 6: Ruleset Abstraction (The "Game Logic" Bridge)
+**Objective:** Support different board types and game rules without refactoring core components.
+
+### 🛠️ Technical Architecture
+- **`Ruleset` Object**: A configuration object that defines:
+  ```javascript
+  {
+    winLength: 4,
+    allowPopOut: false, // Can remove own piece from bottom row
+    gravityType: 'standard', // or 'wrap-around', 'none'
+    dimensions: { rows: 6, cols: 7 }
+  }
+  ```
+- **Logic Refactor**: All win-detection and move-validation functions will move from `engine.js` into these injectable Ruleset objects.
+
+### ✅ Action Items
+1. Create `src/logic/rulesets/RulesetFactory.js`.
+2. Refactor `checkWin` to iterate based on `ruleset.winLength`.
+3. Enable "Inverted Gravity" as a permanent ruleset option rather than just a temporary feature.
+
+---
+
+## 🎨 Phase 7: Universal Asset & Theme Engine
+**Objective:** Fully decouple the UI components from specific visuals (Emojis, Colors, Fonts).
+
+### 🛠️ Technical Architecture
+- **Semantic Theme Mapping**: Components will no longer use `EMOJIS.MONKEY`. Instead, they use `Theme.getAsset('FEATURE_ACTOR_1')`.
+- **CSS Variable Injection**: Inject theme-specific colors and spacing via a global `<style>` tag or Styled Components `ThemeProvider`.
+- **Theme Registry**:
+  - **`Classic`**: Red/Yellow discs, standard sounds.
+  - **`Cyberpunk`**: Neon glowing discs, synth-wave sound effects, glitch animations.
+  - **`Ghostly`**: Translucent pieces, spooky echoes, fading animations.
+
+### ✅ Action Items
+1. Create a `ThemeProvider` context wrapper.
+2. Map all current visual constants (Phase 3) to the new Theme Bridge.
+3. Build a "Theme Selector" with real-time preview.
+
+---
+
+## ⚡ Phase 8: Web Worker Logic (Performance Optimization)
+**Objective:** Offload heavy computations to keep the UI at a constant 60 FPS.
+
+### 🛠️ Technical Architecture
+- **Worker Communication**: Use `postMessage` to send the current board state and active ruleset to a background thread.
+- **Async Engine**: The game loop will become asynchronous, waiting for the Worker to return the `winningLine` or the `cpuBestMove`.
+- **Batch Processing**: Pattern detection (2x2 squares, lines) will happen in parallel with the drop animation.
+
+### ✅ Action Items
+1. Setup `src/logic/workers/logicWorker.js` using Webpack's worker-loader.
+2. Move `findPatternAt` and `cpuEngine` calculations into the worker.
+3. Implement a "Thinking..." indicator in the UI to manage async latency.
