@@ -20,7 +20,8 @@ import {  returnToNormalGravity,
 import FeatureBlockIndicator from "../../designSystem/Features/core/FeatureBlockIndicator";
 import { useGameSettings } from "../../../hooks/settings/useGameSettings";
 
-import { PHYSICS_CONFIG, ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS, SOUNDS } from "../../../logic/core/coreConfig";
+import { PHYSICS_CONFIG, ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS, SOUNDS, EVENTS } from "../../../logic/core/coreConfig";
+import { gameBus } from "../../../logic/core/eventBus";
 
 const Board = ({
   board,
@@ -51,7 +52,49 @@ const Board = ({
   const [touchTimeout, setTouchTimeout] = useState(null);
   const [jigglingCols, setJigglingCols] = useState({});
   const [ejectedPieces, setEjectedPieces] = useState([]);
+  
+  // NEW: Internal Bus-driven state
+  const [isUILocked, setIsUILocked] = useState(false);
+  const [busCpuThinkingCol, setBusCpuThinkingCol] = useState(null);
+  const [busCpuDroppingCol, setBusCpuDroppingCol] = useState(null);
+
   const { enableBoardShake, shakeIntensity } = useGameSettings();
+
+  // PHASE 4: Listen to the System Nervous System
+  useEffect(() => {
+    const unsubLock = gameBus.on(EVENTS.UI_LOCK, () => setIsUILocked(true));
+    const unsubUnlock = gameBus.on(EVENTS.UI_UNLOCK, () => setIsUILocked(false));
+    
+    const unsubCpuStart = gameBus.on(EVENTS.CPU_THINKING_START, (data) => {
+      setBusCpuThinkingCol(data.col);
+    });
+
+    const unsubCpuMove = gameBus.on(EVENTS.CPU_MOVE_DECIDED, (data) => {
+      setBusCpuThinkingCol(null);
+      setBusCpuDroppingCol(data.col);
+    });
+
+    const unsubReset = gameBus.on(EVENTS.GAME_RESET, () => {
+      setIsUILocked(false);
+      setBusCpuThinkingCol(null);
+      setBusCpuDroppingCol(null);
+      setDroppingCol(null);
+    });
+
+    // We also need to clear CPU dropping col when the piece actually lands
+    const unsubDrop = gameBus.on(EVENTS.PIECE_DROPPED, () => {
+      setBusCpuDroppingCol(null);
+    });
+
+    return () => {
+      unsubLock();
+      unsubUnlock();
+      unsubCpuStart();
+      unsubCpuMove();
+      unsubReset();
+      unsubDrop();
+    };
+  }, []);
 
   // Standardized timing function
   const calculateDropDuration = (distance) => {
@@ -153,7 +196,7 @@ const Board = ({
   };
 
   const handleClick = (col) => {
-    if (winner || isDraw || !canInteract || droppingCol !== null) return;
+    if (winner || isDraw || !canInteract || droppingCol !== null || isUILocked) return;
 
     // CHANGE: Handle blocked columns
     if (isColumnBlocked(col)) {
@@ -163,7 +206,9 @@ const Board = ({
       
       setTimeout(() => {
         setJigglingCols(prev => ({ ...prev, [clickedCol]: true }));
-        if (soundManager) soundManager.playSound("error"); // Will fallback to click or ignore if error.mp3 not found
+        
+        // EMIT: Column blocked
+        gameBus.emit(EVENTS.COLUMN_BLOCKED, { columnIndex: clickedCol });
         
         setTimeout(() => {
           setJigglingCols(prev => ({ ...prev, [clickedCol]: false }));
@@ -226,11 +271,12 @@ const Board = ({
 
     // Impact 1 (50%)
     setTimeout(() => {
-      if (soundManager) soundManager.playSound("drop");
+      // Sound is now handled by GameBus (PIECE_DROPPED)
       if (enableBoardShake) {
         // Delay shake by 60ms to feel like a reaction
         setTimeout(() => {
           setIsShaking(true);
+          gameBus.emit(EVENTS.UI_SHAKE, { intensity: shakeIntensity });
           setTimeout(() => setIsShaking(false), ANIMATION_CONFIG.SHAKE_DURATION);
         }, ANIMATION_CONFIG.SHAKE_DELAY);
       }
@@ -239,14 +285,8 @@ const Board = ({
     }, animationDuration * 0.5);
 
     // Impact 2 (82%)
-    setTimeout(() => {
-      if (soundManager) soundManager.playSound("drop");
-    }, animationDuration * 0.82);
-
     // Impact 3 (97% - settle)
-    setTimeout(() => {
-      if (soundManager) soundManager.playSound("drop");
-    }, animationDuration * 0.97);
+    // (Removed manual sound triggers - now handled by logic-level events)
 
     setTimeout(() => {
       setFallingDisc(null);
@@ -322,7 +362,9 @@ const Board = ({
     }
   };
 
-  const activeCol = isCpuThinking && cpuPreviewCol !== null ? cpuPreviewCol : (hoverCol !== null ? hoverCol : touchCol);
+  const activeCol = (isCpuThinking || busCpuThinkingCol !== null) 
+    ? (cpuPreviewCol ?? busCpuThinkingCol) 
+    : (hoverCol !== null ? hoverCol : touchCol);
 
   // Calculate target row for the active column highlight
   let activeTargetRow = -1;
@@ -345,19 +387,21 @@ const Board = ({
   }
 
   // Create CPU falling disc animation when CPU is dropping
-  const cpuFallingDisc = isCpuDropping && cpuDroppingCol !== null ? (() => {
+  const cpuFallingDisc = (isCpuDropping || busCpuDroppingCol !== null) ? (() => {
+    const colToUse = cpuDroppingCol ?? busCpuDroppingCol;
+    
     // Find target row for CPU drop
     let targetRow = -1;
     if (isLogicUpsideDown) {
       for (let row = 0; row < board.length; row++) {
-        if (board[row][cpuDroppingCol] === EMOJIS.EMPTY_SLOT) {
+        if (board[row][colToUse] === EMOJIS.EMPTY_SLOT) {
           targetRow = row;
           break;
         }
       }
     } else {
       for (let row = board.length - 1; row >= 0; row--) {
-        if (board[row][cpuDroppingCol] === EMOJIS.EMPTY_SLOT) {
+        if (board[row][colToUse] === EMOJIS.EMPTY_SLOT) {
           targetRow = row;
           break;
         }
@@ -370,7 +414,7 @@ const Board = ({
     const distance = isLogicUpsideDown ? targetRow + 1 : board.length - targetRow;
     
     return {
-      col: cpuDroppingCol,
+      col: colToUse,
       targetRow,
       currentRow: startRow,
       player: EMOJIS.YELLOW_DISC, // CPU player emoji
@@ -380,7 +424,7 @@ const Board = ({
 
   // Preview row for "ghost" disc
   const previewRow = useMemo(() => {
-    if (activeCol === null || winner || isDraw || (!canInteract && !isCpuThinking)) return null;
+    if (activeCol === null || winner || isDraw || (!canInteract && !isCpuThinking && busCpuThinkingCol === null)) return null;
 
     if (isLogicUpsideDown) {
       // Find top-most empty cell

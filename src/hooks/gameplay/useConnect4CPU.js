@@ -4,7 +4,8 @@ import {
   calculateDropDuration, 
   getTargetRow 
 } from "../../logic/core/engine";
-import { CORE_CONFIG, ANIMATION_CONFIG, PLAYERS } from "../../logic/core/coreConfig";
+import { CORE_CONFIG, ANIMATION_CONFIG, PLAYERS, EVENTS } from "../../logic/core/coreConfig";
+import { gameBus } from "../../logic/core/eventBus";
 import { pickCpuMoveSmart, getBoardKey } from "../../logic/cpu/cpuEngine";
 import { updateMemoryOnGameEnd } from "../../logic/cpu/cpuMemory";
 import { createInitialState, processMove } from "../../logic/core/gameEngine";
@@ -44,16 +45,22 @@ export const useConnect4CPU = (difficulty = "Expert") => {
 
     aiTimerRef.current = setTimeout(() => {
       // ENGINE: Standard column-based move
-      const move = pickCpuMoveSmart(board, difficulty, { winLength: CORE_CONFIG.WIN_LENGTH, gravity: true });
+      const move = pickCpuMoveSmart(board, difficulty, { winLength: CORE_CONFIG.MODE.WIN_PATTERN.length, gravity: true });
       if (!move) { setGameState(prev => ({ ...prev, isDraw: true })); return; }
       
       const col = typeof move === 'object' ? move.col : move;
 
+      // EMIT: CPU Thinking Start
+      gameBus.emit(EVENTS.CPU_THINKING_START, { col });
       setIsCpuThinking(true);
       setCpuPreviewCol(col);
 
       setTimeout(() => {
         historyRef.current.push({ key: getBoardKey(board, CPU), col, player: CPU });
+        
+        // EMIT: CPU Move Decided & UI Lock
+        gameBus.emit(EVENTS.CPU_MOVE_DECIDED, { col });
+        gameBus.emit(EVENTS.UI_LOCK);
         
         setIsCpuThinking(false);
         setCpuPreviewCol(null);
@@ -70,6 +77,9 @@ export const useConnect4CPU = (difficulty = "Expert") => {
           });
           setIsCpuDropping(false);
           setCpuDroppingCol(null);
+          
+          // EMIT: UI Unlock
+          gameBus.emit(EVENTS.UI_UNLOCK);
         }, animationDuration + 100); // 100ms post-drop buffer
       }, 500); // 500ms targeting duration
     }, 600); // 600ms thinking duration
@@ -92,6 +102,7 @@ export const useConnect4CPU = (difficulty = "Expert") => {
     setIsCpuDropping(false);
     setCpuDroppingCol(null);
     setGameState(createInitialState());
+    gameBus.emit(EVENTS.GAME_RESET);
   }, []);
 
   return { 
