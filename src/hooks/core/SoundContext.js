@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useCallback, useEffect, useRef, useState } from "react";
+import { soundBridge } from "../../logic/audio/SoundBridge";
 
 const SoundContext = createContext(null);
 
@@ -483,6 +484,12 @@ export const SoundProvider = ({ children }) => {
     resumeBackgroundMusic,
     isAudioSupported: Object.keys(audioInstancesRef.current).length > 0,
   };
+
+  // PHASE 4: Link Sound System to GameBus
+  useEffect(() => {
+    soundBridge.init(value);
+    return () => soundBridge.cleanup();
+  }, [value]);
 
   return <SoundContext.Provider value={value}>{children}</SoundContext.Provider>;
 };

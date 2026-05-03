@@ -20,7 +20,8 @@ import {  returnToNormalGravity,
 import FeatureBlockIndicator from "../../designSystem/Features/core/FeatureBlockIndicator";
 import { useGameSettings } from "../../../hooks/settings/useGameSettings";
 
-import { PHYSICS_CONFIG, ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS, SOUNDS } from "../../../logic/core/coreConfig";
+import { PHYSICS_CONFIG, ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS, SOUNDS, EVENTS } from "../../../logic/core/coreConfig";
+import { gameBus } from "../../../logic/core/eventBus";
 
 const Board = ({
   board,
@@ -163,7 +164,9 @@ const Board = ({
       
       setTimeout(() => {
         setJigglingCols(prev => ({ ...prev, [clickedCol]: true }));
-        if (soundManager) soundManager.playSound("error"); // Will fallback to click or ignore if error.mp3 not found
+        
+        // EMIT: Column blocked
+        gameBus.emit(EVENTS.COLUMN_BLOCKED, { columnIndex: clickedCol });
         
         setTimeout(() => {
           setJigglingCols(prev => ({ ...prev, [clickedCol]: false }));
@@ -226,11 +229,12 @@ const Board = ({
 
     // Impact 1 (50%)
     setTimeout(() => {
-      if (soundManager) soundManager.playSound("drop");
+      // Sound is now handled by GameBus (PIECE_DROPPED)
       if (enableBoardShake) {
         // Delay shake by 60ms to feel like a reaction
         setTimeout(() => {
           setIsShaking(true);
+          gameBus.emit(EVENTS.UI_SHAKE, { intensity: shakeIntensity });
           setTimeout(() => setIsShaking(false), ANIMATION_CONFIG.SHAKE_DURATION);
         }, ANIMATION_CONFIG.SHAKE_DELAY);
       }
@@ -239,14 +243,8 @@ const Board = ({
     }, animationDuration * 0.5);
 
     // Impact 2 (82%)
-    setTimeout(() => {
-      if (soundManager) soundManager.playSound("drop");
-    }, animationDuration * 0.82);
-
     // Impact 3 (97% - settle)
-    setTimeout(() => {
-      if (soundManager) soundManager.playSound("drop");
-    }, animationDuration * 0.97);
+    // (Removed manual sound triggers - now handled by logic-level events)
 
     setTimeout(() => {
       setFallingDisc(null);

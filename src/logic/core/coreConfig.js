@@ -134,7 +134,7 @@ export const RULESETS = {
 };
 
 // THE MASTER MODE SWITCH (The absolute source of truth)
-export const GAME_MODE_KEY = "CHAOS_SQUARE"; 
+export const GAME_MODE_KEY = "CLASSIC"; 
 
 // Derived Exports
 export const ACTIVE_MODE = RULESETS[GAME_MODE_KEY];
