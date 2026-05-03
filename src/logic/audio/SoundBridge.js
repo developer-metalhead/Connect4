@@ -21,6 +21,14 @@ class SoundBridge {
 
     console.log("[SoundBridge] 🔊 Audio System Linked to GameBus");
 
+    this.subscribe(EVENTS.GAME_RESET, () => {
+      this.soundManager.stopAllSounds();
+    });
+
+    this.subscribe(EVENTS.GAME_START, () => {
+      this.soundManager.stopAllSounds();
+    });
+
     // Map EVENTS to SOUNDS
     this.subscribe(EVENTS.PIECE_DROPPED, () => {
       this.soundManager.playSound("drop");

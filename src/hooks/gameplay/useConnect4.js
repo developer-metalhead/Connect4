@@ -1,5 +1,7 @@
 import { useState, useCallback } from "react";
 import { createInitialState, processMove } from "../../logic/core/gameEngine";
+import { gameBus } from "../../logic/core/eventBus";
+import { EVENTS } from "../../logic/core/coreConfig";
 
 /**
  * Hook for a standard 2-Player Local Connect 4 game.
@@ -18,6 +20,7 @@ export const useConnect4 = () => {
 
   const reset = useCallback(() => {
     setGameState(createInitialState());
+    gameBus.emit(EVENTS.GAME_RESET);
   }, []);
 
   return {
