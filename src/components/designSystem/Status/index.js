@@ -106,11 +106,11 @@ export const MatchResultOverlay = ({
             {isDeclined ? (rematchState.declineReason || "The session has ended.") : (
               <>
                 {subtitle}
-                {CORE_CONFIG.MODE_NAME !== "Classic" && (
+                {/* {CORE_CONFIG.MODE_NAME !== "Classic" && (
                   <div style={{ fontSize: '12px', opacity: 0.6, marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>
                     Mode: {CORE_CONFIG.MODE_NAME}
                   </div>
-                )}
+                )} */}
               </>
             )}
           </OverlaySubtitle>
