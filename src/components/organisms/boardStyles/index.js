@@ -595,7 +595,7 @@ const Board = ({
         {(() => {
           if (!winner || !winningLine || winningLine.length === 0) return null;
 
-          const type = CORE_CONFIG.WIN_PATTERN.type;
+          const type = CORE_CONFIG.MODE.WIN_PATTERN.type;
 
           // Strategy 1: The Classic Connecting Line
           if (type === PATTERNS.LINE) {
@@ -667,7 +667,7 @@ const Board = ({
                   style={{
                     left: `calc(var(--board-padding) + ${center.col} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
                     top: `calc(var(--board-padding) + ${center.row} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
-                    width: `calc(${CORE_CONFIG.WIN_PATTERN.armLength * 2} * (var(--cell) + var(--gap)) + var(--cell))`,
+                    width: `calc(${(CORE_CONFIG.MODE.WIN_PATTERN.armLength || 1) * 2} * (var(--cell) + var(--gap)) + var(--cell))`,
                     height: "var(--cell)",
                     transform: "translate(-50%, -50%)",
                   }}
@@ -679,7 +679,7 @@ const Board = ({
                   style={{
                     left: `calc(var(--board-padding) + ${center.col} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
                     top: `calc(var(--board-padding) + ${center.row} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
-                    width: `calc(${CORE_CONFIG.WIN_PATTERN.armLength * 2} * (var(--cell) + var(--gap)) + var(--cell))`,
+                    width: `calc(${(CORE_CONFIG.MODE.WIN_PATTERN.armLength || 1) * 2} * (var(--cell) + var(--gap)) + var(--cell))`,
                     height: "var(--cell)",
                     transform: "translate(-50%, -50%) rotate(90deg)",
                   }}

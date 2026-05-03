@@ -76,6 +76,47 @@ export const SOUNDS = {
   BOMB_EXPLOSION: "bomb_explosion",
 };
 
+// --- THE MASTER RULESET REGISTRY ---
+export const RULESETS = {
+  CLASSIC: {
+    NAME: "Classic",
+    ROWS: 6,
+    COLS: 7,
+    WIN_PATTERN: { type: PATTERNS.LINE, length: 4 }
+  },
+  GRAND: {
+    NAME: "Grand Connect",
+    ROWS: 8,
+    COLS: 10,
+    WIN_PATTERN: { type: PATTERNS.LINE, length: 5 }
+  },
+  BLITZ: {
+    NAME: "Blitz Mode",
+    ROWS: 4,
+    COLS: 5,
+    WIN_PATTERN: { type: PATTERNS.LINE, length: 3 }
+  },
+  CHAOS_SQUARE: {
+    NAME: "Chaos Square",
+    ROWS: 6,
+    COLS: 7,
+    WIN_PATTERN: { type: PATTERNS.SQUARE, size: 2 }
+  },
+  TIC_TAC_TOE: {
+    NAME: "Tic Tac Toe",
+    ROWS: 3,
+    COLS: 3,
+    WIN_PATTERN: { type: PATTERNS.LINE, size: 3 }
+  }
+};
+
+// THE MASTER MODE SWITCH (The absolute source of truth)
+export const GAME_MODE_KEY = "CHAOS_SQUARE"; 
+
+// Derived Exports
+export const ACTIVE_MODE = RULESETS[GAME_MODE_KEY];
+
+
 // --- THE PHYSICS & ANIMATION ENGINE CONFIG ---
 export const PHYSICS_CONFIG = {
   EJECTION: {
@@ -98,8 +139,10 @@ export const PHYSICS_CONFIG = {
     CPU_POST_DROP_DELAY: 150,
   }
 };
+export const ANIMATION_CONFIG = PHYSICS_CONFIG.ANIMATION;
 
-// --- THE UI DICTIONARY (Localization Ready) ---
+
+// --- THE UI DICTIONARY ---
 export const UI_STRINGS = {
   MENU: {
     GAME: "Game Settings",
@@ -121,26 +164,9 @@ export const UI_STRINGS = {
   }
 };
 
-export const RULESETS = {
-  CLASSIC: {
-    ROWS: 6,
-    COLS: 7,
-    WIN_LENGTH: 4,
-  }
-};
-
-// --- LEGACY COMPATIBILITY ---
-export const ROWS = RULESETS.CLASSIC.ROWS;
-export const COLS = RULESETS.CLASSIC.COLS;
-export const PLAYER1 = EMOJIS.RED_DISC;
-export const PLAYER2 = EMOJIS.YELLOW_DISC;
-export const EMPTY = EMOJIS.EMPTY_SLOT;
-export const ANIMATION_CONFIG = PHYSICS_CONFIG.ANIMATION;
-
+// --- CORE ENGINE EXPORT ---
 export const CORE_CONFIG = {
-  ROWS: ROWS,
-  COLS: COLS,
-  WIN_PATTERN: { type: PATTERNS.LINE, length: RULESETS.CLASSIC.WIN_LENGTH }, 
+  MODE: ACTIVE_MODE, // This handles ROWS, COLS, and WIN_PATTERN
   DEFAULT_FIRST_PLAYER: EMOJIS.RED_DISC,
 };
 
@@ -148,5 +174,11 @@ export const PLAYERS = {
   P1: EMOJIS.RED_DISC,
   P2: EMOJIS.YELLOW_DISC,
   EMPTY: EMOJIS.EMPTY_SLOT
-
 };
+
+// --- LEGACY COMPATIBILITY (Used by chaosChickenFeatures and other helpers) ---
+export const ROWS = ACTIVE_MODE.ROWS;
+export const COLS = ACTIVE_MODE.COLS;
+export const EMPTY = EMOJIS.EMPTY_SLOT;
+export const PLAYER1 = EMOJIS.RED_DISC;
+export const PLAYER2 = EMOJIS.YELLOW_DISC;

@@ -1,4 +1,4 @@
-import { CORE_CONFIG, PLAYERS, ANIMATION_CONFIG, PATTERNS } from "./coreConfig";
+import { CORE_CONFIG, PLAYERS, ANIMATION_CONFIG, PATTERNS, ROWS, COLS } from "./coreConfig";
 import { findPatternAt } from "../patterns/patternEngine";
 
 const { EMPTY } = PLAYERS;
@@ -6,7 +6,7 @@ const { EMPTY } = PLAYERS;
 /**
  * Creates a fresh empty board array based on specific dimensions
  */
-export const createEmptyBoard = (rows = 6, cols = 7) => {
+export const createEmptyBoard = (rows = ROWS, cols = COLS) => {
   return Array(rows)
     .fill()
     .map(() => Array(cols).fill(EMPTY));
@@ -24,9 +24,10 @@ export const isValidMove = (board, col) => {
  * Core win detection logic.
  * Now powered by the Registry-based Pattern Engine for 100% decoupling.
  */
-export const checkWin = (board, row, col, player) => {
-  // We use the central WIN_PATTERN from CORE_CONFIG
-  const wins = findPatternAt(board, row, col, player, CORE_CONFIG.WIN_PATTERN);
+export const checkWin = (board, row, col, player, pattern) => {
+  // Use the provided pattern (or fallback to CORE_CONFIG)
+  const patternToUse = pattern || CORE_CONFIG.MODE.WIN_PATTERN;
+  const wins = findPatternAt(board, row, col, player, patternToUse);
   
   if (wins.length > 0) {
     // Return the first winning line's coordinates (for highlighting)

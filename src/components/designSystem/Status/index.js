@@ -9,7 +9,7 @@ import {
   ActionGroup 
 } from "./Status.style";
 import Button from "../Button";
-import { EMOJIS, UI_STRINGS } from "../../../logic/core/coreConfig";
+import { EMOJIS, UI_STRINGS, CORE_CONFIG } from "../../../logic/core/coreConfig";
 
 /**
  * Current Turn / Game State Indicator
@@ -103,7 +103,16 @@ export const MatchResultOverlay = ({
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
           <OverlayTitle variant={variant}>{isDeclined ? UI_STRINGS.MATCH.ROOM_CLOSED : title}</OverlayTitle>
           <OverlaySubtitle>
-            {isDeclined ? (rematchState.declineReason || "The session has ended.") : subtitle}
+            {isDeclined ? (rematchState.declineReason || "The session has ended.") : (
+              <>
+                {subtitle}
+                {CORE_CONFIG.MODE_NAME !== "Classic" && (
+                  <div style={{ fontSize: '12px', opacity: 0.6, marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    Mode: {CORE_CONFIG.MODE_NAME}
+                  </div>
+                )}
+              </>
+            )}
           </OverlaySubtitle>
         </div>
         
