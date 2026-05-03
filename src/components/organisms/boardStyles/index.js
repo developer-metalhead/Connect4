@@ -20,7 +20,7 @@ import {  returnToNormalGravity,
 import FeatureBlockIndicator from "../../designSystem/Features/core/FeatureBlockIndicator";
 import { useGameSettings } from "../../../hooks/settings/useGameSettings";
 
-import { ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS, SOUNDS } from "../../../logic/core/coreConfig";
+import { PHYSICS_CONFIG, ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS, SOUNDS } from "../../../logic/core/coreConfig";
 
 const Board = ({
   board,
@@ -74,10 +74,10 @@ const Board = ({
       prevBoardRef.current.forEach((row, r) => {
         row.forEach((cell, c) => {
           if (cell !== EMOJIS.EMPTY_SLOT) {
-            // Random physics trajectories
-            const vx = (Math.random() - 0.5) * 1200; // Wider horizontal spread
-            const vy = -(Math.random() * 600 + 400); // Stronger upward pop
-            const vr = (Math.random() - 0.5) * 1080; // More rotation for chaos
+            // Random physics trajectories using PHYSICS_CONFIG
+            const vx = (Math.random() - 0.5) * PHYSICS_CONFIG.EJECTION.VX_RANGE;
+            const vy = -(Math.random() * PHYSICS_CONFIG.EJECTION.VY_RANGE + PHYSICS_CONFIG.EJECTION.VY_BASE);
+            const vr = (Math.random() - 0.5) * PHYSICS_CONFIG.EJECTION.VR_RANGE;
             
             newEjected.push({
               id: `eject-${r}-${c}-${Math.random()}`,

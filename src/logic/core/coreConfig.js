@@ -76,20 +76,71 @@ export const SOUNDS = {
   BOMB_EXPLOSION: "bomb_explosion",
 };
 
-// --- LEGACY COMPATIBILITY LAYER ---
-// These are used by legacy helpers and engines.
-export const ROWS = 6;
-export const COLS = 7;
+// --- THE PHYSICS & ANIMATION ENGINE CONFIG ---
+export const PHYSICS_CONFIG = {
+  EJECTION: {
+    VX_RANGE: 1200,
+    VY_BASE: 400,
+    VY_RANGE: 600,
+    VR_RANGE: 1080,
+  },
+  ANIMATION: {
+    DROP_BASE_DURATION: 400,
+    DROP_PER_ROW_ADDITION: 50,
+    GRAVITY_DROP_PER_ROW: 120,
+    SHAKE_DELAY: 60,
+    SHAKE_DURATION: 150,
+    RIPPLE_DURATION: 500,
+  },
+  CPU:{
+    CPU_THINKING_DURATION: 350,
+    CPU_TARGETING_DURATION: 450,
+    CPU_POST_DROP_DELAY: 150,
+  }
+};
+
+// --- THE UI DICTIONARY (Localization Ready) ---
+export const UI_STRINGS = {
+  MENU: {
+    GAME: "Game Settings",
+    SOUND: "Sound Settings",
+    BOARD: "Board Settings",
+    CPU: "CPU Settings",
+    ONLINE: "Online Settings",
+    FUN: "Fun Mode Settings",
+  },
+  MATCH: {
+    PLAY_AGAIN: "Play Again",
+    MAIN_MENU: "Main Menu",
+    WIN_TITLE: "VICTORY!",
+    LOSS_TITLE: "DEFEAT",
+    DRAW_TITLE: "DRAW",
+    ROOM_CLOSED: "ROOM CLOSED",
+    OPPONENT_LEFT: "Opponent Left",
+    WAITING: "Waiting",
+  }
+};
+
+export const RULESETS = {
+  CLASSIC: {
+    ROWS: 6,
+    COLS: 7,
+    WIN_LENGTH: 4,
+  }
+};
+
+// --- LEGACY COMPATIBILITY ---
+export const ROWS = RULESETS.CLASSIC.ROWS;
+export const COLS = RULESETS.CLASSIC.COLS;
 export const PLAYER1 = EMOJIS.RED_DISC;
 export const PLAYER2 = EMOJIS.YELLOW_DISC;
 export const EMPTY = EMOJIS.EMPTY_SLOT;
-
+export const ANIMATION_CONFIG = PHYSICS_CONFIG.ANIMATION;
 
 export const CORE_CONFIG = {
   ROWS: ROWS,
   COLS: COLS,
-  // PLUG & PLAY: Change this to ANY pattern to change the goal of the game!
-  WIN_PATTERN: { type: PATTERNS.LINE, length: 4 }, 
+  WIN_PATTERN: { type: PATTERNS.LINE, length: RULESETS.CLASSIC.WIN_LENGTH }, 
   DEFAULT_FIRST_PLAYER: EMOJIS.RED_DISC,
 };
 
@@ -97,19 +148,5 @@ export const PLAYERS = {
   P1: EMOJIS.RED_DISC,
   P2: EMOJIS.YELLOW_DISC,
   EMPTY: EMOJIS.EMPTY_SLOT
-};
 
-export const ANIMATION_CONFIG = {
-  // Visual Effects
-  DROP_BASE_DURATION: 400,
-  DROP_PER_ROW_ADDITION: 50,
-  GRAVITY_DROP_PER_ROW: 120,
-  SHAKE_DELAY: 60,
-  SHAKE_DURATION: 150,
-  RIPPLE_DURATION: 500,
-
-  // CPU Brain Timings
-  CPU_THINKING_DURATION: 350,
-  CPU_TARGETING_DURATION: 450,
-  CPU_POST_DROP_DELAY: 150,
 };
