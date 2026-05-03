@@ -9,7 +9,7 @@ import {
   ActionGroup 
 } from "./Status.style";
 import Button from "../Button";
-import { EMOJIS } from "../../../logic/core/coreConfig";
+import { EMOJIS, UI_STRINGS, CORE_CONFIG } from "../../../logic/core/coreConfig";
 
 /**
  * Current Turn / Game State Indicator
@@ -27,9 +27,9 @@ export const MatchResultOverlay = ({
   title, 
   subtitle, 
   onPrimaryAction, 
-  primaryActionLabel = "Play Again",
+  primaryActionLabel = UI_STRINGS.MATCH.PLAY_AGAIN,
   onSecondaryAction,
-  secondaryActionLabel = "Main Menu",
+  secondaryActionLabel = UI_STRINGS.MATCH.MAIN_MENU,
   variant = "win", // win, loss, draw, default
   icon,
   soundManager,
@@ -78,18 +78,18 @@ export const MatchResultOverlay = ({
 
   if (rematchState?.expiresAt) {
     if (hasRequested) {
-      dynamicPrimaryLabel = `Waiting (${timeLeft})`;
+      dynamicPrimaryLabel = `${UI_STRINGS.MATCH.WAITING} (${timeLeft})`;
       isPrimaryDisabled = true;
     } else {
       dynamicPrimaryLabel = `Rematch (${timeLeft})`;
     }
   } else if (hasRequested) {
-    dynamicPrimaryLabel = "Waiting...";
+    dynamicPrimaryLabel = UI_STRINGS.MATCH.WAITING;
     isPrimaryDisabled = true;
   }
   
   if (isDeclined) {
-    dynamicPrimaryLabel = "Opponent Left";
+    dynamicPrimaryLabel = UI_STRINGS.MATCH.OPPONENT_LEFT;
     isPrimaryDisabled = true;
   }
 
@@ -101,9 +101,18 @@ export const MatchResultOverlay = ({
         </ResultIcon>
         
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-          <OverlayTitle variant={variant}>{isDeclined ? "ROOM CLOSED" : title}</OverlayTitle>
+          <OverlayTitle variant={variant}>{isDeclined ? UI_STRINGS.MATCH.ROOM_CLOSED : title}</OverlayTitle>
           <OverlaySubtitle>
-            {isDeclined ? (rematchState.declineReason || "The session has ended.") : subtitle}
+            {isDeclined ? (rematchState.declineReason || "The session has ended.") : (
+              <>
+                {subtitle}
+                {CORE_CONFIG.MODE_NAME !== "Classic" && (
+                  <div style={{ fontSize: '12px', opacity: 0.6, marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    Mode: {CORE_CONFIG.MODE_NAME}
+                  </div>
+                )}
+              </>
+            )}
           </OverlaySubtitle>
         </div>
         

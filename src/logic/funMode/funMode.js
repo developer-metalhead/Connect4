@@ -48,7 +48,6 @@ export const MONKEY_CONFIG = {
   TRIGGER_THRESHOLD: 2,
   MAX_ACTIVATIONS_PER_MATCH: 1,
   
-  
   VOICE_LINES: [
     "Time to flip things up!",
     "Ooo-ooo! Gravity is my playground!",

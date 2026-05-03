@@ -20,7 +20,7 @@ import {  returnToNormalGravity,
 import FeatureBlockIndicator from "../../designSystem/Features/core/FeatureBlockIndicator";
 import { useGameSettings } from "../../../hooks/settings/useGameSettings";
 
-import { ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS, SOUNDS } from "../../../logic/core/coreConfig";
+import { PHYSICS_CONFIG, ANIMATION_CONFIG, CORE_CONFIG, PATTERNS, EMOJIS, SOUNDS } from "../../../logic/core/coreConfig";
 
 const Board = ({
   board,
@@ -74,10 +74,10 @@ const Board = ({
       prevBoardRef.current.forEach((row, r) => {
         row.forEach((cell, c) => {
           if (cell !== EMOJIS.EMPTY_SLOT) {
-            // Random physics trajectories
-            const vx = (Math.random() - 0.5) * 1200; // Wider horizontal spread
-            const vy = -(Math.random() * 600 + 400); // Stronger upward pop
-            const vr = (Math.random() - 0.5) * 1080; // More rotation for chaos
+            // Random physics trajectories using PHYSICS_CONFIG
+            const vx = (Math.random() - 0.5) * PHYSICS_CONFIG.EJECTION.VX_RANGE;
+            const vy = -(Math.random() * PHYSICS_CONFIG.EJECTION.VY_RANGE + PHYSICS_CONFIG.EJECTION.VY_BASE);
+            const vr = (Math.random() - 0.5) * PHYSICS_CONFIG.EJECTION.VR_RANGE;
             
             newEjected.push({
               id: `eject-${r}-${c}-${Math.random()}`,
@@ -595,7 +595,7 @@ const Board = ({
         {(() => {
           if (!winner || !winningLine || winningLine.length === 0) return null;
 
-          const type = CORE_CONFIG.WIN_PATTERN.type;
+          const type = CORE_CONFIG.MODE.WIN_PATTERN.type;
 
           // Strategy 1: The Classic Connecting Line
           if (type === PATTERNS.LINE) {
@@ -667,7 +667,7 @@ const Board = ({
                   style={{
                     left: `calc(var(--board-padding) + ${center.col} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
                     top: `calc(var(--board-padding) + ${center.row} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
-                    width: `calc(${CORE_CONFIG.WIN_PATTERN.armLength * 2} * (var(--cell) + var(--gap)) + var(--cell))`,
+                    width: `calc(${(CORE_CONFIG.MODE.WIN_PATTERN.armLength || 1) * 2} * (var(--cell) + var(--gap)) + var(--cell))`,
                     height: "var(--cell)",
                     transform: "translate(-50%, -50%)",
                   }}
@@ -679,7 +679,7 @@ const Board = ({
                   style={{
                     left: `calc(var(--board-padding) + ${center.col} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
                     top: `calc(var(--board-padding) + ${center.row} * (var(--cell) + var(--gap)) + var(--cell) / 2)`,
-                    width: `calc(${CORE_CONFIG.WIN_PATTERN.armLength * 2} * (var(--cell) + var(--gap)) + var(--cell))`,
+                    width: `calc(${(CORE_CONFIG.MODE.WIN_PATTERN.armLength || 1) * 2} * (var(--cell) + var(--gap)) + var(--cell))`,
                     height: "var(--cell)",
                     transform: "translate(-50%, -50%) rotate(90deg)",
                   }}

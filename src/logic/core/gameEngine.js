@@ -13,7 +13,7 @@ import { CORE_CONFIG,PLAYERS } from "./coreConfig";
  */
 export const processMove = (gameState, col) => {
   const { board, currentPlayer, winner, isDraw } = gameState;
-  const { WIN_LENGTH } = CORE_CONFIG;
+  const { WIN_PATTERN } = CORE_CONFIG.MODE;
 
   // 1. Validation
   if (winner || isDraw || !isValidMove(board, col)) {
@@ -24,7 +24,7 @@ export const processMove = (gameState, col) => {
   const { newBoard, row } = dropPiece(board, col, currentPlayer);
   
   // 3. Analyze Result
-  const winResult = checkWin(newBoard, row, col, currentPlayer, WIN_LENGTH);
+  const winResult = checkWin(newBoard, row, col, currentPlayer, WIN_PATTERN);
   
   let nextState = {
     ...gameState,
@@ -49,7 +49,8 @@ export const processMove = (gameState, col) => {
  * Creates the initial state for a standard game
  */
 export const createInitialState = () => {
-  const { ROWS, COLS, DEFAULT_FIRST_PLAYER } = CORE_CONFIG;
+  const { ROWS, COLS } = CORE_CONFIG.MODE;
+  const { DEFAULT_FIRST_PLAYER } = CORE_CONFIG;
   
   return {
     board: createEmptyBoard(ROWS, COLS),
